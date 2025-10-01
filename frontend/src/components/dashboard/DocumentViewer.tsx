@@ -150,9 +150,8 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
           });
 
           console.log('Calling spreadRef.current.import() with blob...');
-          spreadRef.current.import(
-            blob as any,
-            file,
+          (spreadRef.current as any).import(
+            blob,
             () => {
               console.log('✅ Excel file imported successfully');
               console.log('Sheet count:', spreadRef.current?.getSheetCount());
