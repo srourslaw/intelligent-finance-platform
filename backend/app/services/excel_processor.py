@@ -12,7 +12,8 @@ class ExcelProcessor:
     """Process construction project Excel files"""
 
     def __init__(self, data_dir: str = "dummy_data"):
-        self.base_dir = Path(__file__).parent.parent.parent.parent / data_dir
+        # Go up 3 levels from backend/app/services/ to backend/, then to data_dir
+        self.base_dir = Path(__file__).parent.parent.parent / data_dir
         print(f"Excel Processor initialized with base_dir: {self.base_dir}")
 
     def read_budget_file(self) -> Dict[str, Any]:
