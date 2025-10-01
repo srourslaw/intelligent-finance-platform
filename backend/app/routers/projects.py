@@ -1,10 +1,11 @@
 """
 Project data endpoints
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.services.excel_processor import ExcelProcessor
 from app.services.data_aggregator import DataAggregator
 from app.models.schemas import DashboardData, HealthCheck
+from app.routers.auth import get_current_user, User
 from typing import Dict, Any
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
@@ -15,7 +16,7 @@ data_aggregator = DataAggregator()
 
 
 @router.get("/health", response_model=HealthCheck)
-async def health_check():
+async def health_check(current_user: User = Depends(get_current_user)):
     """Check if backend is running and Excel files are accessible"""
     files = excel_processor.check_files_exist()
     files_found = sum(1 for exists in files.values() if exists)
@@ -28,7 +29,7 @@ async def health_check():
 
 
 @router.get("/dashboard")
-async def get_dashboard_data() -> Dict[str, Any]:
+async def get_dashboard_data(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """
     Get complete dashboard data from Excel files
     Returns KPIs, budget, subcontractors, payments, variations, defects, insights
@@ -92,7 +93,7 @@ async def get_dashboard_data() -> Dict[str, Any]:
 
 
 @router.get("/budget")
-async def get_budget_data() -> Dict[str, Any]:
+async def get_budget_data(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Get budget data only"""
     try:
         budget_data = excel_processor.read_budget_file()
@@ -108,7 +109,7 @@ async def get_budget_data() -> Dict[str, Any]:
 
 
 @router.get("/subcontractors")
-async def get_subcontractors() -> Dict[str, Any]:
+async def get_subcontractors(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Get subcontractor data"""
     try:
         return excel_processor.read_subcontractors()
@@ -117,7 +118,7 @@ async def get_subcontractors() -> Dict[str, Any]:
 
 
 @router.get("/client-payments")
-async def get_client_payments() -> Dict[str, Any]:
+async def get_client_payments(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Get client payment data"""
     try:
         return excel_processor.read_client_payments()
@@ -126,7 +127,7 @@ async def get_client_payments() -> Dict[str, Any]:
 
 
 @router.get("/defects")
-async def get_defects() -> Dict[str, Any]:
+async def get_defects(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Get defects data"""
     try:
         return excel_processor.read_defects()
@@ -135,7 +136,7 @@ async def get_defects() -> Dict[str, Any]:
 
 
 @router.get("/timesheets")
-async def get_timesheets() -> Dict[str, Any]:
+async def get_timesheets(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Get timesheet data"""
     try:
         return excel_processor.read_timesheets()
@@ -144,7 +145,7 @@ async def get_timesheets() -> Dict[str, Any]:
 
 
 @router.get("/purchase-orders")
-async def get_purchase_orders() -> Dict[str, Any]:
+async def get_purchase_orders(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Get purchase orders data"""
     try:
         return excel_processor.read_purchase_orders()
@@ -153,7 +154,7 @@ async def get_purchase_orders() -> Dict[str, Any]:
 
 
 @router.get("/cashflow")
-async def get_cashflow(weeks: int = 12) -> Dict[str, Any]:
+async def get_cashflow(weeks: int = 12, current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Get cashflow forecast"""
     try:
         budget_data = excel_processor.read_budget_file()
@@ -170,7 +171,7 @@ async def get_cashflow(weeks: int = 12) -> Dict[str, Any]:
 
 
 @router.get("/insights")
-async def get_insights() -> Dict[str, Any]:
+async def get_insights(current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Get AI-generated insights"""
     try:
         # Read all Excel files

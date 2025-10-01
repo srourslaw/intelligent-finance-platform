@@ -1,10 +1,11 @@
 """
 File upload endpoints for Excel files
 """
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from pathlib import Path
 import shutil
 from typing import Dict, Any
+from app.routers.auth import get_current_user, User
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 
@@ -13,7 +14,7 @@ UPLOAD_DIR = Path(__file__).parent.parent.parent.parent / "dummy_data"
 
 
 @router.post("/budget")
-async def upload_budget_file(file: UploadFile = File(...)) -> Dict[str, Any]:
+async def upload_budget_file(file: UploadFile = File(...), current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Upload MASTER_PROJECT_BUDGET.xlsx file"""
     try:
         if not file.filename.endswith('.xlsx'):
@@ -40,7 +41,7 @@ async def upload_budget_file(file: UploadFile = File(...)) -> Dict[str, Any]:
 
 
 @router.post("/subcontractors")
-async def upload_subcontractor_file(file: UploadFile = File(...)) -> Dict[str, Any]:
+async def upload_subcontractor_file(file: UploadFile = File(...), current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Upload Subcontractor_Register.xlsx file"""
     try:
         if not file.filename.endswith('.xlsx'):
@@ -65,7 +66,7 @@ async def upload_subcontractor_file(file: UploadFile = File(...)) -> Dict[str, A
 
 
 @router.post("/client-payments")
-async def upload_client_payments_file(file: UploadFile = File(...)) -> Dict[str, Any]:
+async def upload_client_payments_file(file: UploadFile = File(...), current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Upload Client_Payment_Tracker.xlsx file"""
     try:
         if not file.filename.endswith('.xlsx'):
@@ -90,7 +91,7 @@ async def upload_client_payments_file(file: UploadFile = File(...)) -> Dict[str,
 
 
 @router.post("/defects")
-async def upload_defects_file(file: UploadFile = File(...)) -> Dict[str, Any]:
+async def upload_defects_file(file: UploadFile = File(...), current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Upload Defects_And_Snagging.xlsx file"""
     try:
         if not file.filename.endswith('.xlsx'):
@@ -115,7 +116,7 @@ async def upload_defects_file(file: UploadFile = File(...)) -> Dict[str, Any]:
 
 
 @router.post("/timesheets")
-async def upload_timesheets_file(file: UploadFile = File(...)) -> Dict[str, Any]:
+async def upload_timesheets_file(file: UploadFile = File(...), current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Upload Timesheets_September_2024.xlsx file"""
     try:
         if not file.filename.endswith('.xlsx'):
@@ -140,7 +141,7 @@ async def upload_timesheets_file(file: UploadFile = File(...)) -> Dict[str, Any]
 
 
 @router.post("/purchase-orders")
-async def upload_purchase_orders_file(file: UploadFile = File(...)) -> Dict[str, Any]:
+async def upload_purchase_orders_file(file: UploadFile = File(...), current_user: User = Depends(get_current_user)) -> Dict[str, Any]:
     """Upload Purchase_Orders_Master.xlsx file"""
     try:
         if not file.filename.endswith('.xlsx'):
