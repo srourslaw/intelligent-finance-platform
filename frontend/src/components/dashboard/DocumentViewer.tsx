@@ -10,8 +10,8 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import '@mescius/spread-sheets/styles/gc.spread.sheets.excel2013white.css';
 
-// Configure PDF.js worker - use CDN with CORS support
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Configure PDF.js worker - use jsdelivr CDN
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface DocumentItem {
   filename: string;
@@ -133,6 +133,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       if (doc.type === 'excel') {
         console.log('Loading Excel file...');
         console.log('spreadRef.current:', spreadRef.current);
+        console.log('File info:', doc.filename, 'Size:', arrayBuffer.byteLength);
 
         // Load Excel file into SpreadJS
         if (!spreadRef.current) {
@@ -146,16 +147,26 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         const blob = new Blob([arrayBuffer], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
-        console.log('Blob created for Excel, calling excelIO.open...');
+        console.log('Blob created for Excel, size:', blob.size, 'type:', blob.type);
+        console.log('Calling excelIO.open with blob...');
 
         excelIO.open(
           blob,
           (json: any) => {
-            console.log('Excel JSON received from ExcelIO:', json);
+            console.log('✅ Excel JSON received from ExcelIO');
+            console.log('JSON keys:', Object.keys(json || {}));
+            console.log('Sheets:', json?.sheets);
             if (spreadRef.current) {
-              spreadRef.current.fromJSON(json);
-              console.log('✅ Excel loaded successfully into SpreadJS');
-              setPreviewLoading(false);
+              try {
+                spreadRef.current.fromJSON(json);
+                console.log('✅ Excel loaded successfully into SpreadJS');
+                console.log('Active sheet count:', spreadRef.current.getSheetCount());
+                setPreviewLoading(false);
+              } catch (err) {
+                console.error('Error calling fromJSON:', err);
+                setError('Failed to display Excel file');
+                setPreviewLoading(false);
+              }
             } else {
               console.error('spreadRef.current became null during load');
               setError('Failed to load Excel');
@@ -164,7 +175,12 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
           },
           (error: any) => {
             console.error('❌ Excel load error:', error);
-            setError('Failed to load Excel file: ' + (error?.message || 'Unknown error'));
+            console.log('Error details:', {
+              errorCode: error?.errorCode,
+              errorMessage: error?.errorMessage,
+              fullError: error
+            });
+            setError('Failed to load Excel file: ' + (error?.errorMessage || error?.message || 'Unknown error'));
             setPreviewLoading(false);
           }
         );
