@@ -1,17 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
-import { Document, Page, pdfjs } from 'react-pdf';
-import { SpreadSheets } from '@mescius/spread-sheets-react';
-import * as GC from '@mescius/spread-sheets';
-import '@mescius/spread-sheets-io';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
-import '@mescius/spread-sheets/styles/gc.spread.sheets.excel2013white.css';
-
-// Configure PDF.js worker - use jsdelivr CDN
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface DocumentItem {
   filename: string;
@@ -40,13 +30,8 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const [error, setError] = useState<string | null>(null);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
-  // PDF state
+  // Document blob URL (for both PDF and Excel)
   const [pdfBlob, setPdfBlob] = useState<string | null>(null);
-  const [numPages, setNumPages] = useState<number>(0);
-  const [pageNumber, setPageNumber] = useState<number>(1);
-
-  // SpreadJS state
-  const spreadRef = useRef<GC.Spread.Sheets.Workbook | null>(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -130,53 +115,15 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       const arrayBuffer = await response.arrayBuffer();
       console.log('ArrayBuffer received, size:', arrayBuffer.byteLength);
 
-      if (doc.type === 'excel') {
-        console.log('Loading Excel file...');
-        console.log('spreadRef.current:', spreadRef.current);
-        console.log('File info:', doc.filename, 'Size:', arrayBuffer.byteLength);
+      if (doc.type === 'excel' || doc.type === 'pdf') {
+        // Create blob URL for both Excel and PDF - simple iframe approach
+        const mimeType = doc.type === 'excel'
+          ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          : 'application/pdf';
 
-        // Load Excel file into SpreadJS
-        if (!spreadRef.current) {
-          console.error('SpreadJS not initialized! spreadRef.current is null');
-          setError('SpreadJS viewer not ready. Please try again.');
-          setPreviewLoading(false);
-          return;
-        }
-
-        try {
-          // Use SpreadJS built-in import method instead of ExcelIO
-          const blob = new Blob([arrayBuffer], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          });
-
-          console.log('Calling spreadRef.current.import() with blob...');
-          (spreadRef.current as any).import(
-            blob,
-            () => {
-              console.log('✅ Excel file imported successfully');
-              console.log('Sheet count:', spreadRef.current?.getSheetCount());
-              setPreviewLoading(false);
-            },
-            (error: any) => {
-              console.error('❌ Excel import error:', error);
-              setError('Failed to import Excel file: ' + (error?.errorMessage || error?.message || 'Unknown error'));
-              setPreviewLoading(false);
-            },
-            {
-              fileType: GC.Spread.Sheets.FileType.excel
-            }
-          );
-        } catch (err) {
-          console.error('❌ Excel load error:', err);
-          setError('Failed to load Excel file: ' + (err instanceof Error ? err.message : 'Unknown error'));
-          setPreviewLoading(false);
-        }
-      } else if (doc.type === 'pdf') {
-        console.log('Loading PDF file...');
-        // Create blob URL for PDF
-        const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+        const blob = new Blob([arrayBuffer], { type: mimeType });
         const blobUrl = URL.createObjectURL(blob);
-        console.log('PDF blob URL created:', blobUrl);
+        console.log(`${doc.type.toUpperCase()} blob URL created:`, blobUrl);
         setPdfBlob(blobUrl);
       }
     } catch (err) {
@@ -184,22 +131,8 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       setError('Failed to preview document: ' + (err instanceof Error ? err.message : 'Unknown error'));
       setPreviewLoading(false);
     } finally {
-      if (doc.type === 'pdf') {
-        setPreviewLoading(false);
-      }
+      setPreviewLoading(false);
     }
-  };
-
-  const workbookInit = (spread: GC.Spread.Sheets.Workbook) => {
-    console.log('🎯 SpreadJS workbook initializing...', spread);
-    spreadRef.current = spread;
-    // Configure SpreadJS to be read-only
-    spread.options.allowUserEditFormula = false;
-    spread.options.tabStripVisible = true;
-    spread.options.newTabVisible = false;
-    spread.options.tabEditable = false;
-    spread.options.allowUserResize = true;
-    console.log('✅ SpreadJS workbook initialized and configured');
   };
 
   const toggleFolder = (folder: string) => {
@@ -233,70 +166,17 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const renderPdfPreview = () => {
-    if (!pdfBlob) return null;
+  const renderDocumentPreview = () => {
+    if (!pdfBlob || !selectedDocument) return null;
 
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between bg-gray-50 p-3 rounded border border-gray-200">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-semibold text-gray-700">
-              Page {pageNumber} of {numPages}
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
-              disabled={pageNumber <= 1}
-              className="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-colors"
-            >
-              ← Previous
-            </button>
-            <button
-              onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
-              disabled={pageNumber >= numPages}
-              className="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-colors"
-            >
-              Next →
-            </button>
-          </div>
-        </div>
-
-        <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white p-4 flex justify-center">
-          <Document
-            file={pdfBlob}
-            onLoadSuccess={({ numPages }) => {
-              console.log('PDF loaded successfully, pages:', numPages);
-              setNumPages(numPages);
-            }}
-            onLoadError={(error) => {
-              console.error('PDF load error:', error);
-              setError('Failed to load PDF');
-            }}
-            loading={
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading PDF...</p>
-                </div>
-              </div>
-            }
-            error={
-              <div className="p-8 text-center">
-                <p className="text-red-600 font-semibold mb-2">Failed to load PDF</p>
-                <p className="text-sm text-gray-600">Please try downloading the file instead</p>
-              </div>
-            }
-          >
-            <Page
-              pageNumber={pageNumber}
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-              className="shadow-xl"
-              width={Math.min(window.innerWidth * 0.5, 850)}
-            />
-          </Document>
-        </div>
+      <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
+        <iframe
+          src={pdfBlob}
+          className="w-full"
+          style={{ height: '650px' }}
+          title={selectedDocument.filename}
+        />
       </div>
     );
   };
@@ -390,22 +270,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
         {/* Preview Panel */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 shadow-sm" style={{ minHeight: '750px', maxHeight: '750px', overflowY: 'auto' }}>
-          {/* SpreadJS - Always mounted (hidden off-screen) to keep workbook initialized */}
-          <div style={{
-            position: selectedDocument?.type === 'excel' && !previewLoading && !error ? 'relative' : 'absolute',
-            left: selectedDocument?.type === 'excel' && !previewLoading && !error ? '0' : '-9999px',
-            width: selectedDocument?.type === 'excel' && !previewLoading && !error ? '100%' : '1px',
-            height: selectedDocument?.type === 'excel' && !previewLoading && !error ? '650px' : '1px',
-            overflow: 'hidden'
-          }}>
-            <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white" style={{ height: '100%', width: '100%' }}>
-              <SpreadSheets
-                workbookInitialized={workbookInit}
-                hostStyle={{ width: '100%', height: '100%' }}
-              />
-            </div>
-          </div>
-
           {!selectedDocument && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <FileText className="w-16 h-16 mb-4 text-gray-300" />
@@ -451,7 +315,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
               {!previewLoading && !error && (
                 <div>
-                  {selectedDocument.type === 'pdf' && renderPdfPreview()}
+                  {(selectedDocument.type === 'pdf' || selectedDocument.type === 'excel') && renderDocumentPreview()}
                   {selectedDocument.type === 'image' && renderImagePreview()}
                 </div>
               )}
