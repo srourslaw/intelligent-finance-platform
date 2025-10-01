@@ -387,7 +387,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
         {/* Preview Panel */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 shadow-sm" style={{ minHeight: '750px', maxHeight: '750px', overflowY: 'auto' }}>
-          {/* SpreadJS - Always mounted but positioned based on whether Excel is selected */}
+          {/* SpreadJS - Always mounted (hidden off-screen) to keep workbook initialized */}
           <div style={{
             position: selectedDocument?.type === 'excel' && !previewLoading && !error ? 'relative' : 'absolute',
             left: selectedDocument?.type === 'excel' && !previewLoading && !error ? '0' : '-9999px',
@@ -399,9 +399,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
               <SpreadSheets
                 workbookInitialized={workbookInit}
                 hostStyle={{ width: '100%', height: '100%' }}
-              >
-                <Worksheet />
-              </SpreadSheets>
+              />
             </div>
           </div>
 
