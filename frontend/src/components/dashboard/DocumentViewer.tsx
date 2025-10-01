@@ -3,9 +3,7 @@ import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lu
 import { Document, Page, pdfjs } from 'react-pdf';
 import { SpreadSheets, Worksheet } from '@mescius/spread-sheets-react';
 import * as GC from '@mescius/spread-sheets';
-import '@mescius/spread-sheets-io';
-import '@mescius/spread-sheets-charts';
-import '@mescius/spread-sheets-shapes';
+import * as ExcelIO from '@mescius/spread-excelio';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -128,31 +126,26 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       const arrayBuffer = await response.arrayBuffer();
 
       if (doc.type === 'excel') {
-        // Load Excel file into SpreadJS using spread.import()
+        // Load Excel file into SpreadJS
         if (spreadRef.current) {
+          const excelIO = new ExcelIO.IO();
           const blob = new Blob([arrayBuffer], {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
           });
 
-          // Convert Blob to File for SpreadJS import
-          const file = new (window as any).File([blob], doc.filename, {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          });
-
-          // Use spread.import() method as per SpreadJS guide
-          spreadRef.current.import(
-            file,
-            () => {
-              console.log('Excel import successful');
-              setPreviewLoading(false);
+          excelIO.open(
+            blob,
+            (json: any) => {
+              if (spreadRef.current) {
+                spreadRef.current.fromJSON(json);
+                console.log('Excel loaded successfully');
+                setPreviewLoading(false);
+              }
             },
             (error: any) => {
-              console.error('Excel import error:', error);
+              console.error('Excel load error:', error);
               setError('Failed to load Excel file');
               setPreviewLoading(false);
-            },
-            {
-              fileType: GC.Spread.Sheets.FileType.excel
             }
           );
         }
@@ -165,8 +158,9 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     } catch (err) {
       console.error('Preview error:', err);
       setError('Failed to preview document');
+      setPreviewLoading(false);
     } finally {
-      if (doc.type !== 'excel') {
+      if (doc.type === 'pdf') {
         setPreviewLoading(false);
       }
     }
