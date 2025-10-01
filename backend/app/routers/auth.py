@@ -23,11 +23,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 # Demo user database
+# Pre-hashed password for "demo123" using bcrypt
 DEMO_USERS = {
     "demo@construction.com": {
         "email": "demo@construction.com",
         "full_name": "Demo User",
-        "hashed_password": pwd_context.hash("demo123"),
+        "hashed_password": "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5NU7BlYqEj.K2",  # demo123
         "role": "project_manager"
     }
 }
