@@ -145,12 +145,13 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
         try {
           // Use SpreadJS built-in import method instead of ExcelIO
-          const file = new File([arrayBuffer], doc.filename, {
+          const blob = new Blob([arrayBuffer], {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
           });
 
-          console.log('Calling spreadRef.current.import()...');
+          console.log('Calling spreadRef.current.import() with blob...');
           spreadRef.current.import(
+            blob as any,
             file,
             () => {
               console.log('✅ Excel file imported successfully');
