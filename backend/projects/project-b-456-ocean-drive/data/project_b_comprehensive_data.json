@@ -1,0 +1,212 @@
+
+{
+  "project": {
+    "id": "PROJ-B-002",
+    "name": "Innovate Corp - Office Fit-out",
+    "client": "Innovate Corp",
+    "address": "Level 12, 456 Ocean Drive, Miami FL 33139",
+    "contractValue": 1250000,
+    "startDate": "2024-07-15",
+    "originalCompletionDate": "2025-01-20",
+    "forecastCompletionDate": "2025-01-28",
+    "daysDelayed": 8,
+    "percentComplete": 35,
+    "status": "In Progress",
+    "projectManager": "David Lee",
+    "siteSupervisor": "Carlos Gomez"
+  },
+  "budgetSummary": {
+    "totalBudget": 1250000,
+    "totalSpent": 410500,
+    "totalCommitted": 285000,
+    "forecastFinal": 1265000,
+    "variance": -15000,
+    "categories": [
+      {
+        "category": "PRELIMINARIES",
+        "budget": 85000,
+        "actual": 75000,
+        "committed": 10000,
+        "forecast": 85000,
+        "variance": 0,
+        "percentComplete": 88
+      },
+      {
+        "category": "DEMOLITION & SITE PREP",
+        "budget": 45000,
+        "actual": 48000,
+        "committed": 0,
+        "forecast": 48000,
+        "variance": -3000,
+        "percentComplete": 100
+      },
+      {
+        "category": "PARTITIONS & CEILINGS",
+        "budget": 180000,
+        "actual": 150000,
+        "committed": 30000,
+        "forecast": 180000,
+        "variance": 0,
+        "percentComplete": 83
+      },
+      {
+        "category": "FLOORING",
+        "budget": 95000,
+        "actual": 20000,
+        "committed": 75000,
+        "forecast": 95000,
+        "variance": 0,
+        "percentComplete": 21
+      },
+      {
+        "category": "JOINERY",
+        "budget": 220000,
+        "actual": 50000,
+        "committed": 170000,
+        "forecast": 220000,
+        "variance": 0,
+        "percentComplete": 23
+      },
+      {
+        "category": "MECHANICAL (HVAC)",
+        "budget": 150000,
+        "actual": 60000,
+        "committed": 90000,
+        "forecast": 155000,
+        "variance": -5000,
+        "percentComplete": 40
+      },
+      {
+        "category": "ELECTRICAL & DATA",
+        "budget": 250000,
+        "actual": 100000,
+        "committed": 150000,
+        "forecast": 255000,
+        "variance": -5000,
+        "percentComplete": 40
+      },
+      {
+        "category": "HYDRAULICS (PLUMBING)",
+        "budget": 75000,
+        "actual": 30000,
+        "committed": 45000,
+        "forecast": 75000,
+        "variance": 0,
+        "percentComplete": 40
+      },
+      {
+        "category": "FIRE SERVICES",
+        "budget": 60000,
+        "actual": 20000,
+        "committed": 40000,
+        "forecast": 62000,
+        "variance": -2000,
+        "percentComplete": 33
+      },
+      {
+        "category": "FINISHES (PAINT, ETC)",
+        "budget": 90000,
+        "actual": 0,
+        "committed": 90000,
+        "forecast": 90000,
+        "variance": 0,
+        "percentComplete": 0
+      }
+    ]
+  },
+  "subcontractors": [
+    {
+      "id": "SUB-B-001",
+      "trade": "Demolition",
+      "company": "Miami Demo Group",
+      "contact": "Juan Perez",
+      "phone": "305-555-0101",
+      "email": "juan@miamidemo.com",
+      "contractValue": 48000,
+      "status": "Complete",
+      "payments": [
+        {
+          "invoiceNumber": "MDG-1050",
+          "total": 48000,
+          "paidDate": "2024-08-20"
+        }
+      ]
+    },
+    {
+      "id": "SUB-B-002",
+      "trade": "Partitions & Ceilings",
+      "company": "Drywall Solutions Inc.",
+      "contact": "Mike Brown",
+      "phone": "305-555-0102",
+      "email": "mike@drywallsolutions.com",
+      "contractValue": 180000,
+      "status": "In Progress",
+      "payments": [
+        {
+          "invoiceNumber": "DSI-2024-08-01",
+          "total": 90000,
+          "paidDate": "2024-09-15"
+        },
+        {
+          "invoiceNumber": "DSI-2024-09-01",
+          "total": 60000,
+          "paidDate": "2024-10-15"
+        }
+      ]
+    }
+  ],
+  "clientPayments": {
+    "milestones": [
+      {
+        "milestone": "Deposit",
+        "percentage": 10,
+        "amount": 125000,
+        "status": "PAID"
+      },
+      {
+        "milestone": "Design Finalization",
+        "percentage": 15,
+        "amount": 187500,
+        "status": "PAID"
+      },
+      {
+        "milestone": "Construction Commencement",
+        "percentage": 25,
+        "amount": 312500,
+        "status": "OVERDUE",
+        "issueFlag": true
+      }
+    ],
+    "variations": [
+      {
+        "voNumber": "VO-B-001",
+        "description": "Upgrade to smart lighting system",
+        "costImpact": 12000,
+        "status": "Approved"
+      }
+    ]
+  },
+  "defects": [],
+  "dataQualityIssues": {
+    "totalIssues": 3,
+    "categories": [
+      {
+        "category": "Overdue Payments",
+        "count": 1,
+        "severity": "Critical",
+        "examples": [
+          "Client payment 'Construction Commencement': $312,500 overdue"
+        ]
+      },
+      {
+        "category": "Over Budget Items",
+        "count": 2,
+        "severity": "Medium",
+        "examples": [
+          "Mechanical (HVAC): $5,000 over",
+          "Electrical & Data: $5,000 over"
+        ]
+      }
+    ]
+  }
+}

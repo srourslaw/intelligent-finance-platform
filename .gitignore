@@ -82,11 +82,12 @@ backend/env/
 
 # Uploaded files (for future)
 uploads/
-*.pdf
-*.xlsx
-*.xls
-*.doc
-*.docx
+# Allow project data files but block uploads
+!backend/projects/**/*.pdf
+!backend/projects/**/*.xlsx
+!backend/projects/**/*.xls
+!backend/projects/**/*.doc
+!backend/projects/**/*.docx
 
 # Secrets and credentials
 credentials.json
