@@ -41,10 +41,53 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<Api
 }
 
 /**
+ * Login
+ */
+export async function login(email: string, password: string) {
+  const formData = new URLSearchParams();
+  formData.append('username', email);
+  formData.append('password', password);
+
+  return fetchAPI<{ access_token: string; token_type: string }>('/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData.toString(),
+  });
+}
+
+/**
+ * Verify token
+ */
+export async function verifyToken(token: string) {
+  return fetchAPI<{ email: string; full_name: string; role: string }>('/auth/verify', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+}
+
+/**
+ * Get current user
+ */
+export async function getCurrentUser(token: string) {
+  return fetchAPI<{ email: string; full_name: string; role: string }>('/auth/me', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+}
+
+/**
  * Health Check
  */
-export async function checkApiHealth() {
-  return fetchAPI<{ status: string; message: string }>('/projects/health');
+export async function checkApiHealth(token?: string) {
+  return fetchAPI<{ status: string; message: string }>('/projects/health', {
+    headers: token ? {
+      'Authorization': `Bearer ${token}`,
+    } : {},
+  });
 }
 
 /**
@@ -229,6 +272,9 @@ export async function uploadPurchaseOrdersFile(file: File) {
 }
 
 export default {
+  login,
+  verifyToken,
+  getCurrentUser,
   checkApiHealth,
   getDashboardData,
   getBudgetData,

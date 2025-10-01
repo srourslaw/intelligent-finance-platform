@@ -71,10 +71,10 @@ export function Home() {
               Track budgets, costs, and profitability in real-time.
             </p>
             <Link
-              to="/dashboard"
+              to="/login"
               className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
             >
-              View Dashboard
+              Sign In to Dashboard
               <ArrowRight className="w-5 h-5" />
             </Link>
             <div className="mt-6 flex justify-center gap-4">
