@@ -135,7 +135,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
           });
 
           // Convert Blob to File for SpreadJS import
-          const file = new File([blob], doc.filename, {
+          const file = new (window as any).File([blob], doc.filename, {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
           });
 
