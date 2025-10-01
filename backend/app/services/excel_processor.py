@@ -195,6 +195,93 @@ class ExcelProcessor:
             print(f"Error reading defects file: {e}")
             return {"error": str(e), "defects": []}
 
+    def read_timesheets(self) -> Dict[str, Any]:
+        """Read Timesheets_September_2024.xlsx"""
+        try:
+            file_path = self.base_dir / "09_TIMESHEETS" / "Timesheets_September_2024.xlsx"
+
+            if not file_path.exists():
+                return {"error": "Timesheets file not found", "entries": []}
+
+            # Read Site Supervisor sheet
+            df_supervisor = pd.read_excel(file_path, sheet_name="Site Supervisor", header=2)
+            df_supervisor = df_supervisor.dropna(how='all')
+
+            # Read Labour Hours sheet
+            df_labour = pd.read_excel(file_path, sheet_name="Labour Hours", header=2)
+            df_labour = df_labour.dropna(how='all')
+
+            timesheet_entries = []
+
+            # Process supervisor entries
+            for _, row in df_supervisor.iterrows():
+                if pd.notna(row['Date']):
+                    timesheet_entries.append({
+                        "date": str(row['Date']),
+                        "employee": str(row['Employee']),
+                        "role": "Site Supervisor",
+                        "hours": float(row['Hours']) if pd.notna(row['Hours']) else 0,
+                        "rate": float(row['Rate']) if pd.notna(row['Rate']) else 0,
+                        "cost": float(row['Cost']) if pd.notna(row['Cost']) else 0,
+                        "task": str(row['Task']) if pd.notna(row['Task']) else ""
+                    })
+
+            # Process labour entries
+            for _, row in df_labour.iterrows():
+                if pd.notna(row['Date']):
+                    timesheet_entries.append({
+                        "date": str(row['Date']),
+                        "employee": str(row['Worker']),
+                        "role": str(row['Role']),
+                        "hours": float(row['Hours']) if pd.notna(row['Hours']) else 0,
+                        "rate": float(row['Rate']) if pd.notna(row['Rate']) else 0,
+                        "cost": float(row['Cost']) if pd.notna(row['Cost']) else 0,
+                        "task": str(row['Task']) if pd.notna(row['Task']) else ""
+                    })
+
+            print(f"✓ Timesheets: {len(timesheet_entries)} entries")
+            return {"entries": timesheet_entries}
+
+        except Exception as e:
+            print(f"Error reading timesheets file: {e}")
+            return {"error": str(e), "entries": []}
+
+    def read_purchase_orders(self) -> Dict[str, Any]:
+        """Read Purchase_Orders_Master.xlsx"""
+        try:
+            file_path = self.base_dir / "10_PURCHASE_ORDERS" / "Purchase_Orders_Master.xlsx"
+
+            if not file_path.exists():
+                return {"error": "Purchase orders file not found", "orders": []}
+
+            # Read PO Register sheet
+            df = pd.read_excel(file_path, sheet_name="PO Register", header=2)
+            df = df.dropna(how='all')
+
+            purchase_orders = []
+            for _, row in df.iterrows():
+                if pd.notna(row['PO#']):
+                    purchase_orders.append({
+                        "po_num": str(row['PO#']),
+                        "date": str(row['Date']),
+                        "supplier": str(row['Supplier']),
+                        "description": str(row['Description']),
+                        "category": str(row['Category']),
+                        "amount": float(row['Amount']) if pd.notna(row['Amount']) else 0,
+                        "gst": float(row['GST']) if pd.notna(row['GST']) else 0,
+                        "total": float(row['Total']) if pd.notna(row['Total']) else 0,
+                        "invoice_received": str(row['Invoice Received']),
+                        "paid": str(row['Paid']),
+                        "notes": str(row['Notes']) if pd.notna(row['Notes']) else ""
+                    })
+
+            print(f"✓ Purchase Orders: {len(purchase_orders)}")
+            return {"orders": purchase_orders}
+
+        except Exception as e:
+            print(f"Error reading purchase orders file: {e}")
+            return {"error": str(e), "orders": []}
+
     def check_files_exist(self) -> Dict[str, bool]:
         """Check which Excel files exist"""
         files = {
@@ -202,5 +289,7 @@ class ExcelProcessor:
             "subcontractors": (self.base_dir / "07_SUBCONTRACTORS" / "Subcontractor_Register.xlsx").exists(),
             "client_payments": (self.base_dir / "11_CLIENT_BILLING" / "Client_Payment_Tracker.xlsx").exists(),
             "defects": (self.base_dir / "15_DEFECTS_SNAGGING" / "Defects_And_Snagging.xlsx").exists(),
+            "timesheets": (self.base_dir / "09_TIMESHEETS" / "Timesheets_September_2024.xlsx").exists(),
+            "purchase_orders": (self.base_dir / "10_PURCHASE_ORDERS" / "Purchase_Orders_Master.xlsx").exists(),
         }
         return files

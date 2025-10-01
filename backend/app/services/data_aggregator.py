@@ -162,3 +162,153 @@ class DataAggregator:
             })
 
         return issues
+
+    @staticmethod
+    def get_cashflow_forecast(
+        budget_items: List[Dict],
+        milestones: List[Dict],
+        variations: List[Dict],
+        weeks: int = 12
+    ) -> Dict[str, Any]:
+        """Generate cashflow forecast for next N weeks"""
+        from datetime import datetime, timedelta
+
+        # Calculate weekly burn rate from budget
+        total_forecast = sum(item['forecast'] for item in budget_items)
+        total_spent = sum(item['actual_spent'] for item in budget_items)
+        remaining_spend = total_forecast - total_spent
+
+        # Average weekly burn rate
+        weekly_burn_rate = remaining_spend / weeks if weeks > 0 else 0
+
+        # Expected income from milestones and variations
+        expected_income = sum(m['amount'] for m in milestones if m['status'].upper() in ['PENDING', 'SUBMITTED'])
+        expected_income += sum(v['client_price'] for v in variations if v['status'].upper() == 'APPROVED' and v['invoiced'].upper() == 'NO')
+
+        # Generate weekly forecast
+        weekly_forecast = []
+        current_date = datetime.now()
+        cumulative_cash = 0
+
+        for week in range(weeks):
+            week_start = current_date + timedelta(weeks=week)
+            week_end = week_start + timedelta(days=6)
+
+            # Estimate cash in/out for the week
+            cash_in = expected_income / weeks if weeks > 0 else 0
+            cash_out = weekly_burn_rate
+            net_cash = cash_in - cash_out
+            cumulative_cash += net_cash
+
+            weekly_forecast.append({
+                "week": week + 1,
+                "week_start": week_start.strftime("%Y-%m-%d"),
+                "week_end": week_end.strftime("%Y-%m-%d"),
+                "cash_in": round(cash_in, 2),
+                "cash_out": round(cash_out, 2),
+                "net_cash": round(net_cash, 2),
+                "cumulative_cash": round(cumulative_cash, 2)
+            })
+
+        return {
+            "forecast_weeks": weeks,
+            "weekly_burn_rate": round(weekly_burn_rate, 2),
+            "expected_income": round(expected_income, 2),
+            "weekly_forecast": weekly_forecast
+        }
+
+    @staticmethod
+    def generate_insights(
+        budget_items: List[Dict],
+        subcontractors: List[Dict],
+        payments: List[Dict],
+        milestones: List[Dict],
+        variations: List[Dict],
+        defects: List[Dict]
+    ) -> List[Dict[str, Any]]:
+        """Generate AI-style insights from project data"""
+
+        insights = []
+
+        # Budget variance insights
+        over_budget_items = [item for item in budget_items if item['variance'] < -1000]
+        if over_budget_items:
+            total_overrun = sum(abs(item['variance']) for item in over_budget_items)
+            insights.append({
+                "type": "budget_variance",
+                "priority": "high",
+                "title": "Budget Overruns Detected",
+                "message": f"{len(over_budget_items)} line items are over budget by ${total_overrun:,.2f} total",
+                "recommendation": "Review cost allocation and consider value engineering opportunities",
+                "data": {"count": len(over_budget_items), "amount": total_overrun}
+            })
+
+        # Cash flow insight
+        total_budget = 650000
+        total_spent = sum(item['actual_spent'] for item in budget_items)
+        burn_rate = (total_spent / total_budget * 100) if total_budget > 0 else 0
+
+        completion_rate = sum(item['percent_complete'] for item in budget_items) / len(budget_items) if budget_items else 0
+
+        if burn_rate > completion_rate + 10:
+            insights.append({
+                "type": "cash_flow",
+                "priority": "critical",
+                "title": "Spending Outpacing Progress",
+                "message": f"You've spent {burn_rate:.1f}% of budget but only completed {completion_rate:.1f}% of work",
+                "recommendation": "Investigate cost overruns and accelerate completion of in-progress items",
+                "data": {"burn_rate": burn_rate, "completion_rate": completion_rate}
+            })
+
+        # Revenue leakage insight
+        uninvoiced_variations = [v for v in variations if v['status'].upper() == 'APPROVED' and v['invoiced'].upper() == 'NO']
+        if uninvoiced_variations:
+            revenue_loss = sum(v['client_price'] for v in uninvoiced_variations)
+            insights.append({
+                "type": "revenue_opportunity",
+                "priority": "high",
+                "title": "Uninvoiced Approved Variations",
+                "message": f"${revenue_loss:,.2f} in approved variations not yet invoiced",
+                "recommendation": "Issue invoices immediately to improve cash flow and recover costs",
+                "data": {"count": len(uninvoiced_variations), "amount": revenue_loss}
+            })
+
+        # Subcontractor payment insight
+        overdue_payments = [p for p in payments if p['status'].upper() == 'OVERDUE']
+        if overdue_payments:
+            total_overdue = sum(p['total'] for p in overdue_payments)
+            insights.append({
+                "type": "payment_risk",
+                "priority": "high",
+                "title": "Overdue Subcontractor Payments",
+                "message": f"{len(overdue_payments)} payment(s) overdue totaling ${total_overdue:,.2f}",
+                "recommendation": "Prioritize payments to maintain contractor relationships and avoid work stoppages",
+                "data": {"count": len(overdue_payments), "amount": total_overdue}
+            })
+
+        # Defect trend insight
+        critical_defects = [d for d in defects if d['severity'].upper() == 'CRITICAL']
+        if critical_defects:
+            insights.append({
+                "type": "quality_risk",
+                "priority": "critical",
+                "title": "Critical Defects Require Attention",
+                "message": f"{len(critical_defects)} critical defect(s) blocking project handover",
+                "recommendation": "Mobilize resources to resolve critical defects immediately",
+                "data": {"count": len(critical_defects)}
+            })
+
+        # Completion forecast
+        if budget_items:
+            avg_completion = sum(item['percent_complete'] for item in budget_items) / len(budget_items)
+            if avg_completion > 80:
+                insights.append({
+                    "type": "milestone",
+                    "priority": "medium",
+                    "title": "Project Nearing Completion",
+                    "message": f"Project is {avg_completion:.1f}% complete - prepare for handover activities",
+                    "recommendation": "Schedule final inspections, prepare documentation, and plan defect rectification",
+                    "data": {"completion_rate": avg_completion}
+                })
+
+        return insights

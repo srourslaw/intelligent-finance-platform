@@ -31,7 +31,7 @@ async def health_check():
 async def get_dashboard_data() -> Dict[str, Any]:
     """
     Get complete dashboard data from Excel files
-    Returns KPIs, budget, subcontractors, payments, variations, defects
+    Returns KPIs, budget, subcontractors, payments, variations, defects, insights
     """
     try:
         # Read all Excel files
@@ -57,6 +57,10 @@ async def get_dashboard_data() -> Dict[str, Any]:
         critical_issues = data_aggregator.identify_critical_issues(
             payments, milestones, defects, variations
         )
+        cashflow = data_aggregator.get_cashflow_forecast(budget_items, milestones, variations)
+        insights = data_aggregator.generate_insights(
+            budget_items, subcontractors, payments, milestones, variations, defects
+        )
 
         print(f"Dashboard data prepared:")
         print(f"  - Budget items: {len(budget_items)}")
@@ -66,6 +70,7 @@ async def get_dashboard_data() -> Dict[str, Any]:
         print(f"  - Variations: {len(variations)}")
         print(f"  - Defects: {len(defects)}")
         print(f"  - Critical issues: {len(critical_issues)}")
+        print(f"  - Insights: {len(insights)}")
 
         return {
             "kpis": kpis,
@@ -76,7 +81,9 @@ async def get_dashboard_data() -> Dict[str, Any]:
             "milestones": milestones,
             "variations": variations,
             "defects": defects,
-            "critical_issues": critical_issues
+            "critical_issues": critical_issues,
+            "cashflow": cashflow,
+            "insights": insights
         }
 
     except Exception as e:
@@ -123,5 +130,68 @@ async def get_defects() -> Dict[str, Any]:
     """Get defects data"""
     try:
         return excel_processor.read_defects()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/timesheets")
+async def get_timesheets() -> Dict[str, Any]:
+    """Get timesheet data"""
+    try:
+        return excel_processor.read_timesheets()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/purchase-orders")
+async def get_purchase_orders() -> Dict[str, Any]:
+    """Get purchase orders data"""
+    try:
+        return excel_processor.read_purchase_orders()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/cashflow")
+async def get_cashflow(weeks: int = 12) -> Dict[str, Any]:
+    """Get cashflow forecast"""
+    try:
+        budget_data = excel_processor.read_budget_file()
+        budget_items = budget_data.get("items", [])
+
+        client_data = excel_processor.read_client_payments()
+        milestones = client_data.get("milestones", [])
+        variations = client_data.get("variations", [])
+
+        cashflow = data_aggregator.get_cashflow_forecast(budget_items, milestones, variations, weeks)
+        return cashflow
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/insights")
+async def get_insights() -> Dict[str, Any]:
+    """Get AI-generated insights"""
+    try:
+        # Read all Excel files
+        budget_data = excel_processor.read_budget_file()
+        budget_items = budget_data.get("items", [])
+
+        subcontractor_data = excel_processor.read_subcontractors()
+        subcontractors = subcontractor_data.get("subcontractors", [])
+        payments = subcontractor_data.get("payments", [])
+
+        client_data = excel_processor.read_client_payments()
+        milestones = client_data.get("milestones", [])
+        variations = client_data.get("variations", [])
+
+        defects_data = excel_processor.read_defects()
+        defects = defects_data.get("defects", [])
+
+        insights = data_aggregator.generate_insights(
+            budget_items, subcontractors, payments, milestones, variations, defects
+        )
+
+        return {"insights": insights}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
