@@ -93,7 +93,7 @@ export async function checkApiHealth(token?: string) {
 /**
  * Get complete dashboard data
  */
-export async function getDashboardData(token: string) {
+export async function getDashboardData(token: string, projectId: string = 'project-a-123-sunset-blvd') {
   return fetchAPI<{
     kpis: any;
     budget_summary: any;
@@ -106,7 +106,7 @@ export async function getDashboardData(token: string) {
     critical_issues: any[];
     cashflow: any;
     insights: any[];
-  }>('/projects/dashboard', {
+  }>(`/projects/dashboard?project_id=${projectId}`, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },

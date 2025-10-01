@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, TrendingDown, TrendingUp, AlertTriangle, Calendar, CheckCircle2, LogOut } from 'lucide-react';
+import { DollarSign, TrendingDown, TrendingUp, AlertTriangle, Calendar, CheckCircle2, LogOut, ArrowLeft } from 'lucide-react';
 import { KPICard } from '../components/dashboard/KPICard';
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
@@ -13,18 +13,28 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dashboardData, setDashboardData] = useState<any>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+
+  useEffect(() => {
+    // Get selected project from localStorage
+    const projectId = localStorage.getItem('selectedProjectId');
+    if (!projectId) {
+      // No project selected, redirect to projects page
+      navigate('/projects');
+      return;
+    }
+    setSelectedProjectId(projectId);
+  }, [navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!token) {
-        setError('Not authenticated');
-        setLoading(false);
+      if (!token || !selectedProjectId) {
         return;
       }
 
       try {
         setLoading(true);
-        const response = await getDashboardData(token);
+        const response = await getDashboardData(token, selectedProjectId);
 
         if (response.error) {
           setError(response.error);
@@ -39,7 +49,7 @@ export function Dashboard() {
     };
 
     fetchData();
-  }, [token]);
+  }, [token, selectedProjectId]);
 
   const handleLogout = () => {
     logout();
@@ -125,6 +135,13 @@ export function Dashboard() {
                 <p className="text-sm font-medium text-gray-600">Welcome, {user?.full_name || 'User'}</p>
                 <p className="text-sm font-bold text-gray-900">{projectData.name}</p>
               </div>
+              <button
+                onClick={() => navigate('/projects')}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Projects
+              </button>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
@@ -221,7 +238,7 @@ export function Dashboard() {
         <BudgetTreemap />
 
         {/* Document Viewer */}
-        <DocumentViewer />
+        <DocumentViewer projectId={selectedProjectId} />
 
         {/* Additional Info Section */}
         <div className="bg-white rounded-lg shadow-md p-6">

@@ -10,9 +10,6 @@ from app.routers.auth import get_current_user, User
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 
-# Initialize document viewer
-doc_viewer = DocumentViewer()
-
 
 @router.get("/list/{project_id}")
 async def list_documents(
@@ -24,6 +21,7 @@ async def list_documents(
     Returns file tree structure
     """
     try:
+        doc_viewer = DocumentViewer(project_id=project_id)
         files = doc_viewer.get_file_tree(project_id)
         return files
     except Exception as e:
@@ -44,6 +42,7 @@ async def preview_document(
     - For Images: Returns base64 encoded image
     """
     try:
+        doc_viewer = DocumentViewer(project_id=project_id)
         preview = doc_viewer.preview_file(file_path, max_rows)
 
         if "error" in preview:
@@ -67,6 +66,7 @@ async def get_document_metadata(
     Get document metadata
     """
     try:
+        doc_viewer = DocumentViewer(project_id=project_id)
         metadata = doc_viewer.get_file_metadata(Path(file_path))
 
         if "error" in metadata:
@@ -90,6 +90,7 @@ async def download_document(
     Download a document file
     """
     try:
+        doc_viewer = DocumentViewer(project_id=project_id)
         full_path = doc_viewer.base_dir / file_path
 
         if not full_path.exists():
@@ -118,6 +119,7 @@ async def preview_excel(
     Preview Excel file with more rows
     """
     try:
+        doc_viewer = DocumentViewer(project_id=project_id)
         preview = doc_viewer.excel_to_json(Path(file_path), max_rows)
 
         if "error" in preview:
@@ -141,6 +143,7 @@ async def preview_pdf(
     Preview PDF file
     """
     try:
+        doc_viewer = DocumentViewer(project_id=project_id)
         preview = doc_viewer.pdf_to_preview(Path(file_path))
 
         if "error" in preview:
@@ -164,6 +167,7 @@ async def preview_image(
     Preview image file (returns base64)
     """
     try:
+        doc_viewer = DocumentViewer(project_id=project_id)
         preview = doc_viewer.image_to_base64(Path(file_path))
 
         if "error" in preview:

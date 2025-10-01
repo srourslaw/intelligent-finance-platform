@@ -13,10 +13,11 @@ from PyPDF2 import PdfReader
 class DocumentViewer:
     """Service for viewing documents in the browser"""
 
-    def __init__(self, data_dir: str = "dummy_data"):
-        self.base_dir = Path(__file__).parent.parent.parent.parent / data_dir
+    def __init__(self, project_id: str = "project-a-123-sunset-blvd"):
+        self.project_id = project_id
+        self.base_dir = Path(__file__).parent.parent.parent / "projects" / project_id / "data"
 
-    def get_file_tree(self, project_id: str = "project-a") -> List[Dict[str, Any]]:
+    def get_file_tree(self, project_id: str = "project-a-123-sunset-blvd") -> List[Dict[str, Any]]:
         """Get file tree structure from dummy_data folders"""
         files = []
 

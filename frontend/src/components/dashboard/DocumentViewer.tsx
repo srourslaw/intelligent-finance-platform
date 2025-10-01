@@ -16,7 +16,11 @@ interface DocumentsByFolder {
   [folder: string]: Document[];
 }
 
-export function DocumentViewer() {
+interface DocumentViewerProps {
+  projectId: string;
+}
+
+export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const { token } = useAuth();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [documentsByFolder, setDocumentsByFolder] = useState<DocumentsByFolder>({});
@@ -29,11 +33,11 @@ export function DocumentViewer() {
 
   useEffect(() => {
     const fetchDocuments = async () => {
-      if (!token) return;
+      if (!token || !projectId) return;
 
       try {
         setLoading(true);
-        const response = await getDocumentList('project-a', token);
+        const response = await getDocumentList(projectId, token);
 
         if (response.error) {
           setError(response.error);
@@ -71,7 +75,7 @@ export function DocumentViewer() {
     };
 
     fetchDocuments();
-  }, [token]);
+  }, [token, projectId]);
 
   const handleDocumentClick = async (doc: Document) => {
     setSelectedDocument(doc);
@@ -79,7 +83,7 @@ export function DocumentViewer() {
     setPreview(null);
 
     try {
-      const response = await previewDocument('project-a', doc.path, token!);
+      const response = await previewDocument(projectId, doc.path, token!);
 
       if (response.error) {
         setPreview({ error: response.error });

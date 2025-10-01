@@ -11,10 +11,12 @@ from typing import Dict, List, Any
 class ExcelProcessor:
     """Process construction project Excel files"""
 
-    def __init__(self, data_dir: str = "dummy_data"):
-        # Go up 3 levels from backend/app/services/ to backend/, then to data_dir
-        self.base_dir = Path(__file__).parent.parent.parent / data_dir
-        print(f"Excel Processor initialized with base_dir: {self.base_dir}")
+    def __init__(self, project_id: str = "project-a-123-sunset-blvd"):
+        # Go up 3 levels from backend/app/services/ to backend/projects/{project_id}/data
+        self.project_id = project_id
+        self.base_dir = Path(__file__).parent.parent.parent / "projects" / project_id / "data"
+        print(f"Excel Processor initialized for project: {project_id}")
+        print(f"Base dir: {self.base_dir}")
 
     def read_budget_file(self) -> Dict[str, Any]:
         """Read MASTER_PROJECT_BUDGET.xlsx and extract data"""
