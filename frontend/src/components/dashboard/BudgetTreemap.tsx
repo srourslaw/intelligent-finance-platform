@@ -21,21 +21,24 @@ interface CustomTooltipProps {
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    const variancePercent = ((data.variance / data.budget) * 100).toFixed(1);
-    const status = data.variance < 0 ? 'Over Budget' : data.variance > 0 ? 'Under Budget' : 'On Budget';
+    const budget = data.budget || 0;
+    const actual = data.actual || 0;
+    const variance = data.variance || 0;
+    const variancePercent = budget > 0 ? ((variance / budget) * 100).toFixed(1) : '0.0';
+    const status = variance < 0 ? 'Over Budget' : variance > 0 ? 'Under Budget' : 'On Budget';
 
     return (
       <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-        <p className="font-semibold text-gray-900 mb-2">{data.name}</p>
+        <p className="font-semibold text-gray-900 mb-2">{data.name || 'Unknown'}</p>
         <div className="space-y-1 text-sm">
           <p className="text-gray-600">
-            Budget: <span className="font-medium text-gray-900">${data.budget.toLocaleString()}</span>
+            Budget: <span className="font-medium text-gray-900">${budget.toLocaleString()}</span>
           </p>
           <p className="text-gray-600">
-            Actual: <span className="font-medium text-gray-900">${data.actual.toLocaleString()}</span>
+            Actual: <span className="font-medium text-gray-900">${actual.toLocaleString()}</span>
           </p>
-          <p className={`font-medium ${data.variance < 0 ? 'text-red-600' : 'text-green-600'}`}>
-            {status}: ${Math.abs(data.variance).toLocaleString()} ({variancePercent}%)
+          <p className={`font-medium ${variance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+            {status}: ${Math.abs(variance).toLocaleString()} ({variancePercent}%)
           </p>
         </div>
       </div>
@@ -50,6 +53,9 @@ const CustomContent = (props: any) => {
   // Only show label if box is large enough
   if (width < 80 || height < 50) return null;
 
+  const displaySize = size || 0;
+  const displayVariance = variance || 0;
+
   return (
     <g>
       <text
@@ -60,7 +66,7 @@ const CustomContent = (props: any) => {
         fontSize={14}
         fontWeight="600"
       >
-        {name}
+        {name || 'Unknown'}
       </text>
       <text
         x={x + width / 2}
@@ -69,17 +75,17 @@ const CustomContent = (props: any) => {
         fill="#fff"
         fontSize={12}
       >
-        ${size.toLocaleString()}
+        ${displaySize.toLocaleString()}
       </text>
       <text
         x={x + width / 2}
         y={y + height / 2 + 28}
         textAnchor="middle"
-        fill={variance < 0 ? '#fca5a5' : '#86efac'}
+        fill={displayVariance < 0 ? '#fca5a5' : '#86efac'}
         fontSize={11}
         fontWeight="500"
       >
-        {variance < 0 ? 'Over' : variance > 0 ? 'Under' : 'On'} Budget
+        {displayVariance < 0 ? 'Over' : displayVariance > 0 ? 'Under' : 'On'} Budget
       </text>
     </g>
   );
@@ -228,19 +234,19 @@ export function BudgetTreemap() {
           <div>
             <p className="text-sm text-gray-600">Total Budget</p>
             <p className="text-lg font-semibold text-gray-900">
-              ${data.reduce((sum, item) => sum + item.budget, 0).toLocaleString()}
+              ${data.reduce((sum, item) => sum + (item.budget || 0), 0).toLocaleString()}
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Total Actual</p>
             <p className="text-lg font-semibold text-gray-900">
-              ${data.reduce((sum, item) => sum + item.actual, 0).toLocaleString()}
+              ${data.reduce((sum, item) => sum + (item.actual || 0), 0).toLocaleString()}
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Total Variance</p>
-            <p className={`text-lg font-semibold ${data.reduce((sum, item) => sum + item.variance, 0) < 0 ? 'text-red-600' : 'text-green-600'}`}>
-              ${Math.abs(data.reduce((sum, item) => sum + item.variance, 0)).toLocaleString()}
+            <p className={`text-lg font-semibold ${data.reduce((sum, item) => sum + (item.variance || 0), 0) < 0 ? 'text-red-600' : 'text-green-600'}`}>
+              ${Math.abs(data.reduce((sum, item) => sum + (item.variance || 0), 0)).toLocaleString()}
             </p>
           </div>
         </div>
