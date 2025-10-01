@@ -116,11 +116,11 @@ export async function getDashboardData(token: string, projectId: string = 'proje
 /**
  * Get budget data
  */
-export async function getBudgetData(token: string) {
+export async function getBudgetData(token: string, projectId: string = 'project-a-123-sunset-blvd') {
   return fetchAPI<{
     summary: any;
     items: any[];
-  }>('/projects/budget', {
+  }>(`/projects/budget?project_id=${projectId}`, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },

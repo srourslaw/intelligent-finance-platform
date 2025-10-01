@@ -235,7 +235,7 @@ export function Dashboard() {
         </div>
 
         {/* Budget Treemap Visualization */}
-        <BudgetTreemap />
+        <BudgetTreemap projectId={selectedProjectId} />
 
         {/* Document Viewer */}
         <DocumentViewer projectId={selectedProjectId} />

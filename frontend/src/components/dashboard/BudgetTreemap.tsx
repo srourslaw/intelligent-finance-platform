@@ -91,7 +91,11 @@ const CustomContent = (props: any) => {
   );
 };
 
-export function BudgetTreemap() {
+interface BudgetTreemapProps {
+  projectId: string;
+}
+
+export function BudgetTreemap({ projectId }: BudgetTreemapProps) {
   const { token } = useAuth();
   const [data, setData] = useState<TreemapData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,11 +103,11 @@ export function BudgetTreemap() {
 
   useEffect(() => {
     const fetchBudgetData = async () => {
-      if (!token) return;
+      if (!token || !projectId) return;
 
       try {
         setLoading(true);
-        const response = await getBudgetData(token);
+        const response = await getBudgetData(token, projectId);
 
         console.log('Budget API Response:', response);
 
@@ -161,7 +165,7 @@ export function BudgetTreemap() {
     };
 
     fetchBudgetData();
-  }, [token]);
+  }, [token, projectId]);
 
   if (loading) {
     return (
