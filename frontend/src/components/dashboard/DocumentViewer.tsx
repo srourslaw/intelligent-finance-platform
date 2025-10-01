@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
-import { getDocumentList, previewDocument, getDocumentDownloadUrl } from '../../services/api';
+import { Document, Page, pdfjs } from 'react-pdf';
+import * as XLSX from 'xlsx';
+import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface Document {
   filename: string;
@@ -25,11 +32,18 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [documentsByFolder, setDocumentsByFolder] = useState<DocumentsByFolder>({});
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
-  const [preview, setPreview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+
+  // PDF state
+  const [numPages, setNumPages] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+
+  // Excel state
+  const [excelData, setExcelData] = useState<any>(null);
+  const [selectedSheet, setSelectedSheet] = useState<string>('');
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -80,23 +94,35 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const handleDocumentClick = async (doc: Document) => {
     setSelectedDocument(doc);
     setPreviewLoading(true);
-    setPreview(null);
+    setError(null);
+    setExcelData(null);
+    setNumPages(0);
+    setPageNumber(1);
 
     try {
-      console.log('Previewing document:', { projectId, path: doc.path, type: doc.type });
-      const response = await previewDocument(projectId, doc.path, token!);
-      console.log('Preview response:', response);
+      if (doc.type === 'excel') {
+        // Fetch and parse Excel file
+        const url = getDocumentDownloadUrl(projectId, doc.path);
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
-      if (response.error) {
-        console.error('Preview error:', response.error);
-        setPreview({ error: response.error });
-      } else {
-        console.log('Preview data type:', response.data?.type);
-        setPreview(response.data);
+        setExcelData(workbook);
+        // Select first non-empty sheet
+        const firstNonEmptySheet = workbook.SheetNames.find(name => {
+          const sheet = workbook.Sheets[name];
+          const data = XLSX.utils.sheet_to_json(sheet);
+          return data.length > 0;
+        });
+        setSelectedSheet(firstNonEmptySheet || workbook.SheetNames[0]);
       }
     } catch (err) {
-      console.error('Preview exception:', err);
-      setPreview({ error: 'Failed to preview document' });
+      console.error('Preview error:', err);
+      setError('Failed to preview document');
     } finally {
       setPreviewLoading(false);
     }
@@ -133,36 +159,52 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const renderExcelPreview = (previewData: any) => {
-    if (!previewData.sheets) return null;
+  const renderExcelPreview = () => {
+    if (!excelData || !selectedSheet) return null;
 
-    const firstSheetName = previewData.sheet_names?.[0];
-    const sheet = previewData.sheets[firstSheetName];
+    const sheet = excelData.Sheets[selectedSheet];
+    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
 
-    if (!sheet || sheet.error) {
-      return <p className="text-red-600">Error loading Excel sheet</p>;
+    if (jsonData.length === 0) {
+      return <p className="text-gray-500">Sheet is empty</p>;
     }
+
+    // Get headers (first row)
+    const headers = jsonData[0] || [];
+    const rows = jsonData.slice(1);
 
     return (
       <div className="space-y-4">
-        <h4 className="font-semibold text-gray-900">Sheet: {firstSheetName}</h4>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-300 text-xs">
-            <thead className="bg-gray-50">
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium text-gray-700">Sheet:</label>
+          <select
+            value={selectedSheet}
+            onChange={(e) => setSelectedSheet(e.target.value)}
+            className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+          >
+            {excelData.SheetNames.map((name: string) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="overflow-auto max-h-[500px] border border-gray-300 rounded">
+          <table className="min-w-full text-xs border-collapse">
+            <thead className="bg-gray-100 sticky top-0">
               <tr>
-                {sheet.columns.map((col: string, idx: number) => (
-                  <th key={idx} className="border border-gray-300 px-2 py-1 text-left font-medium text-gray-700">
-                    {col}
+                {headers.map((header: any, idx: number) => (
+                  <th key={idx} className="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-900">
+                    {header || `Column ${idx + 1}`}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {sheet.data.slice(0, 20).map((row: any[], rowIdx: number) => (
+              {rows.slice(0, 100).map((row: any[], rowIdx: number) => (
                 <tr key={rowIdx} className={rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  {row.map((cell: any, cellIdx: number) => (
-                    <td key={cellIdx} className="border border-gray-300 px-2 py-1 text-gray-900">
-                      {cell}
+                  {headers.map((_, cellIdx: number) => (
+                    <td key={cellIdx} className="border border-gray-300 px-3 py-2 text-gray-900">
+                      {row[cellIdx] ?? ''}
                     </td>
                   ))}
                 </tr>
@@ -170,39 +212,84 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
             </tbody>
           </table>
         </div>
-        {sheet.total_rows > 20 && (
+        {rows.length > 100 && (
           <p className="text-sm text-gray-600">
-            Showing first 20 of {sheet.total_rows} rows
+            Showing first 100 of {rows.length} rows
           </p>
         )}
       </div>
     );
   };
 
-  const renderPdfPreview = (previewData: any) => {
-    if (!previewData.pages) return null;
+  const renderPdfPreview = () => {
+    if (!selectedDocument) return null;
+
+    const url = getDocumentDownloadUrl(projectId, selectedDocument.path);
 
     return (
       <div className="space-y-4">
-        <p className="text-sm text-gray-600">
-          {previewData.page_count} pages total (showing first 3)
-        </p>
-        {previewData.pages.slice(0, 3).map((page: any) => (
-          <div key={page.page_number} className="border border-gray-300 p-4 rounded">
-            <h4 className="font-semibold text-gray-900 mb-2">Page {page.page_number}</h4>
-            <pre className="text-xs text-gray-700 whitespace-pre-wrap">{page.text}</pre>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            Page {pageNumber} of {numPages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
+              disabled={pageNumber <= 1}
+              className="px-3 py-1 bg-gray-200 text-gray-700 rounded disabled:opacity-50 text-sm"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
+              disabled={pageNumber >= numPages}
+              className="px-3 py-1 bg-gray-200 text-gray-700 rounded disabled:opacity-50 text-sm"
+            >
+              Next
+            </button>
           </div>
-        ))}
+        </div>
+
+        <div className="border border-gray-300 rounded overflow-auto">
+          <Document
+            file={url}
+            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+            loading={
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+              </div>
+            }
+            error={
+              <div className="p-4 text-red-600">
+                Failed to load PDF. Please try downloading the file.
+              </div>
+            }
+          >
+            <Page
+              pageNumber={pageNumber}
+              renderTextLayer={true}
+              renderAnnotationLayer={true}
+              className="mx-auto"
+              width={800}
+            />
+          </Document>
+        </div>
       </div>
     );
   };
 
-  const renderImagePreview = (previewData: any) => {
-    if (!previewData.data) return null;
+  const renderImagePreview = () => {
+    if (!selectedDocument) return null;
+
+    const url = getDocumentDownloadUrl(projectId, selectedDocument.path);
 
     return (
       <div>
-        <img src={previewData.data} alt={previewData.filename} className="max-w-full h-auto rounded" />
+        <img
+          src={url}
+          alt={selectedDocument.filename}
+          className="max-w-full h-auto rounded border border-gray-300"
+        />
       </div>
     );
   };
@@ -218,7 +305,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     );
   }
 
-  if (error) {
+  if (error && documents.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-md p-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Project Documents</h2>
@@ -312,12 +399,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                 </div>
               )}
 
-              {!previewLoading && preview && (
+              {!previewLoading && (
                 <div>
-                  {preview.error && <p className="text-red-600">{preview.error}</p>}
-                  {preview.type === 'excel' && renderExcelPreview(preview)}
-                  {preview.type === 'pdf' && renderPdfPreview(preview)}
-                  {preview.type === 'image' && renderImagePreview(preview)}
+                  {selectedDocument.type === 'excel' && renderExcelPreview()}
+                  {selectedDocument.type === 'pdf' && renderPdfPreview()}
+                  {selectedDocument.type === 'image' && renderImagePreview()}
                 </div>
               )}
             </div>
