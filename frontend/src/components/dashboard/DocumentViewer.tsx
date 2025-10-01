@@ -83,14 +83,19 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     setPreview(null);
 
     try {
+      console.log('Previewing document:', { projectId, path: doc.path, type: doc.type });
       const response = await previewDocument(projectId, doc.path, token!);
+      console.log('Preview response:', response);
 
       if (response.error) {
+        console.error('Preview error:', response.error);
         setPreview({ error: response.error });
       } else {
+        console.log('Preview data type:', response.data?.type);
         setPreview(response.data);
       }
     } catch (err) {
+      console.error('Preview exception:', err);
       setPreview({ error: 'Failed to preview document' });
     } finally {
       setPreviewLoading(false);
@@ -292,7 +297,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                   </div>
                 </div>
                 <a
-                  href={getDocumentDownloadUrl('project-a', selectedDocument.path)}
+                  href={getDocumentDownloadUrl(projectId, selectedDocument.path)}
                   download
                   className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm"
                 >
