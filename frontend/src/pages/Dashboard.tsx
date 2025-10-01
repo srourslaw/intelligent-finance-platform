@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DollarSign, TrendingDown, TrendingUp, AlertTriangle, Calendar, CheckCircle2, LogOut } from 'lucide-react';
 import { KPICard } from '../components/dashboard/KPICard';
+import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -213,6 +214,11 @@ export function Dashboard() {
             icon={Calendar}
             trend={projectData.daysBehind > 0 ? 'negative' : 'positive'}
           />
+        </div>
+
+        {/* Budget Treemap Visualization */}
+        <div className="mb-8">
+          <BudgetTreemap />
         </div>
 
         {/* Additional Info Section */}
