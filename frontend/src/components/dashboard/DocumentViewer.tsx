@@ -165,7 +165,27 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   };
 
   const renderDocumentPreview = () => {
-    if (!pdfBlob || !selectedDocument) return null;
+    if (!selectedDocument) return null;
+
+    if (selectedDocument.type === 'excel') {
+      // For Excel, use direct download URL with Office Online viewer
+      const fileUrl = getDocumentDownloadUrl(projectId, selectedDocument.path);
+      const viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+
+      return (
+        <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
+          <iframe
+            src={viewerUrl}
+            className="w-full"
+            style={{ height: '650px' }}
+            title={selectedDocument.filename}
+          />
+        </div>
+      );
+    }
+
+    // For PDF, use blob URL
+    if (!pdfBlob) return null;
 
     return (
       <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
