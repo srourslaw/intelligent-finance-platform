@@ -3,7 +3,7 @@ import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lu
 import { Document, Page, pdfjs } from 'react-pdf';
 import { SpreadSheets } from '@mescius/spread-sheets-react';
 import * as GC from '@mescius/spread-sheets';
-import * as ExcelIO from '@mescius/spread-excelio';
+import '@mescius/spread-sheets-io';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -143,47 +143,34 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
           return;
         }
 
-        const excelIO = new ExcelIO.IO();
-        const blob = new Blob([arrayBuffer], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
-        console.log('Blob created for Excel, size:', blob.size, 'type:', blob.type);
-        console.log('Calling excelIO.open with blob...');
+        try {
+          // Use SpreadJS built-in import method instead of ExcelIO
+          const file = new File([arrayBuffer], doc.filename, {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          });
 
-        excelIO.open(
-          blob,
-          (json: any) => {
-            console.log('✅ Excel JSON received from ExcelIO');
-            console.log('JSON keys:', Object.keys(json || {}));
-            console.log('Sheets:', json?.sheets);
-            if (spreadRef.current) {
-              try {
-                spreadRef.current.fromJSON(json);
-                console.log('✅ Excel loaded successfully into SpreadJS');
-                console.log('Active sheet count:', spreadRef.current.getSheetCount());
-                setPreviewLoading(false);
-              } catch (err) {
-                console.error('Error calling fromJSON:', err);
-                setError('Failed to display Excel file');
-                setPreviewLoading(false);
-              }
-            } else {
-              console.error('spreadRef.current became null during load');
-              setError('Failed to load Excel');
+          console.log('Calling spreadRef.current.import()...');
+          spreadRef.current.import(
+            file,
+            () => {
+              console.log('✅ Excel file imported successfully');
+              console.log('Sheet count:', spreadRef.current?.getSheetCount());
               setPreviewLoading(false);
+            },
+            (error: any) => {
+              console.error('❌ Excel import error:', error);
+              setError('Failed to import Excel file: ' + (error?.errorMessage || error?.message || 'Unknown error'));
+              setPreviewLoading(false);
+            },
+            {
+              fileType: GC.Spread.Sheets.FileType.excel
             }
-          },
-          (error: any) => {
-            console.error('❌ Excel load error:', error);
-            console.log('Error details:', {
-              errorCode: error?.errorCode,
-              errorMessage: error?.errorMessage,
-              fullError: error
-            });
-            setError('Failed to load Excel file: ' + (error?.errorMessage || error?.message || 'Unknown error'));
-            setPreviewLoading(false);
-          }
-        );
+          );
+        } catch (err) {
+          console.error('❌ Excel load error:', err);
+          setError('Failed to load Excel file: ' + (err instanceof Error ? err.message : 'Unknown error'));
+          setPreviewLoading(false);
+        }
       } else if (doc.type === 'pdf') {
         console.log('Loading PDF file...');
         // Create blob URL for PDF
