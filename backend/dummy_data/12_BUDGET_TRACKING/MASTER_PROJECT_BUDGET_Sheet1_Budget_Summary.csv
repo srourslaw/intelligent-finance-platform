@@ -1,0 +1,15 @@
+Category,Sub-Category,Budget,Actual,Committed,Forecast,Variance,% Complete,Notes
+LAND & ACQUISITION,Land Purchase - 123 Sunset Blvd,$285000.00,$285000,$0,$285000.00,$0.00,100%,PAID - Settlement 15/Jan/2024
+LAND & ACQUISITION,Stamp Duty,$12750,$12750.00,$0.00,$12750,($0),100%,
+LAND & ACQUISITION,Legal Fees - Conveyancing,$1850.50,$1850.50,,$1850.50,$0.00,100%,Jenkins & Associates
+LAND & ACQUISITION,Survey & Title Search,$950,$950,0,$950.00,$0,100%,
+LAND & ACQUISITION,Soil Testing & Geotechnical,$2400.00,$2650,$0.00,$2650,($250.00),100%,Extra tests required - clay
+,,,,,,,,"(HIDDEN ROWS: Engineering report review, Environmental assessment)"
+DESIGN & APPROVALS,Architect - Concept Design,$8500,$8500.00,$0,$8500,$0.00,100%,Design Co. - PAID
+DESIGN & APPROVALS,Architect - Detailed Plans,$15500.00,$15500,0,$15500.00,$0,100%,
+DESIGN & APPROVALS,Design Revisions,$2500,$3240.00,,$3240,($740),100%,3 revision rounds!! client kept changing
+DESIGN & APPROVALS,Structural Engineering,$5200,$5200,$0.00,$5200.00,$0.00,100%,
+DESIGN & APPROVALS,Civil Engineering,$3800.00,$3950,0,$3950,($150.00),100%,slight overrun
+DESIGN & APPROVALS,Electrical Design & Plans,$2100,$2100.00,,$2100.00,$0,100%,
+DESIGN & APPROVALS,Plumbing/Hydraulic Design,$1850.00,$1850,0,$1850,$0.00,100%,
+DESIGN & APPROVALS,Council DA Fees & Permits,$4250,$4680.00,,$4680,($430.00),100%,Extra fees for variation
