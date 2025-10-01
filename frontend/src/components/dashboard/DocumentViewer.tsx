@@ -10,8 +10,8 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import '@mescius/spread-sheets/styles/gc.spread.sheets.excel2013white.css';
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Configure PDF.js worker - use CDN with CORS support
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 interface DocumentItem {
   filename: string;
@@ -445,9 +445,13 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                 </div>
               )}
 
+              {/* Always render SpreadJS (hidden when not in use) so it stays initialized */}
+              <div style={{ display: !previewLoading && !error && selectedDocument.type === 'excel' ? 'block' : 'none' }}>
+                {renderExcelPreview()}
+              </div>
+
               {!previewLoading && !error && (
                 <div>
-                  {selectedDocument.type === 'excel' && renderExcelPreview()}
                   {selectedDocument.type === 'pdf' && renderPdfPreview()}
                   {selectedDocument.type === 'image' && renderImagePreview()}
                 </div>
