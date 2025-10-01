@@ -224,6 +224,17 @@ export async function getInsights(token: string) {
 }
 
 /**
+ * Get list of all projects
+ */
+export async function getProjectsList(token: string) {
+  return fetchAPI<any[]>('/projects/list', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+}
+
+/**
  * Upload budget file
  */
 export async function uploadBudgetFile(file: File, token: string) {
@@ -362,6 +373,7 @@ export default {
   getPurchaseOrders,
   getCashflowForecast,
   getInsights,
+  getProjectsList,
   uploadBudgetFile,
   uploadSubcontractorFile,
   uploadClientPaymentsFile,

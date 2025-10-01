@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import { getProjectsList } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Project {
   project_id: string;
@@ -19,6 +20,7 @@ interface Project {
 }
 
 const Projects: React.FC = () => {
+  const { token } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -28,9 +30,13 @@ const Projects: React.FC = () => {
   }, []);
 
   const fetchProjects = async () => {
+    if (!token) return;
+
     try {
-      const response = await api.get('/api/projects/list');
-      setProjects(response.data);
+      const response = await getProjectsList(token);
+      if (response.data) {
+        setProjects(response.data);
+      }
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
