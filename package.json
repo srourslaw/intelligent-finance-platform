@@ -1,0 +1,25 @@
+{
+  "name": "intelligent-finance-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-Powered Financial Dashboard for Construction Companies",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/srourslaw/intelligent-finance-platform.git"
+  },
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview",
+    "install:frontend": "cd frontend && npm install"
+  },
+  "keywords": [
+    "construction",
+    "finance",
+    "dashboard",
+    "ai",
+    "saas"
+  ],
+  "author": "Hussein Srour",
+  "license": "UNLICENSED"
+}
