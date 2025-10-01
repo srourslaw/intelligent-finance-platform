@@ -47,7 +47,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
   // SpreadJS state
   const spreadRef = useRef<GC.Spread.Sheets.Workbook | null>(null);
-  const [spreadInitialized, setSpreadInitialized] = useState(false);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -109,7 +108,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     setPdfBlob(null);
     setNumPages(0);
     setPageNumber(1);
-    setSpreadInitialized(false);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
@@ -131,10 +129,10 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         // Load Excel file into SpreadJS
         if (spreadRef.current) {
           const excelIO = new ExcelIO.IO();
-          excelIO.open(arrayBuffer, (json: any) => {
+          const blob = new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          excelIO.open(blob, (json: any) => {
             if (spreadRef.current) {
               spreadRef.current.fromJSON(json);
-              setSpreadInitialized(true);
             }
           }, (error: any) => {
             console.error('Excel load error:', error);
@@ -158,7 +156,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const workbookInit = (spread: GC.Spread.Sheets.Workbook) => {
     spreadRef.current = spread;
     // Configure SpreadJS to be read-only
-    spread.options.allowUserEditFormu = false;
+    spread.options.allowUserEditFormula = false;
     spread.options.tabStripVisible = true;
     spread.options.newTabVisible = false;
     spread.options.tabEditable = false;
