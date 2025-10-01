@@ -1,0 +1,25 @@
+
+**TAX INVOICE**
+
+**Miami Demo Group**
+123 Industrial Rd, Miami
+INV-MDG-1050
+
+**Bill To:**
+Coastal Commercial Constructions
+Level 12, 456 Ocean Drive, Miami
+
+**Date:** 2024-07-20
+**Due Date:** 2024-08-19
+
+---
+| Description | Amount |
+|---|---|
+| Complete Demolition of Level 12 | $48,000.00 |
+| Waste Removal | $5,000.00 |
+| **Subtotal** | **$53,000.00** |
+| **GST (10%)** | **$5,300.00** |
+| **TOTAL** | **$58,300.00** |
+---
+**Status: PAID**
+**Payment Date:** 2024-08-15

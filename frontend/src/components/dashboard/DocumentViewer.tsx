@@ -134,9 +134,14 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
           });
 
+          // Convert Blob to File for SpreadJS import
+          const file = new File([blob], doc.filename, {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          });
+
           // Use spread.import() method as per SpreadJS guide
           spreadRef.current.import(
-            blob,
+            file,
             () => {
               console.log('Excel import successful');
               setPreviewLoading(false);
