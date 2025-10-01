@@ -1,0 +1,1094 @@
+{
+  "project": {
+    "id": "PROJ-A-001",
+    "name": "123 Sunset Boulevard",
+    "client": "Mr & Mrs Thompson",
+    "address": "123 Sunset Boulevard, Riverside Heights, NSW 2155",
+    "contractValue": 650000,
+    "startDate": "2024-01-15",
+    "originalCompletionDate": "2024-10-30",
+    "forecastCompletionDate": "2024-11-11",
+    "daysDelayed": 12,
+    "percentComplete": 65,
+    "status": "In Progress - Behind Schedule",
+    "projectManager": "Sarah Chen",
+    "siteSupervisor": "Mark Williams"
+  },
+
+  "budgetSummary": {
+    "totalBudget": 650000,
+    "totalSpent": 574600,
+    "totalCommitted": 38900,
+    "forecastFinal": 658500,
+    "variance": -8500,
+    "categories": [
+      {
+        "category": "LAND & ACQUISITION",
+        "budget": 303000,
+        "actual": 303200,
+        "committed": 0,
+        "forecast": 303200,
+        "variance": -200,
+        "percentComplete": 100,
+        "lineItems": [
+          {
+            "item": "Land Purchase - 123 Sunset Blvd",
+            "budget": 285000,
+            "actual": 285000,
+            "committed": 0,
+            "forecast": 285000,
+            "variance": 0,
+            "percentComplete": 100,
+            "notes": "PAID - Settlement 15/Jan/2024",
+            "supplier": "Ray White Riverside",
+            "invoiceRef": "RW-2024-0089"
+          },
+          {
+            "item": "Stamp Duty",
+            "budget": 12750,
+            "actual": 12750,
+            "committed": 0,
+            "forecast": 12750,
+            "variance": 0,
+            "percentComplete": 100,
+            "notes": "NSW Revenue"
+          },
+          {
+            "item": "Legal Fees - Conveyancing",
+            "budget": 1850,
+            "actual": 1850.50,
+            "committed": 0,
+            "forecast": 1850.50,
+            "variance": -0.50,
+            "percentComplete": 100,
+            "notes": "",
+            "supplier": "Jenkins & Associates"
+          },
+          {
+            "item": "Survey & Title Search",
+            "budget": 950,
+            "actual": 950,
+            "committed": 0,
+            "forecast": 950,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Soil Testing & Geotechnical",
+            "budget": 2400,
+            "actual": 2650,
+            "committed": 0,
+            "forecast": 2650,
+            "variance": -250,
+            "percentComplete": 100,
+            "notes": "Extra tests required - clay found",
+            "supplier": "GeoTech Solutions"
+          }
+        ]
+      },
+      {
+        "category": "DESIGN & APPROVALS",
+        "budget": 44200,
+        "actual": 45720,
+        "committed": 0,
+        "forecast": 45720,
+        "variance": -1520,
+        "percentComplete": 100,
+        "lineItems": [
+          {
+            "item": "Architect - Concept Design",
+            "budget": 8500,
+            "actual": 8500,
+            "committed": 0,
+            "forecast": 8500,
+            "variance": 0,
+            "percentComplete": 100,
+            "notes": "Design Co. - PAID",
+            "supplier": "Modern Design Co"
+          },
+          {
+            "item": "Architect - Detailed Plans",
+            "budget": 15500,
+            "actual": 15500,
+            "committed": 0,
+            "forecast": 15500,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Design Revisions",
+            "budget": 2500,
+            "actual": 3240,
+            "committed": 0,
+            "forecast": 3240,
+            "variance": -740,
+            "percentComplete": 100,
+            "notes": "3 revision rounds!! client kept changing mind",
+            "issueFlag": true
+          },
+          {
+            "item": "Structural Engineering",
+            "budget": 5200,
+            "actual": 5200,
+            "committed": 0,
+            "forecast": 5200,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "Structural Solutions Pty Ltd"
+          },
+          {
+            "item": "Civil Engineering",
+            "budget": 3800,
+            "actual": 3950,
+            "committed": 0,
+            "forecast": 3950,
+            "variance": -150,
+            "percentComplete": 100,
+            "notes": "slight overrun - additional drainage calcs"
+          },
+          {
+            "item": "Electrical Design & Plans",
+            "budget": 2100,
+            "actual": 2100,
+            "committed": 0,
+            "forecast": 2100,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Plumbing/Hydraulic Design",
+            "budget": 1850,
+            "actual": 1850,
+            "committed": 0,
+            "forecast": 1850,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Council DA Fees & Permits",
+            "budget": 4250,
+            "actual": 4680,
+            "committed": 0,
+            "forecast": 4680,
+            "variance": -430,
+            "percentComplete": 100,
+            "notes": "Extra fees for variation approval"
+          },
+          {
+            "item": "Building Permit & Inspections",
+            "budget": 500,
+            "actual": 700,
+            "committed": 0,
+            "forecast": 700,
+            "variance": -200,
+            "percentComplete": 100,
+            "notes": "Additional inspection fees"
+          }
+        ]
+      },
+      {
+        "category": "SITE PREPARATION",
+        "budget": 18500,
+        "actual": 18920,
+        "committed": 0,
+        "forecast": 18920,
+        "variance": -420,
+        "percentComplete": 100,
+        "lineItems": [
+          {
+            "item": "Site Clearing & Demolition",
+            "budget": 4200,
+            "actual": 4200,
+            "committed": 0,
+            "forecast": 4200,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "Clear Site Services"
+          },
+          {
+            "item": "Excavation - House & Driveway",
+            "budget": 8500,
+            "actual": 8920,
+            "committed": 0,
+            "forecast": 8920,
+            "variance": -420,
+            "percentComplete": 100,
+            "notes": "Rock found - extra excavation required URGENT",
+            "supplier": "Big Dig Excavations",
+            "issueFlag": true
+          },
+          {
+            "item": "Temp Site Fencing",
+            "budget": 1800,
+            "actual": 1800,
+            "committed": 0,
+            "forecast": 1800,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Temp Power Connection",
+            "budget": 950,
+            "actual": 950,
+            "committed": 0,
+            "forecast": 950,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Temp Water Connection",
+            "budget": 750,
+            "actual": 750,
+            "committed": 0,
+            "forecast": 750,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Site Toilet Hire (6 months)",
+            "budget": 2300,
+            "actual": 2300,
+            "committed": 0,
+            "forecast": 2300,
+            "variance": 0,
+            "percentComplete": 100,
+            "notes": "Portaloo Weekly Service"
+          }
+        ]
+      },
+      {
+        "category": "FOUNDATION",
+        "budget": 45000,
+        "actual": 45890,
+        "committed": 0,
+        "forecast": 45890,
+        "variance": -890,
+        "percentComplete": 100,
+        "lineItems": [
+          {
+            "item": "Footings - Concrete Supply",
+            "budget": 8500,
+            "actual": 8500,
+            "committed": 0,
+            "forecast": 8500,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "ReadyMix Concrete Co"
+          },
+          {
+            "item": "Footings - Steel/Reo",
+            "budget": 4200,
+            "actual": 4200,
+            "committed": 0,
+            "forecast": 4200,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "Steel Supplies Pty Ltd"
+          },
+          {
+            "item": "Footings - Labour",
+            "budget": 3800,
+            "actual": 3800,
+            "committed": 0,
+            "forecast": 3800,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "Concrete Crew"
+          },
+          {
+            "item": "Termite Barrier",
+            "budget": 1950,
+            "actual": 1950,
+            "committed": 0,
+            "forecast": 1950,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "Termite Shield Co"
+          },
+          {
+            "item": "Slab - Concrete (35m3)",
+            "budget": 12500,
+            "actual": 12500,
+            "committed": 0,
+            "forecast": 12500,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "ReadyMix Concrete Co"
+          },
+          {
+            "item": "Slab - Steel Mesh & Reo",
+            "budget": 5800,
+            "actual": 5800,
+            "committed": 0,
+            "forecast": 5800,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Slab - Waterproofing",
+            "budget": 2100,
+            "actual": 2990,
+            "committed": 0,
+            "forecast": 2990,
+            "variance": -890,
+            "percentComplete": 100,
+            "notes": "Extra waterproofing required - wet site",
+            "issueFlag": true
+          },
+          {
+            "item": "Slab - Labour & Finishing",
+            "budget": 6150,
+            "actual": 6150,
+            "committed": 0,
+            "forecast": 6150,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "Concrete Crew"
+          }
+        ]
+      },
+      {
+        "category": "FRAME & STRUCTURE",
+        "budget": 62000,
+        "actual": 62000,
+        "committed": 0,
+        "forecast": 62000,
+        "variance": 0,
+        "percentComplete": 100,
+        "lineItems": [
+          {
+            "item": "Timber Frame Supply",
+            "budget": 28500,
+            "actual": 28500,
+            "committed": 0,
+            "forecast": 28500,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "Bunnings Trade",
+            "poRef": "PO-045"
+          },
+          {
+            "item": "Frame Labour",
+            "budget": 18500,
+            "actual": 18500,
+            "committed": 0,
+            "forecast": 18500,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "Frame Masters Pty Ltd"
+          },
+          {
+            "item": "Roof Trusses Supply & Install",
+            "budget": 9200,
+            "actual": 9200,
+            "committed": 0,
+            "forecast": 9200,
+            "variance": 0,
+            "percentComplete": 100,
+            "supplier": "Truss Tech"
+          },
+          {
+            "item": "Engineering Inspections",
+            "budget": 1500,
+            "actual": 1500,
+            "committed": 0,
+            "forecast": 1500,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Bracing & Wind Ties",
+            "budget": 2100,
+            "actual": 2100,
+            "committed": 0,
+            "forecast": 2100,
+            "variance": 0,
+            "percentComplete": 100
+          },
+          {
+            "item": "Frame Connectors/Hardware",
+            "budget": 2200,
+            "actual": 2200,
+            "committed": 0,
+            "forecast": 2200,
+            "variance": 0,
+            "percentComplete": 100
+          }
+        ]
+      }
+    ]
+  },
+
+  "subcontractors": [
+    {
+      "id": "SUB-001",
+      "trade": "Excavation",
+      "company": "Big Dig Excavations Pty Ltd",
+      "contact": "Dave Mitchell",
+      "phone": "0412 345 678",
+      "email": "dave@bigdig.com.au",
+      "abn": "51 824 967 123",
+      "contractValue": 8920,
+      "contractDate": "2024-01-20",
+      "status": "Complete",
+      "insuranceExpiry": "2025-06-30",
+      "licenseNumber": "EXC-45612",
+      "payments": [
+        {
+          "invoiceDate": "2024-02-15",
+          "invoiceNumber": "BD-2024-156",
+          "description": "Excavation works - complete",
+          "amountExGST": 8109.09,
+          "gst": 810.91,
+          "total": 8920,
+          "dueDate": "2024-03-15",
+          "paidDate": "2024-03-10",
+          "paymentMethod": "EFT",
+          "retentionHeld": 0,
+          "notes": "Paid on time"
+        }
+      ]
+    },
+    {
+      "id": "SUB-002",
+      "trade": "Concrete",
+      "company": "Concrete Crew",
+      "contact": "Steve Johnson",
+      "phone": "(02) 5555-1234",
+      "email": "steve.j@concretecrew.com",
+      "abn": "12345678901",
+      "contractValue": 18450,
+      "contractDate": "2024-02-01",
+      "status": "Complete",
+      "insuranceExpiry": "2024-12-31",
+      "licenseNumber": "CON-78945",
+      "notes": "Insurance expiring soon - need renewal!",
+      "issueFlag": true,
+      "payments": [
+        {
+          "invoiceDate": "2024-03-20",
+          "invoiceNumber": "CC-789",
+          "description": "Footings & Slab - Progress 1",
+          "amountExGST": 10000,
+          "gst": 1000,
+          "total": 11000,
+          "dueDate": "2024-04-20",
+          "paidDate": "2024-04-18",
+          "paymentMethod": "EFT",
+          "retentionHeld": 550
+        },
+        {
+          "invoiceDate": "2024-04-10",
+          "invoiceNumber": "CC-812",
+          "description": "Slab completion & finishing",
+          "amountExGST": 6772.73,
+          "gst": 677.27,
+          "total": 7450,
+          "dueDate": "2024-05-10",
+          "paidDate": "2024-05-15",
+          "paymentMethod": "EFT",
+          "retentionHeld": 372.50,
+          "notes": "Paid 5 days late"
+        }
+      ]
+    },
+    {
+      "id": "SUB-003",
+      "trade": "Framing",
+      "company": "Frame Masters Pty Ltd",
+      "contact": "Tony Romano",
+      "phone": "04 1234 5678",
+      "email": "tony@framemasters.com.au",
+      "abn": "51 987 654 321",
+      "contractValue": 18500,
+      "contractDate": "2024-03-15",
+      "status": "Complete",
+      "insuranceExpiry": "2025-03-31",
+      "licenseNumber": "CAR-12345",
+      "payments": [
+        {
+          "invoiceDate": "2024-05-20",
+          "invoiceNumber": "FM-2024-089",
+          "description": "Frame erection - complete",
+          "amountExGST": 16818.18,
+          "gst": 1681.82,
+          "total": 18500,
+          "dueDate": "2024-06-20",
+          "paidDate": "2024-06-22",
+          "paymentMethod": "EFT",
+          "retentionHeld": 925,
+          "notes": "Retention to be released at practical completion"
+        }
+      ]
+    },
+    {
+      "id": "SUB-004",
+      "trade": "Roofing",
+      "company": "Apex Roofing Solutions",
+      "contact": "Michael Chen",
+      "phone": "0423456789",
+      "email": "",
+      "abn": "88 765 432 109",
+      "contractValue": 24500,
+      "contractDate": "2024-05-01",
+      "status": "Complete",
+      "insuranceExpiry": "2025-08-15",
+      "licenseNumber": "ROOF-89321",
+      "notes": "No email on file - call only",
+      "payments": [
+        {
+          "invoiceDate": "2024-06-30",
+          "invoiceNumber": "ARS-445",
+          "description": "Roof tiles supply & install",
+          "amountExGST": 22272.73,
+          "gst": 2227.27,
+          "total": 24500,
+          "dueDate": "2024-07-30",
+          "paidDate": "2024-07-28",
+          "paymentMethod": "EFT",
+          "retentionHeld": 1225,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "SUB-005",
+      "trade": "Brickwork",
+      "company": "Premier Bricklaying",
+      "contact": "John Smith",
+      "phone": "0412987654",
+      "email": "john@premierbrick.com.au",
+      "abn": "12 345 678 902",
+      "contractValue": 38500,
+      "contractDate": "2024-06-10",
+      "status": "Complete",
+      "insuranceExpiry": "2025-12-31",
+      "licenseNumber": "BRICK-54678",
+      "payments": [
+        {
+          "invoiceDate": "2024-08-15",
+          "invoiceNumber": "PB-2024-234",
+          "description": "Brickwork - Progress payment 1",
+          "amountExGST": 18181.82,
+          "gst": 1818.18,
+          "total": 20000,
+          "dueDate": "2024-09-15",
+          "paidDate": "2024-09-12",
+          "paymentMethod": "EFT",
+          "retentionHeld": 1000
+        },
+        {
+          "invoiceDate": "2024-09-20",
+          "invoiceNumber": "PB-2024-267",
+          "description": "Brickwork - Final",
+          "amountExGST": 16818.18,
+          "gst": 1681.82,
+          "total": 18500,
+          "dueDate": "2024-10-20",
+          "paidDate": null,
+          "paymentMethod": null,
+          "retentionHeld": 925,
+          "notes": "OVERDUE by 5 days!",
+          "issueFlag": true,
+          "overdueBy": 5
+        }
+      ]
+    },
+    {
+      "id": "SUB-006",
+      "trade": "Plumbing",
+      "company": "Hydro Plumbing Services",
+      "contact": "Robert Lee",
+      "phone": "(02)55551678",
+      "email": "rob@hydroplumbing.net",
+      "abn": "45123789012",
+      "contractValue": 28580,
+      "contractDate": "2024-06-20",
+      "status": "In Progress",
+      "insuranceExpiry": "2025-06-30",
+      "licenseNumber": "PLB-98765",
+      "payments": [
+        {
+          "invoiceDate": "2024-08-10",
+          "invoiceNumber": "HPS-1024",
+          "description": "Rough-in plumbing",
+          "amountExGST": 13636.36,
+          "gst": 1363.64,
+          "total": 15000,
+          "dueDate": "2024-09-10",
+          "paidDate": "2024-09-08",
+          "paymentMethod": "EFT",
+          "retentionHeld": 750
+        },
+        {
+          "invoiceDate": "2024-09-25",
+          "invoiceNumber": "HPS-1089",
+          "description": "Fixtures & final connections",
+          "amountExGST": 12345.45,
+          "gst": 1234.55,
+          "total": 13580,
+          "dueDate": "2024-10-25",
+          "paidDate": null,
+          "paymentMethod": null,
+          "retentionHeld": 679,
+          "notes": "Due in 4 days"
+        }
+      ]
+    },
+    {
+      "id": "SUB-007",
+      "trade": "Electrical",
+      "company": "Spark Electrical Group",
+      "contact": "Andrew Wilson",
+      "phone": "0456123789",
+      "email": "awilson@sparkelectrical.com",
+      "abn": "78 901 234 567",
+      "contractValue": 32240,
+      "contractDate": "2024-07-01",
+      "status": "In Progress",
+      "insuranceExpiry": "2025-09-30",
+      "licenseNumber": "ELEC-45123",
+      "payments": [
+        {
+          "invoiceDate": "2024-08-20",
+          "invoiceNumber": "SEG-789-24",
+          "description": "Rough-in electrical",
+          "amountExGST": 15454.55,
+          "gst": 1545.45,
+          "total": 17000,
+          "dueDate": "2024-09-20",
+          "paidDate": "2024-09-18",
+          "paymentMethod": "EFT",
+          "retentionHeld": 850
+        },
+        {
+          "invoiceDate": "2024-10-05",
+          "invoiceNumber": "SEG-845-24",
+          "description": "Switchboard & final connections",
+          "amountExGST": 13854.55,
+          "gst": 1385.45,
+          "total": 15240,
+          "dueDate": "2024-11-05",
+          "paidDate": null,
+          "paymentMethod": null,
+          "retentionHeld": 762,
+          "notes": "Payment pending"
+        }
+      ]
+    }
+  ],
+
+  "clientPayments": {
+    "milestones": [
+      {
+        "milestone": "Deposit",
+        "percentage": 10,
+        "amount": 65000,
+        "invoiceDate": "2024-01-10",
+        "invoiceNumber": "INV-C-001",
+        "dueDate": "2024-01-20",
+        "daysOverdue": 0,
+        "paidDate": "2024-01-18",
+        "amountPaid": 65000,
+        "outstanding": 0,
+        "bankReference": "DEP-THOMPSON-001",
+        "status": "PAID",
+        "notes": "Cleared funds"
+      },
+      {
+        "milestone": "Base/Slab",
+        "percentage": 15,
+        "amount": 97500,
+        "invoiceDate": "2024-04-15",
+        "invoiceNumber": "INV-C-002",
+        "dueDate": "2024-04-30",
+        "daysOverdue": 0,
+        "paidDate": "2024-04-28",
+        "amountPaid": 97500,
+        "outstanding": 0,
+        "bankReference": "SLAB-THOMPSON-002",
+        "status": "PAID",
+        "notes": ""
+      },
+      {
+        "milestone": "Frame",
+        "percentage": 20,
+        "amount": 130000,
+        "invoiceDate": "2024-06-01",
+        "invoiceNumber": "INV-C-003",
+        "dueDate": "2024-06-15",
+        "daysOverdue": 5,
+        "paidDate": null,
+        "amountPaid": 0,
+        "outstanding": 130000,
+        "bankReference": null,
+        "status": "OVERDUE",
+        "notes": "URGENT - Client hasn't responded to calls! Sent reminder 3 times",
+        "issueFlag": true
+      },
+      {
+        "milestone": "Lock-up",
+        "percentage": 20,
+        "amount": 130000,
+        "invoiceDate": null,
+        "invoiceNumber": null,
+        "dueDate": null,
+        "daysOverdue": null,
+        "paidDate": null,
+        "amountPaid": null,
+        "outstanding": 130000,
+        "bankReference": null,
+        "status": "Not Yet Invoiced",
+        "notes": "Due when external walls/roof/windows complete - approx 2 weeks"
+      },
+      {
+        "milestone": "Fixing",
+        "percentage": 15,
+        "amount": 97500,
+        "invoiceDate": null,
+        "invoiceNumber": null,
+        "dueDate": null,
+        "daysOverdue": null,
+        "paidDate": null,
+        "amountPaid": null,
+        "outstanding": 97500,
+        "bankReference": null,
+        "status": "Not Yet Invoiced",
+        "notes": ""
+      },
+      {
+        "milestone": "Practical Completion",
+        "percentage": 15,
+        "amount": 97500,
+        "invoiceDate": null,
+        "invoiceNumber": null,
+        "dueDate": null,
+        "daysOverdue": null,
+        "paidDate": null,
+        "amountPaid": null,
+        "outstanding": 97500,
+        "bankReference": null,
+        "status": "Not Yet Invoiced",
+        "notes": ""
+      },
+      {
+        "milestone": "Final/Defects",
+        "percentage": 5,
+        "amount": 32500,
+        "invoiceDate": null,
+        "invoiceNumber": null,
+        "dueDate": null,
+        "daysOverdue": null,
+        "paidDate": null,
+        "amountPaid": null,
+        "outstanding": 32500,
+        "bankReference": null,
+        "status": "Not Yet Invoiced",
+        "notes": "Payable after defects period (3 months)"
+      }
+    ],
+    "variations": [
+      {
+        "voNumber": "VO-001",
+        "dateRaised": "2024-03-15",
+        "description": "Kitchen benchtop upgrade - stone instead of laminate",
+        "requestedBy": "Mrs Thompson",
+        "costImpact": 4500,
+        "timeImpact": 0,
+        "clientApproved": true,
+        "approvalDate": "2024-03-18",
+        "invoiced": true,
+        "invoiceNumber": "INV-VO-001",
+        "paidDate": "2024-05-10",
+        "notes": "Stone World - supplied and installed"
+      },
+      {
+        "voNumber": "VO-002",
+        "dateRaised": "2024-05-22",
+        "description": "Additional bedroom window - north wall",
+        "requestedBy": "Mr Thompson",
+        "costImpact": 1200,
+        "timeImpact": 0,
+        "clientApproved": true,
+        "approvalDate": "2024-05-25",
+        "invoiced": false,
+        "invoiceNumber": null,
+        "paidDate": null,
+        "notes": "NOT INVOICED YET - revenue leak!",
+        "issueFlag": true
+      },
+      {
+        "voNumber": "VO-003",
+        "dateRaised": "2024-06-10",
+        "description": "Bathroom tile upgrade - larger format tiles",
+        "requestedBy": "Mrs Thompson",
+        "costImpact": 2800,
+        "timeImpact": 0,
+        "clientApproved": true,
+        "approvalDate": "2024-06-12",
+        "invoiced": false,
+        "invoiceNumber": null,
+        "paidDate": null,
+        "notes": "NOT INVOICED - approved 4 months ago!",
+        "issueFlag": true
+      },
+      {
+        "voNumber": "VO-004",
+        "dateRaised": "2024-07-18",
+        "description": "Additional balcony waterproofing membrane",
+        "requestedBy": "Sarah (PM)",
+        "costImpact": 1500,
+        "timeImpact": 0,
+        "clientApproved": true,
+        "approvalDate": "2024-07-20",
+        "invoiced": false,
+        "invoiceNumber": null,
+        "paidDate": null,
+        "notes": "Required for compliance - NOT INVOICED",
+        "issueFlag": true
+      },
+      {
+        "voNumber": "VO-005",
+        "dateRaised": "2024-08-05",
+        "description": "HVAC upgrade - ducted instead of split systems",
+        "requestedBy": "Mr & Mrs Thompson",
+        "costImpact": 3200,
+        "timeImpact": 2,
+        "clientApproved": false,
+        "approvalDate": null,
+        "invoiced": false,
+        "invoiceNumber": null,
+        "paidDate": null,
+        "notes": "PENDING CLIENT APPROVAL - quote sent 2 months ago",
+        "issueFlag": true
+      },
+      {
+        "voNumber": "VO-006",
+        "dateRaised": "2024-09-12",
+        "description": "Additional power points x8 (study, garage, outdoor)",
+        "requestedBy": "Mr Thompson",
+        "costImpact": 960,
+        "timeImpact": 0,
+        "clientApproved": true,
+        "approvalDate": "2024-09-14",
+        "invoiced": false,
+        "invoiceNumber": null,
+        "paidDate": null,
+        "notes": "Approved - NOT INVOICED",
+        "issueFlag": true
+      }
+    ],
+    "summary": {
+      "totalContractValue": 650000,
+      "totalVariationsApproved": 10960,
+      "totalVariationsInvoiced": 4500,
+      "totalVariationsUninvoiced": 6460,
+      "revenueLeakage": 6460,
+      "totalInvoiced": 292500,
+      "totalPaid": 162500,
+      "totalOutstanding": 130000,
+      "overdueAmount": 130000
+    }
+  },
+
+  "defects": [
+    {
+      "itemNumber": "D-001",
+      "dateFound": "2024-10-01",
+      "location": "Living Room",
+      "description": "Paint touch-up required - north wall scuff marks",
+      "severity": "Minor",
+      "tradeResponsible": "Painting",
+      "contractor": "Premier Painters",
+      "photo": "D001.jpg",
+      "targetFixDate": "2024-10-10",
+      "status": "Fixed",
+      "dateFixed": "2024-10-09",
+      "cost": 0,
+      "signoff": "SC - 09/10/24"
+    },
+    {
+      "itemNumber": "D-002",
+      "dateFound": "2024-10-01",
+      "location": "Kitchen",
+      "description": "Benchtop edge chip - requires repair",
+      "severity": "Minor",
+      "tradeResponsible": "Joinery",
+      "contractor": "Stone World",
+      "photo": "D002.jpg",
+      "targetFixDate": "2024-10-12",
+      "status": "In Progress",
+      "dateFixed": null,
+      "cost": 0,
+      "signoff": null
+    },
+    {
+      "itemNumber": "D-003",
+      "dateFound": "2024-10-02",
+      "location": "Master Bathroom",
+      "description": "Shower screen - water leak at bottom seal",
+      "severity": "Critical",
+      "tradeResponsible": "Plumbing",
+      "contractor": "Hydro Plumbing",
+      "photo": "D003.jpg",
+      "targetFixDate": "2024-10-05",
+      "status": "Overdue",
+      "dateFixed": null,
+      "cost": 0,
+      "signoff": null,
+      "notes": "URGENT - needs immediate attention before handover!",
+      "issueFlag": true,
+      "daysOverdue": 16
+    },
+    {
+      "itemNumber": "D-004",
+      "dateFound": "2024-10-02",
+      "location": "Bedroom 2",
+      "description": "Door doesn't close properly - needs adjustment",
+      "severity": "Minor",
+      "tradeResponsible": "Carpentry",
+      "contractor": "Internal Doors Co",
+      "photo": null,
+      "targetFixDate": "2024-10-15",
+      "status": "Pending",
+      "dateFixed": null,
+      "cost": 0,
+      "signoff": null
+    },
+    {
+      "itemNumber": "D-005",
+      "dateFound": "2024-10-03",
+      "location": "Main Bathroom",
+      "description": "Tile grout - uneven color in two sections",
+      "severity": "Minor",
+      "tradeResponsible": "Tiling",
+      "contractor": "Tile Masters",
+      "photo": "D005.jpg",
+      "targetFixDate": "2024-10-18",
+      "status": "Pending",
+      "dateFixed": null,
+      "cost": 0,
+      "signoff": null
+    },
+    {
+      "itemNumber": "D-006",
+      "dateFound": "2024-10-04",
+      "location": "Garage",
+      "description": "Power point - not working (circuit breaker issue)",
+      "severity": "Major",
+      "tradeResponsible": "Electrical",
+      "contractor": "Spark Electrical",
+      "photo": null,
+      "targetFixDate": "2024-10-08",
+      "status": "Fixed",
+      "dateFixed": "2024-10-07",
+      "cost": 0,
+      "signoff": "AW - 07/10/24"
+    },
+    {
+      "itemNumber": "D-007",
+      "dateFound": "2024-10-05",
+      "location": "Front Facade",
+      "description": "Brick mortar - needs pointing in 3 locations",
+      "severity": "Minor",
+      "tradeResponsible": "Brickwork",
+      "contractor": "Premier Bricklaying",
+      "photo": "D007.jpg",
+      "targetFixDate": "2024-10-20",
+      "status": "Pending",
+      "dateFixed": null,
+      "cost": 0,
+      "signoff": null
+    },
+    {
+      "itemNumber": "D-008",
+      "dateFound": "2024-10-06",
+      "location": "Laundry",
+      "description": "Cabinet door misaligned - hinge adjustment needed",
+      "severity": "Minor",
+      "tradeResponsible": "Joinery",
+      "contractor": "Kitchen Kraft",
+      "photo": null,
+      "targetFixDate": "2024-10-22",
+      "status": "Pending",
+      "dateFixed": null,
+      "cost": 0,
+      "signoff": null
+    }
+  ],
+
+  "dataQualityIssues": {
+    "totalIssues": 15,
+    "categories": [
+      {
+        "category": "Missing Invoices",
+        "count": 5,
+        "severity": "High",
+        "examples": [
+          "VO-002: Approved variation $1,200 - NOT INVOICED (2 months)",
+          "VO-003: Bathroom tiles $2,800 - NOT INVOICED (4 months)",
+          "VO-004: Waterproofing $1,500 - NOT INVOICED",
+          "VO-006: Power points $960 - NOT INVOICED"
+        ],
+        "financialImpact": 6460
+      },
+      {
+        "category": "Overdue Payments",
+        "count": 2,
+        "severity": "Critical",
+        "examples": [
+          "Client payment INV-C-003: $130,000 overdue by 5 days",
+          "Subbie Premier Bricklaying: $18,500 overdue to pay"
+        ],
+        "financialImpact": 148500
+      },
+      {
+        "category": "Expired/Expiring Insurance",
+        "count": 1,
+        "severity": "High",
+        "examples": [
+          "Concrete Crew: Insurance expires 31/Dec/2024 - needs renewal"
+        ]
+      },
+      {
+        "category": "Critical Defects",
+        "count": 1,
+        "severity": "Critical",
+        "examples": [
+          "D-003: Shower leak - 16 days overdue for fix"
+        ]
+      },
+      {
+        "category": "Pending Approvals",
+        "count": 1,
+        "severity": "Medium",
+        "examples": [
+          "VO-005: HVAC upgrade $3,200 - pending approval 2 months"
+        ]
+      },
+      {
+        "category": "Over Budget Items",
+        "count": 7,
+        "severity": "High",
+        "examples": [
+          "Design Revisions: $740 over",
+          "Site Excavation: $420 over (rock found)",
+          "Foundation Waterproofing: $890 over",
+          "Roofing: $650 over (tile breakage)",
+          "Plumbing: $580 over",
+          "Electrical: $1,240 over",
+          "Kitchen: $2,100 over (client upgrade not charged)"
+        ],
+        "financialImpact": 8500
+      }
+    ],
+    "recommendations": [
+      "URGENT: Invoice all approved variations immediately ($6,460 revenue leak)",
+      "URGENT: Follow up Frame payment - $130,000 overdue",
+      "Chase Concrete Crew for insurance renewal",
+      "Fix critical shower leak defect immediately",
+      "Get client approval on pending HVAC variation",
+      "Review all over-budget items and implement cost controls"
+    ]
+  }
+}
