@@ -93,7 +93,7 @@ export async function checkApiHealth(token?: string) {
 /**
  * Get complete dashboard data
  */
-export async function getDashboardData() {
+export async function getDashboardData(token: string) {
   return fetchAPI<{
     kpis: any;
     budget_summary: any;
@@ -106,168 +106,216 @@ export async function getDashboardData() {
     critical_issues: any[];
     cashflow: any;
     insights: any[];
-  }>('/projects/dashboard');
+  }>('/projects/dashboard', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 }
 
 /**
  * Get budget data
  */
-export async function getBudgetData() {
+export async function getBudgetData(token: string) {
   return fetchAPI<{
     summary: any;
     items: any[];
-  }>('/projects/budget');
+  }>('/projects/budget', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 }
 
 /**
  * Get subcontractor data
  */
-export async function getSubcontractors() {
+export async function getSubcontractors(token: string) {
   return fetchAPI<{
     subcontractors: any[];
     payments: any[];
-  }>('/projects/subcontractors');
+  }>('/projects/subcontractors', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 }
 
 /**
  * Get client payment data
  */
-export async function getClientPayments() {
+export async function getClientPayments(token: string) {
   return fetchAPI<{
     milestones: any[];
     variations: any[];
-  }>('/projects/client-payments');
+  }>('/projects/client-payments', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 }
 
 /**
  * Get defects data
  */
-export async function getDefects() {
+export async function getDefects(token: string) {
   return fetchAPI<{
     defects: any[];
-  }>('/projects/defects');
+  }>('/projects/defects', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 }
 
 /**
  * Get timesheets data
  */
-export async function getTimesheets() {
+export async function getTimesheets(token: string) {
   return fetchAPI<{
     entries: any[];
-  }>('/projects/timesheets');
+  }>('/projects/timesheets', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 }
 
 /**
  * Get purchase orders data
  */
-export async function getPurchaseOrders() {
+export async function getPurchaseOrders(token: string) {
   return fetchAPI<{
     orders: any[];
-  }>('/projects/purchase-orders');
+  }>('/projects/purchase-orders', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 }
 
 /**
  * Get cashflow forecast
  */
-export async function getCashflowForecast(weeks: number = 12) {
+export async function getCashflowForecast(token: string, weeks: number = 12) {
   return fetchAPI<{
     forecast_weeks: number;
     weekly_burn_rate: number;
     expected_income: number;
     weekly_forecast: any[];
-  }>(`/projects/cashflow?weeks=${weeks}`);
+  }>(`/projects/cashflow?weeks=${weeks}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 }
 
 /**
  * Get AI-generated insights
  */
-export async function getInsights() {
+export async function getInsights(token: string) {
   return fetchAPI<{
     insights: any[];
-  }>('/projects/insights');
+  }>('/projects/insights', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
 }
 
 /**
  * Upload budget file
  */
-export async function uploadBudgetFile(file: File) {
+export async function uploadBudgetFile(file: File, token: string) {
   const formData = new FormData();
   formData.append('file', file);
 
   return fetchAPI<{ status: string; message: string; filename: string }>('/uploads/budget', {
     method: 'POST',
     body: formData,
-    headers: {}, // Let browser set Content-Type for FormData
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
 }
 
 /**
  * Upload subcontractor file
  */
-export async function uploadSubcontractorFile(file: File) {
+export async function uploadSubcontractorFile(file: File, token: string) {
   const formData = new FormData();
   formData.append('file', file);
 
   return fetchAPI<{ status: string; message: string; filename: string }>('/uploads/subcontractors', {
     method: 'POST',
     body: formData,
-    headers: {},
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
 }
 
 /**
  * Upload client payments file
  */
-export async function uploadClientPaymentsFile(file: File) {
+export async function uploadClientPaymentsFile(file: File, token: string) {
   const formData = new FormData();
   formData.append('file', file);
 
   return fetchAPI<{ status: string; message: string; filename: string }>('/uploads/client-payments', {
     method: 'POST',
     body: formData,
-    headers: {},
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
 }
 
 /**
  * Upload defects file
  */
-export async function uploadDefectsFile(file: File) {
+export async function uploadDefectsFile(file: File, token: string) {
   const formData = new FormData();
   formData.append('file', file);
 
   return fetchAPI<{ status: string; message: string; filename: string }>('/uploads/defects', {
     method: 'POST',
     body: formData,
-    headers: {},
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
 }
 
 /**
  * Upload timesheets file
  */
-export async function uploadTimesheetsFile(file: File) {
+export async function uploadTimesheetsFile(file: File, token: string) {
   const formData = new FormData();
   formData.append('file', file);
 
   return fetchAPI<{ status: string; message: string; filename: string }>('/uploads/timesheets', {
     method: 'POST',
     body: formData,
-    headers: {},
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
 }
 
 /**
  * Upload purchase orders file
  */
-export async function uploadPurchaseOrdersFile(file: File) {
+export async function uploadPurchaseOrdersFile(file: File, token: string) {
   const formData = new FormData();
   formData.append('file', file);
 
   return fetchAPI<{ status: string; message: string; filename: string }>('/uploads/purchase-orders', {
     method: 'POST',
     body: formData,
-    headers: {},
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
 }
 

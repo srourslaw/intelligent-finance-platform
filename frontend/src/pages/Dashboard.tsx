@@ -1,15 +1,96 @@
-import { DollarSign, TrendingDown, TrendingUp, AlertTriangle, Calendar, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { DollarSign, TrendingDown, TrendingUp, AlertTriangle, Calendar, CheckCircle2, LogOut } from 'lucide-react';
 import { KPICard } from '../components/dashboard/KPICard';
+import { useAuth } from '../contexts/AuthContext';
+import { getDashboardData } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 export function Dashboard() {
-  // Project A - 123 Sunset Boulevard data
+  const { token, logout, user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!token) {
+        setError('Not authenticated');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await getDashboardData(token);
+
+        if (response.error) {
+          setError(response.error);
+        } else if (response.data) {
+          setDashboardData(response.data);
+        }
+      } catch (err) {
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dashboardData || !dashboardData.kpis) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">No data available</p>
+        </div>
+      </div>
+    );
+  }
+
+  const kpis = dashboardData.kpis;
   const projectData = {
-    name: 'Project A - 123 Sunset Boulevard',
-    contractValue: 650000,
-    totalCosts: 574600,
-    forecastCost: 658500,
-    percentComplete: 65,
-    daysBehind: 12,
+    name: kpis.project_name || 'Project A - 123 Sunset Boulevard',
+    contractValue: kpis.total_contract_value || 0,
+    totalCosts: kpis.total_costs_to_date || 0,
+    forecastCost: kpis.forecast_final_cost || 0,
+    percentComplete: kpis.percent_complete || 0,
+    daysBehind: kpis.days_behind_schedule || 0,
   };
 
   // Calculated values
@@ -39,9 +120,16 @@ export function Dashboard() {
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-600">Current Project</p>
+                <p className="text-sm font-medium text-gray-600">Welcome, {user?.full_name || 'User'}</p>
                 <p className="text-sm font-bold text-gray-900">{projectData.name}</p>
               </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
             </div>
           </div>
         </div>
