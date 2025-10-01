@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { SpreadSheets, Worksheet } from '@mescius/spread-sheets-react';
+import { SpreadSheets } from '@mescius/spread-sheets-react';
 import * as GC from '@mescius/spread-sheets';
 import * as ExcelIO from '@mescius/spread-excelio';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
