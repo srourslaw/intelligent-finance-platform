@@ -35,13 +35,14 @@ class DataAggregator:
         )
 
         return {
-            "total_project_value": total_budget,
-            "total_costs": total_spent,
-            "forecast_cost": total_forecast,
+            "project_name": "Project A - 123 Sunset Boulevard",
+            "total_contract_value": total_budget,
+            "total_costs_to_date": total_spent,
+            "forecast_final_cost": total_forecast,
             "projected_profit": projected_profit,
-            "completion_percentage": int(overall_completion),
+            "percent_complete": int(overall_completion),
             "schedule_status": "12 days behind schedule",
-            "days_behind": 12,
+            "days_behind_schedule": 12,
             "revenue_leakage": revenue_leakage
         }
 
