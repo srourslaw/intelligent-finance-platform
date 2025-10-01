@@ -165,36 +165,35 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   };
 
   const renderDocumentPreview = () => {
-    if (!selectedDocument) return null;
+    if (!pdfBlob || !selectedDocument) return null;
 
-    if (selectedDocument.type === 'excel') {
-      // For Excel, use direct download URL with Office Online viewer
-      const fileUrl = getDocumentDownloadUrl(projectId, selectedDocument.path);
-      const viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
-
-      return (
-        <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
+    // Use blob URL for both PDF and Excel - simple iframe display
+    return (
+      <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
+        {selectedDocument.type === 'pdf' ? (
           <iframe
-            src={viewerUrl}
+            src={pdfBlob}
             className="w-full"
             style={{ height: '650px' }}
             title={selectedDocument.filename}
           />
-        </div>
-      );
-    }
-
-    // For PDF, use blob URL
-    if (!pdfBlob) return null;
-
-    return (
-      <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
-        <iframe
-          src={pdfBlob}
-          className="w-full"
-          style={{ height: '650px' }}
-          title={selectedDocument.filename}
-        />
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-lg font-semibold mb-4">Excel File Preview</p>
+            <p className="text-gray-600 mb-4">{selectedDocument.filename}</p>
+            <p className="text-sm text-gray-500 mb-6">
+              Excel files cannot be previewed in the browser. Please download the file to view it.
+            </p>
+            <a
+              href={pdfBlob}
+              download={selectedDocument.filename}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium shadow-md hover:shadow-lg transition-all"
+            >
+              <Download className="w-5 h-5" />
+              Download Excel File
+            </a>
+          </div>
+        )}
       </div>
     );
   };
