@@ -102,6 +102,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   }, [pdfBlob]);
 
   const handleDocumentClick = async (doc: DocumentItem) => {
+    console.log('=== Document clicked ===', doc.filename, 'Type:', doc.type);
     setSelectedDocument(doc);
     setPreviewLoading(true);
     setError(null);
@@ -111,6 +112,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
+      console.log('Fetching from URL:', url);
 
       // Fetch file with authentication
       const response = await fetch(url, {
@@ -119,45 +121,64 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         }
       });
 
+      console.log('Response status:', response.status, response.ok);
+
       if (!response.ok) {
         throw new Error('Failed to fetch document');
       }
 
       const arrayBuffer = await response.arrayBuffer();
+      console.log('ArrayBuffer received, size:', arrayBuffer.byteLength);
 
       if (doc.type === 'excel') {
-        // Load Excel file into SpreadJS
-        if (spreadRef.current) {
-          const excelIO = new ExcelIO.IO();
-          const blob = new Blob([arrayBuffer], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          });
+        console.log('Loading Excel file...');
+        console.log('spreadRef.current:', spreadRef.current);
 
-          excelIO.open(
-            blob,
-            (json: any) => {
-              if (spreadRef.current) {
-                spreadRef.current.fromJSON(json);
-                console.log('Excel loaded successfully');
-                setPreviewLoading(false);
-              }
-            },
-            (error: any) => {
-              console.error('Excel load error:', error);
-              setError('Failed to load Excel file');
+        // Load Excel file into SpreadJS
+        if (!spreadRef.current) {
+          console.error('SpreadJS not initialized! spreadRef.current is null');
+          setError('SpreadJS viewer not ready. Please try again.');
+          setPreviewLoading(false);
+          return;
+        }
+
+        const excelIO = new ExcelIO.IO();
+        const blob = new Blob([arrayBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        console.log('Blob created for Excel, calling excelIO.open...');
+
+        excelIO.open(
+          blob,
+          (json: any) => {
+            console.log('Excel JSON received from ExcelIO:', json);
+            if (spreadRef.current) {
+              spreadRef.current.fromJSON(json);
+              console.log('✅ Excel loaded successfully into SpreadJS');
+              setPreviewLoading(false);
+            } else {
+              console.error('spreadRef.current became null during load');
+              setError('Failed to load Excel');
               setPreviewLoading(false);
             }
-          );
-        }
+          },
+          (error: any) => {
+            console.error('❌ Excel load error:', error);
+            setError('Failed to load Excel file: ' + (error?.message || 'Unknown error'));
+            setPreviewLoading(false);
+          }
+        );
       } else if (doc.type === 'pdf') {
+        console.log('Loading PDF file...');
         // Create blob URL for PDF
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const blobUrl = URL.createObjectURL(blob);
+        console.log('PDF blob URL created:', blobUrl);
         setPdfBlob(blobUrl);
       }
     } catch (err) {
-      console.error('Preview error:', err);
-      setError('Failed to preview document');
+      console.error('❌ Preview error:', err);
+      setError('Failed to preview document: ' + (err instanceof Error ? err.message : 'Unknown error'));
       setPreviewLoading(false);
     } finally {
       if (doc.type === 'pdf') {
@@ -167,6 +188,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   };
 
   const workbookInit = (spread: GC.Spread.Sheets.Workbook) => {
+    console.log('🎯 SpreadJS workbook initializing...', spread);
     spreadRef.current = spread;
     // Configure SpreadJS to be read-only
     spread.options.allowUserEditFormula = false;
@@ -174,6 +196,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     spread.options.newTabVisible = false;
     spread.options.tabEditable = false;
     spread.options.allowUserResize = true;
+    console.log('✅ SpreadJS workbook initialized and configured');
   };
 
   const toggleFolder = (folder: string) => {
