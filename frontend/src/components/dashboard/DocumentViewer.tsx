@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -30,8 +31,9 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const [error, setError] = useState<string | null>(null);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
-  // Document blob URL (for both PDF and Excel)
+  // Preview state
   const [pdfBlob, setPdfBlob] = useState<string | null>(null);
+  const [excelData, setExcelData] = useState<any>(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -87,47 +89,39 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   }, [pdfBlob]);
 
   const handleDocumentClick = async (doc: DocumentItem) => {
-    console.log('=== Document clicked ===', doc.filename, 'Type:', doc.type);
     setSelectedDocument(doc);
     setPreviewLoading(true);
     setError(null);
     setPdfBlob(null);
+    setExcelData(null);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
-      console.log('Fetching from URL:', url);
 
-      // Fetch file with authentication
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      console.log('Response status:', response.status, response.ok);
-
       if (!response.ok) {
         throw new Error('Failed to fetch document');
       }
 
       const arrayBuffer = await response.arrayBuffer();
-      console.log('ArrayBuffer received, size:', arrayBuffer.byteLength);
 
-      if (doc.type === 'excel' || doc.type === 'pdf') {
-        // Create blob URL for both Excel and PDF - simple iframe approach
-        const mimeType = doc.type === 'excel'
-          ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          : 'application/pdf';
-
-        const blob = new Blob([arrayBuffer], { type: mimeType });
+      if (doc.type === 'pdf') {
+        const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const blobUrl = URL.createObjectURL(blob);
-        console.log(`${doc.type.toUpperCase()} blob URL created:`, blobUrl);
         setPdfBlob(blobUrl);
+      } else if (doc.type === 'excel') {
+        // Parse Excel file using xlsx
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        setExcelData(workbook);
       }
     } catch (err) {
-      console.error('❌ Preview error:', err);
-      setError('Failed to preview document: ' + (err instanceof Error ? err.message : 'Unknown error'));
-      setPreviewLoading(false);
+      console.error('Preview error:', err);
+      setError('Failed to preview document');
     } finally {
       setPreviewLoading(false);
     }
@@ -165,37 +159,54 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   };
 
   const renderDocumentPreview = () => {
-    if (!pdfBlob || !selectedDocument) return null;
+    if (!selectedDocument) return null;
 
-    // Use blob URL for both PDF and Excel - simple iframe display
-    return (
-      <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
-        {selectedDocument.type === 'pdf' ? (
-          <iframe
+    if (selectedDocument.type === 'pdf' && pdfBlob) {
+      return (
+        <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
+          <embed
             src={pdfBlob}
+            type="application/pdf"
             className="w-full"
             style={{ height: '650px' }}
-            title={selectedDocument.filename}
           />
-        ) : (
-          <div className="p-8 text-center">
-            <p className="text-lg font-semibold mb-4">Excel File Preview</p>
-            <p className="text-gray-600 mb-4">{selectedDocument.filename}</p>
-            <p className="text-sm text-gray-500 mb-6">
-              Excel files cannot be previewed in the browser. Please download the file to view it.
-            </p>
-            <a
-              href={pdfBlob}
-              download={selectedDocument.filename}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium shadow-md hover:shadow-lg transition-all"
-            >
-              <Download className="w-5 h-5" />
-              Download Excel File
-            </a>
+        </div>
+      );
+    }
+
+    if (selectedDocument.type === 'excel' && excelData) {
+      const sheetName = excelData.SheetNames[0];
+      const worksheet = excelData.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      return (
+        <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
+          <div className="bg-gradient-to-r from-green-600 to-green-700 p-4 text-white">
+            <h3 className="font-semibold">Sheet: {sheetName}</h3>
           </div>
-        )}
-      </div>
-    );
+          <div className="overflow-auto" style={{ maxHeight: '600px' }}>
+            <table className="w-full border-collapse">
+              <tbody>
+                {(jsonData as any[][]).map((row, rowIndex) => (
+                  <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    {row.map((cell, cellIndex) => (
+                      <td
+                        key={cellIndex}
+                        className="border border-gray-300 px-4 py-2 text-sm"
+                      >
+                        {cell !== null && cell !== undefined ? String(cell) : ''}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   const renderImagePreview = () => {
