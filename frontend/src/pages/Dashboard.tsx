@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { DollarSign, TrendingDown, TrendingUp, AlertTriangle, Calendar, CheckCircle2, LogOut } from 'lucide-react';
 import { KPICard } from '../components/dashboard/KPICard';
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
+import { DocumentViewer } from '../components/dashboard/DocumentViewer';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -219,6 +220,11 @@ export function Dashboard() {
         {/* Budget Treemap Visualization */}
         <div className="mb-8">
           <BudgetTreemap />
+        </div>
+
+        {/* Document Viewer */}
+        <div className="mb-8">
+          <DocumentViewer />
         </div>
 
         {/* Additional Info Section */}

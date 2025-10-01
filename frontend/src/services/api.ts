@@ -319,6 +319,35 @@ export async function uploadPurchaseOrdersFile(file: File, token: string) {
   });
 }
 
+/**
+ * Get list of documents
+ */
+export async function getDocumentList(projectId: string, token: string) {
+  return fetchAPI<any[]>(`/documents/list/${projectId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+}
+
+/**
+ * Preview a document
+ */
+export async function previewDocument(projectId: string, filePath: string, token: string) {
+  return fetchAPI<any>(`/documents/preview/${projectId}/${filePath}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+}
+
+/**
+ * Download a document
+ */
+export function getDocumentDownloadUrl(projectId: string, filePath: string): string {
+  return `${API_BASE_URL}/documents/download/${projectId}/${filePath}`;
+}
+
 export default {
   login,
   verifyToken,
@@ -339,4 +368,7 @@ export default {
   uploadDefectsFile,
   uploadTimesheetsFile,
   uploadPurchaseOrdersFile,
+  getDocumentList,
+  previewDocument,
+  getDocumentDownloadUrl,
 };

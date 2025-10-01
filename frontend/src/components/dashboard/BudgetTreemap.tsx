@@ -110,11 +110,14 @@ export function BudgetTreemap() {
           return;
         }
 
-        if (response.data && response.data.items) {
+        // API returns items directly, not nested in data.items
+        const items = response.data?.items || [];
+
+        if (items.length > 0) {
           // Group by category and aggregate
           const categoryMap = new Map<string, { budget: number; actual: number; variance: number }>();
 
-          response.data.items.forEach((item: any) => {
+          items.forEach((item: any) => {
             const category = item.category || 'Other';
             const existing = categoryMap.get(category) || { budget: 0, actual: 0, variance: 0 };
 
