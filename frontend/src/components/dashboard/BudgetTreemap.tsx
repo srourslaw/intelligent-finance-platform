@@ -105,13 +105,16 @@ export function BudgetTreemap() {
         setLoading(true);
         const response = await getBudgetData(token);
 
+        console.log('Budget API Response:', response);
+
         if (response.error) {
           setError(response.error);
           return;
         }
 
-        // API returns items directly, not nested in data.items
+        // API returns items directly in response.data.items
         const items = response.data?.items || [];
+        console.log('Budget items:', items);
 
         if (items.length > 0) {
           // Group by category and aggregate
@@ -194,27 +197,27 @@ export function BudgetTreemap() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-8 border border-gray-100">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Budget Breakdown by Category</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Interactive visualization showing budget allocation and performance
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Budget Breakdown by Category</h2>
+        <p className="text-sm text-gray-600">
+          Interactive visualization showing budget allocation and performance across all categories
         </p>
       </div>
 
       {/* Legend */}
-      <div className="flex gap-6 mb-4 text-sm">
+      <div className="flex gap-6 mb-6 text-sm bg-white rounded-lg p-4 border border-gray-200">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span className="text-gray-700">Under Budget</span>
+          <div className="w-5 h-5 bg-green-500 rounded-md shadow-sm"></div>
+          <span className="text-gray-700 font-medium">Under Budget</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span className="text-gray-700">Over Budget</span>
+          <div className="w-5 h-5 bg-red-500 rounded-md shadow-sm"></div>
+          <span className="text-gray-700 font-medium">Over Budget</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-gray-400 rounded"></div>
-          <span className="text-gray-700">On Budget</span>
+          <div className="w-5 h-5 bg-gray-400 rounded-md shadow-sm"></div>
+          <span className="text-gray-700 font-medium">On Budget</span>
         </div>
       </div>
 

@@ -138,7 +138,7 @@ export function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Alert Banner (if project is behind or over budget) */}
         {(!isProfitable || projectData.daysBehind > 0) && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
@@ -160,7 +160,7 @@ export function Dashboard() {
         )}
 
         {/* KPI Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Total Project Value */}
           <KPICard
             title="Total Project Value"
@@ -218,14 +218,10 @@ export function Dashboard() {
         </div>
 
         {/* Budget Treemap Visualization */}
-        <div className="mb-8">
-          <BudgetTreemap />
-        </div>
+        <BudgetTreemap />
 
         {/* Document Viewer */}
-        <div className="mb-8">
-          <DocumentViewer />
-        </div>
+        <DocumentViewer />
 
         {/* Additional Info Section */}
         <div className="bg-white rounded-lg shadow-md p-6">

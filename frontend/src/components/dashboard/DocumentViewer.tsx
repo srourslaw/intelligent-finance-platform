@@ -41,11 +41,16 @@ export function DocumentViewer() {
         }
 
         if (response.data) {
-          setDocuments(response.data);
+          // Filter to only show supported file types (Excel, PDF, Images)
+          const supportedDocs = response.data.filter((doc: Document) =>
+            doc.type === 'excel' || doc.type === 'pdf' || doc.type === 'image'
+          );
+
+          setDocuments(supportedDocs);
 
           // Group by folder
           const grouped: DocumentsByFolder = {};
-          response.data.forEach((doc: Document) => {
+          supportedDocs.forEach((doc: Document) => {
             const folder = doc.folder || 'Root';
             if (!grouped[folder]) {
               grouped[folder] = [];
@@ -214,17 +219,17 @@ export function DocumentViewer() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-8 border border-gray-100">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Project Documents</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Access all project files - Excel sheets, PDFs, and images
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Project Documents</h2>
+        <p className="text-sm text-gray-600">
+          Browse and preview all project files - Excel spreadsheets, PDFs, and images
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* File Browser */}
-        <div className="lg:col-span-1 border border-gray-200 rounded-lg p-4 max-h-[600px] overflow-y-auto">
+        <div className="lg:col-span-1 bg-white border border-gray-200 rounded-xl p-4 max-h-[600px] overflow-y-auto shadow-sm">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <FolderOpen className="w-5 h-5" />
             Files ({documents.length})
@@ -265,7 +270,7 @@ export function DocumentViewer() {
         </div>
 
         {/* Preview Panel */}
-        <div className="lg:col-span-2 border border-gray-200 rounded-lg p-4 max-h-[600px] overflow-y-auto">
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 max-h-[600px] overflow-y-auto shadow-sm">
           {!selectedDocument && (
             <div className="flex items-center justify-center h-full text-gray-500">
               <p>Select a document to preview</p>
