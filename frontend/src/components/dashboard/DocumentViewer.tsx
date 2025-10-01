@@ -92,8 +92,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     setPreviewLoading(true);
     setError(null);
     setPdfBlob(null);
-    setNumPages(0);
-    setPageNumber(1);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
