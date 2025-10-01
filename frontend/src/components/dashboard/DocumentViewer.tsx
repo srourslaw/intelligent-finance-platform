@@ -1,16 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import * as XLSX from 'xlsx';
+import { SpreadSheets, Worksheet } from '@mescius/spread-sheets-react';
+import * as GC from '@mescius/spread-sheets';
+import * as ExcelIO from '@mescius/spread-excelio';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import '@mescius/spread-sheets/styles/gc.spread.sheets.excel2013white.css';
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
-interface Document {
+interface DocumentItem {
   filename: string;
   path: string;
   type: string;
@@ -20,7 +23,7 @@ interface Document {
 }
 
 interface DocumentsByFolder {
-  [folder: string]: Document[];
+  [folder: string]: DocumentItem[];
 }
 
 interface DocumentViewerProps {
@@ -29,9 +32,9 @@ interface DocumentViewerProps {
 
 export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const { token } = useAuth();
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [documentsByFolder, setDocumentsByFolder] = useState<DocumentsByFolder>({});
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,9 +45,9 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
 
-  // Excel state
-  const [excelData, setExcelData] = useState<any>(null);
-  const [selectedSheet, setSelectedSheet] = useState<string>('');
+  // SpreadJS state
+  const spreadRef = useRef<GC.Spread.Sheets.Workbook | null>(null);
+  const [spreadInitialized, setSpreadInitialized] = useState(false);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -60,8 +63,8 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         }
 
         if (response.data) {
-          // Filter to only show supported file types (Excel, PDF, Images)
-          const supportedDocs = response.data.filter((doc: Document) =>
+          // Filter to only show supported file types
+          const supportedDocs = response.data.filter((doc: DocumentItem) =>
             doc.type === 'excel' || doc.type === 'pdf' || doc.type === 'image'
           );
 
@@ -69,7 +72,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
           // Group by folder
           const grouped: DocumentsByFolder = {};
-          supportedDocs.forEach((doc: Document) => {
+          supportedDocs.forEach((doc: DocumentItem) => {
             const folder = doc.folder || 'Root';
             if (!grouped[folder]) {
               grouped[folder] = [];
@@ -78,8 +81,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
           });
 
           setDocumentsByFolder(grouped);
-
-          // Expand all folders by default
           setExpandedFolders(new Set(Object.keys(grouped)));
         }
       } catch (err) {
@@ -101,14 +102,14 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     };
   }, [pdfBlob]);
 
-  const handleDocumentClick = async (doc: Document) => {
+  const handleDocumentClick = async (doc: DocumentItem) => {
     setSelectedDocument(doc);
     setPreviewLoading(true);
     setError(null);
-    setExcelData(null);
     setPdfBlob(null);
     setNumPages(0);
     setPageNumber(1);
+    setSpreadInitialized(false);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
@@ -127,17 +128,19 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       const arrayBuffer = await response.arrayBuffer();
 
       if (doc.type === 'excel') {
-        // Parse Excel file
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        setExcelData(workbook);
-
-        // Select first non-empty sheet
-        const firstNonEmptySheet = workbook.SheetNames.find(name => {
-          const sheet = workbook.Sheets[name];
-          const data = XLSX.utils.sheet_to_json(sheet);
-          return data.length > 0;
-        });
-        setSelectedSheet(firstNonEmptySheet || workbook.SheetNames[0]);
+        // Load Excel file into SpreadJS
+        if (spreadRef.current) {
+          const excelIO = new ExcelIO.IO();
+          excelIO.open(arrayBuffer, (json: any) => {
+            if (spreadRef.current) {
+              spreadRef.current.fromJSON(json);
+              setSpreadInitialized(true);
+            }
+          }, (error: any) => {
+            console.error('Excel load error:', error);
+            setError('Failed to load Excel file');
+          });
+        }
       } else if (doc.type === 'pdf') {
         // Create blob URL for PDF
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
@@ -150,6 +153,16 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     } finally {
       setPreviewLoading(false);
     }
+  };
+
+  const workbookInit = (spread: GC.Spread.Sheets.Workbook) => {
+    spreadRef.current = spread;
+    // Configure SpreadJS to be read-only
+    spread.options.allowUserEditFormu = false;
+    spread.options.tabStripVisible = true;
+    spread.options.newTabVisible = false;
+    spread.options.tabEditable = false;
+    spread.options.allowUserResize = true;
   };
 
   const toggleFolder = (folder: string) => {
@@ -184,86 +197,16 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   };
 
   const renderExcelPreview = () => {
-    if (!excelData || !selectedSheet) return null;
-
-    const sheet = excelData.Sheets[selectedSheet];
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
-
-    if (jsonData.length === 0) {
-      return <p className="text-gray-500">Sheet is empty</p>;
-    }
-
-    // Get headers (first row)
-    const headers = jsonData[0] || [];
-    const rows = jsonData.slice(1);
-
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-4 bg-gray-50 p-3 rounded border border-gray-200">
-          <label className="text-sm font-semibold text-gray-700">Worksheet:</label>
-          <select
-            value={selectedSheet}
-            onChange={(e) => setSelectedSheet(e.target.value)}
-            className="px-4 py-2 border-2 border-gray-300 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+      <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
+        <div style={{ height: '650px', width: '100%' }}>
+          <SpreadSheets
+            workbookInitialized={workbookInit}
+            hostStyle={{ width: '100%', height: '100%' }}
           >
-            {excelData.SheetNames.map((name: string) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-          <span className="text-sm text-gray-600 ml-auto">
-            {rows.length} rows × {headers.length} columns
-          </span>
+            <Worksheet />
+          </SpreadSheets>
         </div>
-
-        <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm bg-white">
-          <div className="overflow-auto" style={{ maxHeight: '600px' }}>
-            <table className="min-w-full border-collapse" style={{ fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif' }}>
-              <thead>
-                <tr className="bg-gradient-to-r from-indigo-600 to-indigo-700">
-                  {headers.map((header: any, idx: number) => (
-                    <th
-                      key={idx}
-                      className="sticky top-0 border border-indigo-400 px-4 py-3 text-left text-sm font-bold text-white whitespace-nowrap"
-                      style={{
-                        minWidth: '120px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                      }}
-                    >
-                      {header || `Column ${idx + 1}`}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.slice(0, 200).map((row: any[], rowIdx: number) => (
-                  <tr
-                    key={rowIdx}
-                    className={rowIdx % 2 === 0 ? 'bg-white hover:bg-indigo-50' : 'bg-gray-50 hover:bg-indigo-50'}
-                  >
-                    {headers.map((_, cellIdx: number) => (
-                      <td
-                        key={cellIdx}
-                        className="border border-gray-300 px-4 py-2.5 text-sm text-gray-900 whitespace-nowrap"
-                        style={{
-                          fontFamily: 'inherit',
-                          minWidth: '120px'
-                        }}
-                      >
-                        {row[cellIdx] !== undefined && row[cellIdx] !== null ? String(row[cellIdx]) : ''}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {rows.length > 200 && (
-          <div className="text-sm text-gray-600 bg-yellow-50 border border-yellow-200 rounded p-3">
-            <strong>Note:</strong> Showing first 200 of {rows.length} rows for performance
-          </div>
-        )}
       </div>
     );
   };
@@ -300,10 +243,20 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white p-4 flex justify-center">
           <Document
             file={pdfBlob}
-            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+            onLoadSuccess={({ numPages }) => {
+              console.log('PDF loaded successfully, pages:', numPages);
+              setNumPages(numPages);
+            }}
+            onLoadError={(error) => {
+              console.error('PDF load error:', error);
+              setError('Failed to load PDF');
+            }}
             loading={
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600"></div>
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading PDF...</p>
+                </div>
               </div>
             }
             error={
@@ -318,7 +271,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
               renderTextLayer={true}
               renderAnnotationLayer={true}
               className="shadow-xl"
-              width={Math.min(window.innerWidth * 0.6, 900)}
+              width={Math.min(window.innerWidth * 0.5, 850)}
             />
           </Document>
         </div>
@@ -373,7 +326,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* File Browser */}
-        <div className="lg:col-span-1 bg-white border border-gray-200 rounded-xl p-4 max-h-[700px] overflow-y-auto shadow-sm">
+        <div className="lg:col-span-1 bg-white border border-gray-200 rounded-xl p-4 max-h-[750px] overflow-y-auto shadow-sm">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <FolderOpen className="w-5 h-5" />
             Files ({documents.length})
@@ -396,7 +349,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                     <button
                       key={doc.path}
                       onClick={() => handleDocumentClick(doc)}
-                      className={`w-full text-left flex items-center gap-2 px-2 py-2 rounded text-sm hover:bg-indigo-50 ${
+                      className={`w-full text-left flex items-center gap-2 px-2 py-2 rounded text-sm hover:bg-indigo-50 transition-colors ${
                         selectedDocument?.path === doc.path ? 'bg-indigo-100 ring-2 ring-indigo-500' : ''
                       }`}
                     >
@@ -414,11 +367,12 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         </div>
 
         {/* Preview Panel */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 shadow-sm" style={{ minHeight: '700px', maxHeight: '700px', overflowY: 'auto' }}>
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 shadow-sm" style={{ minHeight: '750px', maxHeight: '750px', overflowY: 'auto' }}>
           {!selectedDocument && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <FileText className="w-16 h-16 mb-4 text-gray-300" />
               <p className="text-lg font-medium">Select a document to preview</p>
+              <p className="text-sm text-gray-400 mt-2">Excel files will show in full SpreadJS viewer</p>
             </div>
           )}
 
@@ -446,12 +400,18 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                 <div className="flex items-center justify-center py-24">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">Loading preview...</p>
+                    <p className="text-gray-600 font-medium">Loading {selectedDocument.type} preview...</p>
                   </div>
                 </div>
               )}
 
-              {!previewLoading && (
+              {!previewLoading && error && (
+                <div className="p-8 text-center">
+                  <p className="text-red-600 font-semibold">{error}</p>
+                </div>
+              )}
+
+              {!previewLoading && !error && (
                 <div>
                   {selectedDocument.type === 'excel' && renderExcelPreview()}
                   {selectedDocument.type === 'pdf' && renderPdfPreview()}
