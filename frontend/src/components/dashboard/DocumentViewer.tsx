@@ -38,6 +38,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
   // PDF state
+  const [pdfBlob, setPdfBlob] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
 
@@ -91,27 +92,45 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     fetchDocuments();
   }, [token, projectId]);
 
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfBlob) {
+        URL.revokeObjectURL(pdfBlob);
+      }
+    };
+  }, [pdfBlob]);
+
   const handleDocumentClick = async (doc: Document) => {
     setSelectedDocument(doc);
     setPreviewLoading(true);
     setError(null);
     setExcelData(null);
+    setPdfBlob(null);
     setNumPages(0);
     setPageNumber(1);
 
     try {
-      if (doc.type === 'excel') {
-        // Fetch and parse Excel file
-        const url = getDocumentDownloadUrl(projectId, doc.path);
-        const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const url = getDocumentDownloadUrl(projectId, doc.path);
 
+      // Fetch file with authentication
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch document');
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+
+      if (doc.type === 'excel') {
+        // Parse Excel file
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         setExcelData(workbook);
+
         // Select first non-empty sheet
         const firstNonEmptySheet = workbook.SheetNames.find(name => {
           const sheet = workbook.Sheets[name];
@@ -119,6 +138,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
           return data.length > 0;
         });
         setSelectedSheet(firstNonEmptySheet || workbook.SheetNames[0]);
+      } else if (doc.type === 'pdf') {
+        // Create blob URL for PDF
+        const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+        const blobUrl = URL.createObjectURL(blob);
+        setPdfBlob(blobUrl);
       }
     } catch (err) {
       console.error('Preview error:', err);
@@ -175,93 +199,117 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Sheet:</label>
+        <div className="flex items-center gap-4 bg-gray-50 p-3 rounded border border-gray-200">
+          <label className="text-sm font-semibold text-gray-700">Worksheet:</label>
           <select
             value={selectedSheet}
             onChange={(e) => setSelectedSheet(e.target.value)}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+            className="px-4 py-2 border-2 border-gray-300 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
             {excelData.SheetNames.map((name: string) => (
               <option key={name} value={name}>{name}</option>
             ))}
           </select>
+          <span className="text-sm text-gray-600 ml-auto">
+            {rows.length} rows × {headers.length} columns
+          </span>
         </div>
 
-        <div className="overflow-auto max-h-[500px] border border-gray-300 rounded">
-          <table className="min-w-full text-xs border-collapse">
-            <thead className="bg-gray-100 sticky top-0">
-              <tr>
-                {headers.map((header: any, idx: number) => (
-                  <th key={idx} className="border border-gray-300 px-3 py-2 text-left font-semibold text-gray-900">
-                    {header || `Column ${idx + 1}`}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.slice(0, 100).map((row: any[], rowIdx: number) => (
-                <tr key={rowIdx} className={rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  {headers.map((_, cellIdx: number) => (
-                    <td key={cellIdx} className="border border-gray-300 px-3 py-2 text-gray-900">
-                      {row[cellIdx] ?? ''}
-                    </td>
+        <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm bg-white">
+          <div className="overflow-auto" style={{ maxHeight: '600px' }}>
+            <table className="min-w-full border-collapse" style={{ fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif' }}>
+              <thead>
+                <tr className="bg-gradient-to-r from-indigo-600 to-indigo-700">
+                  {headers.map((header: any, idx: number) => (
+                    <th
+                      key={idx}
+                      className="sticky top-0 border border-indigo-400 px-4 py-3 text-left text-sm font-bold text-white whitespace-nowrap"
+                      style={{
+                        minWidth: '120px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      {header || `Column ${idx + 1}`}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rows.slice(0, 200).map((row: any[], rowIdx: number) => (
+                  <tr
+                    key={rowIdx}
+                    className={rowIdx % 2 === 0 ? 'bg-white hover:bg-indigo-50' : 'bg-gray-50 hover:bg-indigo-50'}
+                  >
+                    {headers.map((_, cellIdx: number) => (
+                      <td
+                        key={cellIdx}
+                        className="border border-gray-300 px-4 py-2.5 text-sm text-gray-900 whitespace-nowrap"
+                        style={{
+                          fontFamily: 'inherit',
+                          minWidth: '120px'
+                        }}
+                      >
+                        {row[cellIdx] !== undefined && row[cellIdx] !== null ? String(row[cellIdx]) : ''}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-        {rows.length > 100 && (
-          <p className="text-sm text-gray-600">
-            Showing first 100 of {rows.length} rows
-          </p>
+
+        {rows.length > 200 && (
+          <div className="text-sm text-gray-600 bg-yellow-50 border border-yellow-200 rounded p-3">
+            <strong>Note:</strong> Showing first 200 of {rows.length} rows for performance
+          </div>
         )}
       </div>
     );
   };
 
   const renderPdfPreview = () => {
-    if (!selectedDocument) return null;
-
-    const url = getDocumentDownloadUrl(projectId, selectedDocument.path);
+    if (!pdfBlob) return null;
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600">
-            Page {pageNumber} of {numPages}
-          </p>
+        <div className="flex items-center justify-between bg-gray-50 p-3 rounded border border-gray-200">
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-semibold text-gray-700">
+              Page {pageNumber} of {numPages}
+            </span>
+          </div>
           <div className="flex gap-2">
             <button
               onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
               disabled={pageNumber <= 1}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded disabled:opacity-50 text-sm"
+              className="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-colors"
             >
-              Previous
+              ← Previous
             </button>
             <button
               onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
               disabled={pageNumber >= numPages}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded disabled:opacity-50 text-sm"
+              className="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-colors"
             >
-              Next
+              Next →
             </button>
           </div>
         </div>
 
-        <div className="border border-gray-300 rounded overflow-auto">
+        <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white p-4 flex justify-center">
           <Document
-            file={url}
+            file={pdfBlob}
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
             loading={
               <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600"></div>
               </div>
             }
             error={
-              <div className="p-4 text-red-600">
-                Failed to load PDF. Please try downloading the file.
+              <div className="p-8 text-center">
+                <p className="text-red-600 font-semibold mb-2">Failed to load PDF</p>
+                <p className="text-sm text-gray-600">Please try downloading the file instead</p>
               </div>
             }
           >
@@ -269,8 +317,8 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
               pageNumber={pageNumber}
               renderTextLayer={true}
               renderAnnotationLayer={true}
-              className="mx-auto"
-              width={800}
+              className="shadow-xl"
+              width={Math.min(window.innerWidth * 0.6, 900)}
             />
           </Document>
         </div>
@@ -284,11 +332,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     const url = getDocumentDownloadUrl(projectId, selectedDocument.path);
 
     return (
-      <div>
+      <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white p-4 flex justify-center">
         <img
           src={url}
           alt={selectedDocument.filename}
-          className="max-w-full h-auto rounded border border-gray-300"
+          className="max-w-full h-auto rounded shadow-md"
         />
       </div>
     );
@@ -325,7 +373,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* File Browser */}
-        <div className="lg:col-span-1 bg-white border border-gray-200 rounded-xl p-4 max-h-[600px] overflow-y-auto shadow-sm">
+        <div className="lg:col-span-1 bg-white border border-gray-200 rounded-xl p-4 max-h-[700px] overflow-y-auto shadow-sm">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <FolderOpen className="w-5 h-5" />
             Files ({documents.length})
@@ -349,12 +397,12 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                       key={doc.path}
                       onClick={() => handleDocumentClick(doc)}
                       className={`w-full text-left flex items-center gap-2 px-2 py-2 rounded text-sm hover:bg-indigo-50 ${
-                        selectedDocument?.path === doc.path ? 'bg-indigo-100' : ''
+                        selectedDocument?.path === doc.path ? 'bg-indigo-100 ring-2 ring-indigo-500' : ''
                       }`}
                     >
                       {getFileIcon(doc.type)}
                       <div className="flex-1 min-w-0">
-                        <p className="text-gray-900 truncate">{doc.filename}</p>
+                        <p className="text-gray-900 truncate font-medium">{doc.filename}</p>
                         <p className="text-xs text-gray-500">{formatFileSize(doc.size)}</p>
                       </div>
                     </button>
@@ -366,27 +414,28 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         </div>
 
         {/* Preview Panel */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 max-h-[600px] overflow-y-auto shadow-sm">
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 shadow-sm" style={{ minHeight: '700px', maxHeight: '700px', overflowY: 'auto' }}>
           {!selectedDocument && (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              <p>Select a document to preview</p>
+            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+              <FileText className="w-16 h-16 mb-4 text-gray-300" />
+              <p className="text-lg font-medium">Select a document to preview</p>
             </div>
           )}
 
           {selectedDocument && (
             <div>
-              <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-gray-200">
                 <div className="flex items-center gap-3">
                   {getFileIcon(selectedDocument.type)}
                   <div>
-                    <h3 className="font-semibold text-gray-900">{selectedDocument.filename}</h3>
-                    <p className="text-xs text-gray-500">{formatFileSize(selectedDocument.size)}</p>
+                    <h3 className="font-bold text-gray-900 text-lg">{selectedDocument.filename}</h3>
+                    <p className="text-sm text-gray-500">{formatFileSize(selectedDocument.size)}</p>
                   </div>
                 </div>
                 <a
                   href={getDocumentDownloadUrl(projectId, selectedDocument.path)}
                   download
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium shadow-md hover:shadow-lg transition-all"
                 >
                   <Download className="w-4 h-4" />
                   Download
@@ -394,8 +443,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
               </div>
 
               {previewLoading && (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                <div className="flex items-center justify-center py-24">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600 font-medium">Loading preview...</p>
+                  </div>
                 </div>
               )}
 
