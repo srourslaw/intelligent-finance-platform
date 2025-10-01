@@ -230,21 +230,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const renderExcelPreview = () => {
-    return (
-      <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
-        <div style={{ height: '650px', width: '100%' }}>
-          <SpreadSheets
-            workbookInitialized={workbookInit}
-            hostStyle={{ width: '100%', height: '100%' }}
-          >
-            <Worksheet />
-          </SpreadSheets>
-        </div>
-      </div>
-    );
-  };
-
   const renderPdfPreview = () => {
     if (!pdfBlob) return null;
 
@@ -402,6 +387,24 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
         {/* Preview Panel */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 shadow-sm" style={{ minHeight: '750px', maxHeight: '750px', overflowY: 'auto' }}>
+          {/* SpreadJS - Always mounted but positioned based on whether Excel is selected */}
+          <div style={{
+            position: selectedDocument?.type === 'excel' && !previewLoading && !error ? 'relative' : 'absolute',
+            left: selectedDocument?.type === 'excel' && !previewLoading && !error ? '0' : '-9999px',
+            width: selectedDocument?.type === 'excel' && !previewLoading && !error ? '100%' : '1px',
+            height: selectedDocument?.type === 'excel' && !previewLoading && !error ? '650px' : '1px',
+            overflow: 'hidden'
+          }}>
+            <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white" style={{ height: '100%', width: '100%' }}>
+              <SpreadSheets
+                workbookInitialized={workbookInit}
+                hostStyle={{ width: '100%', height: '100%' }}
+              >
+                <Worksheet />
+              </SpreadSheets>
+            </div>
+          </div>
+
           {!selectedDocument && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <FileText className="w-16 h-16 mb-4 text-gray-300" />
@@ -444,11 +447,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                   <p className="text-red-600 font-semibold">{error}</p>
                 </div>
               )}
-
-              {/* Always render SpreadJS (hidden when not in use) so it stays initialized */}
-              <div style={{ display: !previewLoading && !error && selectedDocument.type === 'excel' ? 'block' : 'none' }}>
-                {renderExcelPreview()}
-              </div>
 
               {!previewLoading && !error && (
                 <div>
