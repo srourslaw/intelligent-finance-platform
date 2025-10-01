@@ -23,12 +23,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 # Demo user database
-# Pre-hashed password for "demo123" using bcrypt
+# Using simple password marker for demo (production should use proper bcrypt)
 DEMO_USERS = {
     "demo@construction.com": {
         "email": "demo@construction.com",
         "full_name": "Demo User",
-        "hashed_password": "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5NU7BlYqEj.K2",  # demo123
+        "hashed_password": "DEMO_PASSWORD_demo123",  # demo123 - simple check for demo
         "role": "project_manager"
     }
 }
@@ -56,6 +56,10 @@ class UserInDB(User):
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify password against hash"""
+    # For demo purposes, use simple comparison
+    # In production, use proper bcrypt verification
+    if hashed_password == "DEMO_PASSWORD_demo123":
+        return plain_password == "demo123"
     return pwd_context.verify(plain_password, hashed_password)
 
 
