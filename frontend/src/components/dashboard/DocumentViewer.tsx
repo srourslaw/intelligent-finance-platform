@@ -41,6 +41,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const formulaBarRef = useRef<HTMLDivElement>(null);
   const [excelModified, setExcelModified] = useState(false);
   const [excelBlob, setExcelBlob] = useState<Blob | null>(null);
+  const [spreadReady, setSpreadReady] = useState(false);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -96,7 +97,8 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
   // Load Excel file when blob is ready and SpreadJS is initialized
   useEffect(() => {
-    if (excelBlob && spreadRef.current) {
+    if (excelBlob && spreadReady && spreadRef.current) {
+      console.log('Loading Excel blob into SpreadJS...');
       const excelIO = new ExcelIO.IO();
       excelIO.open(excelBlob, (json: any) => {
         console.log('Excel loaded successfully, applying to spread');
@@ -111,7 +113,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         setPreviewLoading(false);
       });
     }
-  }, [excelBlob, spreadRef.current]);
+  }, [excelBlob, spreadReady]);
 
   const handleDocumentClick = async (doc: DocumentItem) => {
     setSelectedDocument(doc);
@@ -226,6 +228,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
           {/* Spreadsheet */}
           <SpreadSheets
             workbookInitialized={(spread: GC.Spread.Sheets.Workbook) => {
+              console.log('SpreadJS workbook initialized');
               spreadRef.current = spread;
 
               // Initialize formula bar
@@ -255,6 +258,9 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
               spread.options.allowCopyPasteExcelStyle = true;
               spread.options.showVerticalScrollbar = true;
               spread.options.showHorizontalScrollbar = true;
+
+              // Signal that spread is ready
+              setSpreadReady(true);
             }}
             hostStyle={{ height: '700px', width: '100%' }}
           >
