@@ -34,7 +34,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   // Preview state
   const [pdfBlob, setPdfBlob] = useState<string | null>(null);
   const [imageBlob, setImageBlob] = useState<string | null>(null);
-  const [excelData, setExcelData] = useState<any[][]>([]);
+  const [excelSheets, setExcelSheets] = useState<{name: string, data: any[][]}[]>([]);
+  const [activeSheetIndex, setActiveSheetIndex] = useState(0);
+  const [selectedCell, setSelectedCell] = useState<{row: number, col: number} | null>(null);
+  const [selectedColumn, setSelectedColumn] = useState<number | null>(null);
+  const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -95,7 +99,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     setError(null);
     setPdfBlob(null);
     setImageBlob(null);
-    setExcelData([]);
+    setExcelSheets([]);
+    setActiveSheetIndex(0);
+    setSelectedCell(null);
+    setSelectedColumn(null);
+    setSelectedRow(null);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
@@ -118,9 +126,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         setPdfBlob(blobUrl);
       } else if (doc.type === 'excel') {
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-        setExcelData(jsonData as any[][]);
+        const sheets = workbook.SheetNames.map(name => ({
+          name,
+          data: XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1 }) as any[][]
+        }));
+        setExcelSheets(sheets);
       } else if (doc.type === 'image') {
         const blob = new Blob([arrayBuffer]);
         const blobUrl = URL.createObjectURL(blob);
@@ -165,6 +175,17 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  // Helper to convert column index to Excel letter (0 -> A, 1 -> B, etc.)
+  const getColumnLetter = (index: number): string => {
+    let letter = '';
+    let num = index;
+    while (num >= 0) {
+      letter = String.fromCharCode(65 + (num % 26)) + letter;
+      num = Math.floor(num / 26) - 1;
+    }
+    return letter;
+  };
+
   const renderDocumentPreview = () => {
     if (!selectedDocument) return null;
 
@@ -181,31 +202,168 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       );
     }
 
-    if (selectedDocument.type === 'excel' && excelData.length > 0) {
+    if (selectedDocument.type === 'excel' && excelSheets.length > 0) {
+      const activeSheet = excelSheets[activeSheetIndex];
+      const maxCols = activeSheet.data.length > 0
+        ? Math.max(...activeSheet.data.map(row => row.length))
+        : 0;
+
+      const handleCellClick = (rowIndex: number, colIndex: number) => {
+        setSelectedCell({ row: rowIndex, col: colIndex });
+        setSelectedColumn(null);
+        setSelectedRow(null);
+      };
+
+      const handleColumnClick = (colIndex: number) => {
+        setSelectedColumn(colIndex);
+        setSelectedCell(null);
+        setSelectedRow(null);
+      };
+
+      const handleRowClick = (rowIndex: number) => {
+        setSelectedRow(rowIndex);
+        setSelectedCell(null);
+        setSelectedColumn(null);
+      };
+
+      const getCellValue = (rowIndex: number, colIndex: number): string => {
+        const row = activeSheet.data[rowIndex];
+        if (!row) return '';
+        const cell = row[colIndex];
+        return cell !== null && cell !== undefined ? String(cell) : '';
+      };
+
+      const getFormulaBarValue = (): string => {
+        if (selectedCell) {
+          return getCellValue(selectedCell.row, selectedCell.col);
+        }
+        return '';
+      };
+
+      const getSelectedCellAddress = (): string => {
+        if (selectedCell) {
+          return `${getColumnLetter(selectedCell.col)}${selectedCell.row + 1}`;
+        }
+        return '';
+      };
+
       return (
         <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
-          <div className="border-b border-gray-300 bg-gray-50 p-2">
-            <span className="text-sm font-medium text-gray-700">Excel Preview (First Sheet Only)</span>
+          {/* Formula Bar */}
+          <div className="border-b-2 border-gray-300 bg-white px-3 py-2 flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded border border-gray-300" style={{ minWidth: '60px', textAlign: 'center' }}>
+                {getSelectedCellAddress() || 'A1'}
+              </span>
+            </div>
+            <div className="flex-1">
+              <input
+                type="text"
+                value={getFormulaBarValue()}
+                readOnly
+                placeholder="Select a cell to view its value"
+                className="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50"
+              />
+            </div>
           </div>
-          <div className="overflow-auto" style={{ maxHeight: '700px' }}>
-            <table className="min-w-full divide-y divide-gray-200">
-              <tbody className="bg-white divide-y divide-gray-200">
-                {excelData.map((row, rowIndex) => (
-                  <tr key={rowIndex} className={rowIndex === 0 ? 'bg-gray-50' : ''}>
-                    {row.map((cell, cellIndex) => (
-                      <td
-                        key={cellIndex}
-                        className={`px-4 py-2 whitespace-nowrap text-sm ${
-                          rowIndex === 0 ? 'font-semibold text-gray-900' : 'text-gray-700'
-                        } border-r border-gray-200`}
+
+          {/* Sheet tabs */}
+          <div className="border-b border-gray-300 bg-gray-50 px-2 py-1 flex gap-2 overflow-x-auto">
+            {excelSheets.map((sheet, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setActiveSheetIndex(index);
+                  setSelectedCell(null);
+                  setSelectedColumn(null);
+                  setSelectedRow(null);
+                }}
+                className={`px-3 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
+                  index === activeSheetIndex
+                    ? 'bg-white text-indigo-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                {sheet.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Sheet data with horizontal scroll */}
+          <div className="overflow-auto" style={{ maxHeight: '550px', width: '100%' }}>
+            {activeSheet.data.length > 0 ? (
+              <div style={{ overflowX: 'auto', overflowY: 'auto' }}>
+                <table className="border-collapse">
+                  <thead className="sticky top-0 z-10">
+                    <tr>
+                      {/* Row number header cell */}
+                      <th
+                        className="bg-gray-100 border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 sticky left-0 z-20"
+                        style={{ minWidth: '50px', width: '50px' }}
                       >
-                        {cell !== null && cell !== undefined ? String(cell) : ''}
-                      </td>
+                        #
+                      </th>
+                      {/* Column letter headers (A, B, C...) */}
+                      {Array.from({ length: maxCols }).map((_, colIndex) => (
+                        <th
+                          key={colIndex}
+                          onClick={() => handleColumnClick(colIndex)}
+                          className={`border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 cursor-pointer hover:bg-gray-200 transition-colors ${
+                            selectedColumn === colIndex ? 'bg-indigo-200' : 'bg-gray-100'
+                          }`}
+                          style={{ minWidth: '120px', width: '120px' }}
+                        >
+                          {getColumnLetter(colIndex)}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white">
+                    {activeSheet.data.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {/* Row number */}
+                        <td
+                          onClick={() => handleRowClick(rowIndex)}
+                          className={`border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-600 text-center sticky left-0 z-10 cursor-pointer hover:bg-gray-200 transition-colors ${
+                            selectedRow === rowIndex ? 'bg-indigo-200' : 'bg-gray-50'
+                          }`}
+                          style={{ minWidth: '50px', width: '50px' }}
+                        >
+                          {rowIndex + 1}
+                        </td>
+                        {/* Data cells */}
+                        {Array.from({ length: maxCols }).map((_, colIndex) => {
+                          const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex;
+                          const isInSelectedColumn = selectedColumn === colIndex;
+                          const isInSelectedRow = selectedRow === rowIndex;
+
+                          return (
+                            <td
+                              key={colIndex}
+                              onClick={() => handleCellClick(rowIndex, colIndex)}
+                              className={`border border-gray-300 px-3 py-2 text-sm text-gray-900 cursor-pointer transition-colors ${
+                                isSelected
+                                  ? 'bg-indigo-100 ring-2 ring-inset ring-indigo-500'
+                                  : isInSelectedColumn || isInSelectedRow
+                                    ? 'bg-indigo-50'
+                                    : 'hover:bg-gray-100'
+                              }`}
+                              style={{ minWidth: '120px', width: '120px' }}
+                            >
+                              {row[colIndex] !== null && row[colIndex] !== undefined ? String(row[colIndex]) : ''}
+                            </td>
+                          );
+                        })}
+                      </tr>
                     ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center py-12">
+                <p className="text-gray-500">This sheet is empty</p>
+              </div>
+            )}
           </div>
         </div>
       );
