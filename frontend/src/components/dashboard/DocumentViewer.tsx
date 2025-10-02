@@ -1,12 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { SpreadSheets } from '@mescius/spread-sheets-react';
-import * as GC from '@mescius/spread-sheets';
-import '@mescius/spread-sheets/styles/gc.spread.sheets.excel2013white.css';
-import '@mescius/spread-sheets-charts';
-import '@mescius/spread-sheets-shapes';
-import * as ExcelIO from '@mescius/spread-excelio';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -54,8 +48,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const [rangeStart, setRangeStart] = useState<{row: number, col: number} | null>(null);
   const [rangeEnd, setRangeEnd] = useState<{row: number, col: number} | null>(null);
   const [isSelectingRange, setIsSelectingRange] = useState(false);
-  const [excelArrayBuffer, setExcelArrayBuffer] = useState<ArrayBuffer | null>(null);
-  const spreadRef = useRef<GC.Spread.Sheets.Workbook | null>(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -130,7 +122,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     setRangeStart(null);
     setRangeEnd(null);
     setIsSelectingRange(false);
-    setExcelArrayBuffer(null);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
@@ -152,10 +143,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         const blobUrl = URL.createObjectURL(blob);
         setPdfBlob(blobUrl);
       } else if (doc.type === 'excel') {
-        // Store arrayBuffer for SpreadJS import
-        setExcelArrayBuffer(arrayBuffer);
-
-        // Also parse sheets for data mode
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         const sheets = workbook.SheetNames.map(name => ({
           name,
@@ -233,88 +220,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       );
     }
 
-    if (selectedDocument.type === 'excel' && excelArrayBuffer) {
-      try {
-        const handleSpreadInit = (spread: GC.Spread.Sheets.Workbook) => {
-          console.log('SpreadJS workbookInitialized called');
-
-          if (!spread) {
-            console.error('SpreadJS workbook not initialized');
-            return;
-          }
-
-          spreadRef.current = spread;
-          console.log('SpreadJS workbook stored in ref');
-
-          try {
-            // Configure SpreadJS options
-            spread.options.tabStripVisible = true;
-            spread.options.newTabVisible = false;
-            spread.options.tabEditable = false;
-            spread.options.allowUserResize = true;
-            spread.options.showHorizontalScrollbar = true;
-            spread.options.showVerticalScrollbar = true;
-            console.log('SpreadJS options configured');
-
-            // Import Excel file using ExcelIO
-            const excelIO = new ExcelIO.IO();
-            console.log('ExcelIO instance created');
-
-            // Convert ArrayBuffer to Blob
-            const blob = new Blob([excelArrayBuffer], {
-              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            });
-
-            excelIO.open(
-              blob,
-              (json: any) => {
-                console.log('Excel file loaded by ExcelIO');
-                spread.fromJSON(json);
-                console.log('Excel imported successfully');
-                const sheetCount = spread.getSheetCount();
-                console.log(`Loaded ${sheetCount} sheets`);
-
-                // Log sheet names
-                for (let i = 0; i < sheetCount; i++) {
-                  const sheet = spread.getSheet(i);
-                  console.log(`Sheet ${i}: ${sheet.name()}`);
-                }
-              },
-              (error: any) => {
-                console.error('Error importing Excel:', error);
-                alert('Failed to import Excel file: ' + JSON.stringify(error));
-              }
-            );
-          } catch (err) {
-            console.error('Error in handleSpreadInit:', err);
-            alert('Error initializing SpreadJS: ' + err);
-          }
-        };
-
-        console.log('Rendering SpreadSheets component');
-        return (
-          <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
-            <div className="border-b-2 border-gray-300 bg-gray-50 px-3 py-2">
-              <span className="text-sm font-semibold text-gray-700">📊 Excel Viewer</span>
-            </div>
-            <SpreadSheets
-              workbookInitialized={handleSpreadInit}
-              hostStyle={{ height: '700px', width: '100%' }}
-            />
-          </div>
-        );
-      } catch (err) {
-        console.error('Error rendering SpreadJS:', err);
-        alert('Critical error: ' + err);
-        return (
-          <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white p-8">
-            <p className="text-red-600">Failed to render Excel viewer: {String(err)}</p>
-          </div>
-        );
-      }
-    }
-
-    // Fallback for old data mode (shouldn't reach here anymore)
     if (selectedDocument.type === 'excel' && excelSheets.length > 0) {
         const activeSheet = excelSheets[activeSheetIndex];
         const maxCols = activeSheet.data.length > 0

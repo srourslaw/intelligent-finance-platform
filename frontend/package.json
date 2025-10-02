@@ -10,12 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mescius/spread-excelio": "^18.2.3",
-    "@mescius/spread-sheets": "^18.2.3",
-    "@mescius/spread-sheets-charts": "^18.2.3",
     "@mescius/spread-sheets-io": "^18.2.3",
-    "@mescius/spread-sheets-react": "^18.2.3",
-    "@mescius/spread-sheets-shapes": "^18.2.3",
     "axios": "^1.12.2",
     "date-fns": "^4.1.0",
     "jwt-decode": "^4.0.0",
