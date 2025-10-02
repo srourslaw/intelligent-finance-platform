@@ -40,6 +40,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const spreadRef = useRef<GC.Spread.Sheets.Workbook | null>(null);
   const formulaBarRef = useRef<HTMLDivElement>(null);
   const [excelModified, setExcelModified] = useState(false);
+  const [excelBlob, setExcelBlob] = useState<Blob | null>(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -93,12 +94,32 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     };
   }, [pdfBlob, imageBlob]);
 
+  // Load Excel file when blob is ready and SpreadJS is initialized
+  useEffect(() => {
+    if (excelBlob && spreadRef.current) {
+      const excelIO = new ExcelIO.IO();
+      excelIO.open(excelBlob, (json: any) => {
+        console.log('Excel loaded successfully, applying to spread');
+        if (spreadRef.current) {
+          spreadRef.current.fromJSON(json);
+          setPreviewLoading(false);
+        }
+      }, (error: any) => {
+        console.error('Excel load error:', error);
+        console.error('Error details:', JSON.stringify(error));
+        setError(`Failed to load Excel file: ${error?.message || 'Unknown error'}`);
+        setPreviewLoading(false);
+      });
+    }
+  }, [excelBlob, spreadRef.current]);
+
   const handleDocumentClick = async (doc: DocumentItem) => {
     setSelectedDocument(doc);
     setPreviewLoading(true);
     setError(null);
     setPdfBlob(null);
     setImageBlob(null);
+    setExcelBlob(null);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
@@ -120,21 +141,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         const blobUrl = URL.createObjectURL(blob);
         setPdfBlob(blobUrl);
       } else if (doc.type === 'excel') {
-        // Load Excel file into SpreadJS
-        if (spreadRef.current) {
-          const blob = new Blob([arrayBuffer], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          });
-          const excelIO = new ExcelIO.IO();
-          excelIO.open(blob, (json: any) => {
-            if (spreadRef.current) {
-              spreadRef.current.fromJSON(json);
-            }
-          }, (error: Error) => {
-            console.error('Excel load error:', error);
-            setError('Failed to load Excel file');
-          });
-        }
+        // Store blob for SpreadJS to load when initialized
+        const blob = new Blob([arrayBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        setExcelBlob(blob);
       } else if (doc.type === 'image') {
         const blob = new Blob([arrayBuffer]);
         const blobUrl = URL.createObjectURL(blob);
