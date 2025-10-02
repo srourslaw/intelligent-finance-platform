@@ -209,127 +209,17 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     }
 
     if (selectedDocument.type === 'excel') {
-      console.log('Rendering Excel preview, excelBlob:', excelBlob ? `${excelBlob.size} bytes` : 'null', 'spreadReady:', spreadReady);
-
-      if (!excelBlob) {
-        return (
-          <div className="flex items-center justify-center py-24">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
-              <p className="text-gray-600 font-medium">Loading Excel file...</p>
-            </div>
-          </div>
-        );
-      }
+      const downloadUrl = getDocumentDownloadUrl(projectId, selectedDocument.path);
+      const viewUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(downloadUrl)}&embedded=true`;
 
       return (
         <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
-          {/* Formula Bar */}
-          <div className="border-b border-gray-300 bg-gray-50 p-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700 px-2">fx</span>
-              <div
-                ref={formulaBarRef}
-                contentEditable={true}
-                spellCheck={false}
-                className="flex-1 px-3 py-1.5 border border-gray-300 rounded bg-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                style={{ minHeight: '32px' }}
-              />
-            </div>
-          </div>
-
-          {/* Spreadsheet */}
-          <SpreadSheets
-            workbookInitialized={(spread: GC.Spread.Sheets.Workbook) => {
-              console.log('SpreadJS workbook initialized');
-              spreadRef.current = spread;
-
-              // Initialize formula bar
-              if (formulaBarRef.current) {
-                const formulaTextBox = new GC.Spread.Sheets.FormulaTextBox.FormulaTextBox(formulaBarRef.current);
-                formulaTextBox.workbook(spread);
-              }
-
-              // Track changes
-              spread.bind(GC.Spread.Sheets.Events.CellChanged, () => {
-                setExcelModified(true);
-              });
-
-              // Configure SpreadJS options for full Excel-like experience
-              spread.options.allowUserZoom = true;
-              spread.options.scrollbarMaxAlign = true;
-              spread.options.scrollbarShowMax = true;
-
-              // Show sheet tabs at bottom
-              spread.options.tabStripVisible = true;
-              spread.options.newTabVisible = false;
-              spread.options.tabEditable = false;
-              spread.options.tabStripRatio = 0.08;  // Tab strip height
-
-              // Additional Excel-like features
-              spread.options.allowUserResize = true;
-              spread.options.allowCopyPasteExcelStyle = true;
-              spread.options.showVerticalScrollbar = true;
-              spread.options.showHorizontalScrollbar = true;
-
-              // Signal that spread is ready
-              setSpreadReady(true);
-            }}
-            hostStyle={{ height: '700px', width: '100%' }}
-          >
-            <Worksheet />
-          </SpreadSheets>
-
-          {/* Save button - show when modified */}
-          {excelModified && (
-            <div className="border-t border-gray-300 bg-gray-50 p-3 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setExcelModified(false);
-                  // Reset to original - user clicked discard
-                  if (selectedDocument && spreadRef.current) {
-                    handleDocumentClick(selectedDocument);
-                  }
-                }}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
-              >
-                Discard Changes
-              </button>
-              <button
-                onClick={async () => {
-                  if (!spreadRef.current || !selectedDocument) return;
-
-                  try {
-                    // Export to Excel blob
-                    const excelIO = new ExcelIO.IO();
-                    const json = spreadRef.current.toJSON();
-
-                    excelIO.save(json, (blob: Blob) => {
-                      // Download the modified file
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = selectedDocument.filename;
-                      a.click();
-                      URL.revokeObjectURL(url);
-
-                      setExcelModified(false);
-                      alert('File downloaded! Upload it back to replace the original.');
-                    }, (error: Error) => {
-                      console.error('Save error:', error);
-                      alert('Failed to save Excel file');
-                    });
-                  } catch (err) {
-                    console.error('Export error:', err);
-                    alert('Failed to export Excel file');
-                  }
-                }}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium shadow-md hover:shadow-lg transition-all"
-              >
-                Save & Download
-              </button>
-            </div>
-          )}
+          <iframe
+            src={viewUrl}
+            className="w-full"
+            style={{ height: '700px' }}
+            title={selectedDocument.filename}
+          />
         </div>
       );
     }
