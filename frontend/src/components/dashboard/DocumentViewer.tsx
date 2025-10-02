@@ -120,8 +120,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       } else if (doc.type === 'excel') {
         // Load Excel file into SpreadJS
         if (spreadRef.current) {
+          const blob = new Blob([arrayBuffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          });
           const excelIO = new ExcelIO.IO();
-          excelIO.open(arrayBuffer, (json: any) => {
+          excelIO.open(blob, (json: any) => {
             if (spreadRef.current) {
               spreadRef.current.fromJSON(json);
             }
