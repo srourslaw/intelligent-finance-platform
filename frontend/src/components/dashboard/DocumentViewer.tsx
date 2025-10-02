@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
