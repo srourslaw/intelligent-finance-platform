@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import * as GC from '@mescius/spread-sheets';
+import { SpreadSheets, Worksheet } from '@mescius/spread-sheets-react';
+import '@mescius/spread-sheets/styles/gc.spread.sheets.excel2013white.css';
+import * as ExcelIO from '@mescius/spread-excelio';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -33,7 +36,8 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
   // Preview state
   const [pdfBlob, setPdfBlob] = useState<string | null>(null);
-  const [excelData, setExcelData] = useState<any>(null);
+  const [imageBlob, setImageBlob] = useState<string | null>(null);
+  const spreadRef = useRef<GC.Spread.Sheets.Workbook | null>(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -79,21 +83,20 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     fetchDocuments();
   }, [token, projectId]);
 
-  // Cleanup blob URL on unmount
+  // Cleanup blob URLs on unmount
   useEffect(() => {
     return () => {
-      if (pdfBlob) {
-        URL.revokeObjectURL(pdfBlob);
-      }
+      if (pdfBlob) URL.revokeObjectURL(pdfBlob);
+      if (imageBlob) URL.revokeObjectURL(imageBlob);
     };
-  }, [pdfBlob]);
+  }, [pdfBlob, imageBlob]);
 
   const handleDocumentClick = async (doc: DocumentItem) => {
     setSelectedDocument(doc);
     setPreviewLoading(true);
     setError(null);
     setPdfBlob(null);
-    setExcelData(null);
+    setImageBlob(null);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
@@ -115,9 +118,22 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         const blobUrl = URL.createObjectURL(blob);
         setPdfBlob(blobUrl);
       } else if (doc.type === 'excel') {
-        // Parse Excel file using xlsx
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        setExcelData(workbook);
+        // Load Excel file into SpreadJS
+        if (spreadRef.current) {
+          const excelIO = new ExcelIO.IO();
+          excelIO.open(arrayBuffer, (json: any) => {
+            if (spreadRef.current) {
+              spreadRef.current.fromJSON(json);
+            }
+          }, (error: Error) => {
+            console.error('Excel load error:', error);
+            setError('Failed to load Excel file');
+          });
+        }
+      } else if (doc.type === 'image') {
+        const blob = new Blob([arrayBuffer]);
+        const blobUrl = URL.createObjectURL(blob);
+        setImageBlob(blobUrl);
       }
     } catch (err) {
       console.error('Preview error:', err);
@@ -164,65 +180,50 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     if (selectedDocument.type === 'pdf' && pdfBlob) {
       return (
         <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
-          <embed
+          <iframe
             src={pdfBlob}
-            type="application/pdf"
             className="w-full"
-            style={{ height: '650px' }}
+            style={{ height: '700px' }}
+            title={selectedDocument.filename}
           />
         </div>
       );
     }
 
-    if (selectedDocument.type === 'excel' && excelData) {
-      const sheetName = excelData.SheetNames[0];
-      const worksheet = excelData.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
+    if (selectedDocument.type === 'excel') {
       return (
         <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
-          <div className="bg-gradient-to-r from-green-600 to-green-700 p-4 text-white">
-            <h3 className="font-semibold">Sheet: {sheetName}</h3>
-          </div>
-          <div className="overflow-auto" style={{ maxHeight: '600px' }}>
-            <table className="w-full border-collapse">
-              <tbody>
-                {(jsonData as any[][]).map((row, rowIndex) => (
-                  <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    {row.map((cell, cellIndex) => (
-                      <td
-                        key={cellIndex}
-                        className="border border-gray-300 px-4 py-2 text-sm"
-                      >
-                        {cell !== null && cell !== undefined ? String(cell) : ''}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <SpreadSheets
+            workbookInitialized={(spread: GC.Spread.Sheets.Workbook) => {
+              spreadRef.current = spread;
+              // Configure SpreadJS options
+              spread.options.allowUserZoom = true;
+              spread.options.scrollbarMaxAlign = true;
+              spread.options.tabStripVisible = true;
+              spread.options.newTabVisible = false;
+              spread.options.tabEditable = false;
+            }}
+            hostStyle={{ height: '700px', width: '100%' }}
+          >
+            <Worksheet />
+          </SpreadSheets>
+        </div>
+      );
+    }
+
+    if (selectedDocument.type === 'image' && imageBlob) {
+      return (
+        <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white p-4 flex justify-center items-center" style={{ minHeight: '500px' }}>
+          <img
+            src={imageBlob}
+            alt={selectedDocument.filename}
+            className="max-w-full max-h-[650px] h-auto rounded shadow-md object-contain"
+          />
         </div>
       );
     }
 
     return null;
-  };
-
-  const renderImagePreview = () => {
-    if (!selectedDocument) return null;
-
-    const url = getDocumentDownloadUrl(projectId, selectedDocument.path);
-
-    return (
-      <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white p-4 flex justify-center">
-        <img
-          src={url}
-          alt={selectedDocument.filename}
-          className="max-w-full h-auto rounded shadow-md"
-        />
-      </div>
-    );
   };
 
   if (loading) {
@@ -302,7 +303,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <FileText className="w-16 h-16 mb-4 text-gray-300" />
               <p className="text-lg font-medium">Select a document to preview</p>
-              <p className="text-sm text-gray-400 mt-2">Excel files will show in full SpreadJS viewer</p>
+              <p className="text-sm text-gray-400 mt-2">Excel files will show in full spreadsheet viewer with all sheets</p>
             </div>
           )}
 
@@ -341,12 +342,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                 </div>
               )}
 
-              {!previewLoading && !error && (
-                <div>
-                  {(selectedDocument.type === 'pdf' || selectedDocument.type === 'excel') && renderDocumentPreview()}
-                  {selectedDocument.type === 'image' && renderImagePreview()}
-                </div>
-              )}
+              {!previewLoading && !error && renderDocumentPreview()}
             </div>
           )}
         </div>
