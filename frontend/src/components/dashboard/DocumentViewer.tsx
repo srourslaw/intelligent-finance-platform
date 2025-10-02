@@ -1,6 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { SpreadSheets } from '@mescius/spread-sheets-react';
+import * as GC from '@mescius/spread-sheets';
+import '@mescius/spread-sheets/styles/gc.spread.sheets.excel2013white.css';
+import '@mescius/spread-sheets-charts';
+import '@mescius/spread-sheets-shapes';
+import * as ExcelIO from '@mescius/spread-excelio';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -39,6 +45,19 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const [selectedCell, setSelectedCell] = useState<{row: number, col: number} | null>(null);
   const [selectedColumn, setSelectedColumn] = useState<number | null>(null);
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
+  const [formulaInput, setFormulaInput] = useState('');
+  const [isEditingFormula, setIsEditingFormula] = useState(false);
+  const [calculatedValue, setCalculatedValue] = useState<string | null>(null);
+  const [editedCells, setEditedCells] = useState<{[key: string]: string}>({});
+  const [editingCell, setEditingCell] = useState<{row: number, col: number} | null>(null);
+  const [cellInputValue, setCellInputValue] = useState('');
+  const [rangeStart, setRangeStart] = useState<{row: number, col: number} | null>(null);
+  const [rangeEnd, setRangeEnd] = useState<{row: number, col: number} | null>(null);
+  const [isSelectingRange, setIsSelectingRange] = useState(false);
+  const [excelViewMode, setExcelViewMode] = useState<'data' | 'preview'>('preview'); // 'data' for editable, 'preview' for full Excel
+  const [excelBlobUrl, setExcelBlobUrl] = useState<string | null>(null);
+  const [excelArrayBuffer, setExcelArrayBuffer] = useState<ArrayBuffer | null>(null);
+  const spreadRef = useRef<GC.Spread.Sheets.Workbook | null>(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -89,8 +108,9 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     return () => {
       if (pdfBlob) URL.revokeObjectURL(pdfBlob);
       if (imageBlob) URL.revokeObjectURL(imageBlob);
+      if (excelBlobUrl) URL.revokeObjectURL(excelBlobUrl);
     };
-  }, [pdfBlob, imageBlob]);
+  }, [pdfBlob, imageBlob, excelBlobUrl]);
 
 
   const handleDocumentClick = async (doc: DocumentItem) => {
@@ -104,6 +124,18 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     setSelectedCell(null);
     setSelectedColumn(null);
     setSelectedRow(null);
+    setFormulaInput('');
+    setIsEditingFormula(false);
+    setCalculatedValue(null);
+    setEditedCells({});
+    setEditingCell(null);
+    setCellInputValue('');
+    setRangeStart(null);
+    setRangeEnd(null);
+    setIsSelectingRange(false);
+    setExcelViewMode('data');
+    setExcelBlobUrl(null);
+    setExcelArrayBuffer(null);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
@@ -125,6 +157,10 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         const blobUrl = URL.createObjectURL(blob);
         setPdfBlob(blobUrl);
       } else if (doc.type === 'excel') {
+        // Store arrayBuffer for SpreadJS import
+        setExcelArrayBuffer(arrayBuffer);
+
+        // Also parse sheets for data mode
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         const sheets = workbook.SheetNames.map(name => ({
           name,
@@ -202,38 +238,358 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       );
     }
 
+    if (selectedDocument.type === 'excel' && excelArrayBuffer) {
+      try {
+        const handleSpreadInit = (spread: GC.Spread.Sheets.Workbook) => {
+          console.log('SpreadJS workbookInitialized called');
+
+          if (!spread) {
+            console.error('SpreadJS workbook not initialized');
+            return;
+          }
+
+          spreadRef.current = spread;
+          console.log('SpreadJS workbook stored in ref');
+
+          try {
+            // Configure SpreadJS options
+            spread.options.tabStripVisible = true;
+            spread.options.newTabVisible = false;
+            spread.options.tabEditable = false;
+            spread.options.allowUserResize = true;
+            spread.options.showHorizontalScrollbar = true;
+            spread.options.showVerticalScrollbar = true;
+            console.log('SpreadJS options configured');
+
+            // Import Excel file using ExcelIO
+            const excelIO = new ExcelIO.IO();
+            console.log('ExcelIO instance created');
+
+            excelIO.open(
+              excelArrayBuffer,
+              (json: any) => {
+                console.log('Excel file loaded by ExcelIO');
+                spread.fromJSON(json);
+                console.log('Excel imported successfully');
+                const sheetCount = spread.getSheetCount();
+                console.log(`Loaded ${sheetCount} sheets`);
+
+                // Log sheet names
+                for (let i = 0; i < sheetCount; i++) {
+                  const sheet = spread.getSheet(i);
+                  console.log(`Sheet ${i}: ${sheet.name()}`);
+                }
+              },
+              (error: any) => {
+                console.error('Error importing Excel:', error);
+                alert('Failed to import Excel file: ' + JSON.stringify(error));
+              }
+            );
+          } catch (err) {
+            console.error('Error in handleSpreadInit:', err);
+            alert('Error initializing SpreadJS: ' + err);
+          }
+        };
+
+        console.log('Rendering SpreadSheets component');
+        return (
+          <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
+            <div className="border-b-2 border-gray-300 bg-gray-50 px-3 py-2">
+              <span className="text-sm font-semibold text-gray-700">📊 Excel Viewer</span>
+            </div>
+            <SpreadSheets
+              workbookInitialized={handleSpreadInit}
+              hostStyle={{ height: '700px', width: '100%' }}
+            />
+          </div>
+        );
+      } catch (err) {
+        console.error('Error rendering SpreadJS:', err);
+        alert('Critical error: ' + err);
+        return (
+          <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white p-8">
+            <p className="text-red-600">Failed to render Excel viewer: {String(err)}</p>
+          </div>
+        );
+      }
+    }
+
+    // Fallback for old data mode (shouldn't reach here anymore)
     if (selectedDocument.type === 'excel' && excelSheets.length > 0) {
-      const activeSheet = excelSheets[activeSheetIndex];
-      const maxCols = activeSheet.data.length > 0
-        ? Math.max(...activeSheet.data.map(row => row.length))
-        : 0;
+        const activeSheet = excelSheets[activeSheetIndex];
+        const maxCols = activeSheet.data.length > 0
+          ? Math.max(...activeSheet.data.map(row => row.length))
+          : 0;
 
       const handleCellClick = (rowIndex: number, colIndex: number) => {
+        // If editing a cell directly and formula mode active
+        if (editingCell && cellInputValue.includes('=')) {
+          const cellAddr = `${getColumnLetter(colIndex)}${rowIndex + 1}`;
+          setCellInputValue(cellInputValue + cellAddr);
+          return;
+        }
+
+        // If editing in formula bar and formula mode active
+        if (isEditingFormula && formulaInput.includes('=')) {
+          const cellAddr = `${getColumnLetter(colIndex)}${rowIndex + 1}`;
+          setFormulaInput(formulaInput + cellAddr);
+          return;
+        }
+
+        // Normal click: select cell
         setSelectedCell({ row: rowIndex, col: colIndex });
         setSelectedColumn(null);
         setSelectedRow(null);
+        setIsEditingFormula(false);
+        setCalculatedValue(null);
+        setRangeStart(null);
+        setRangeEnd(null);
+        setIsSelectingRange(false);
+
+        // Set formula input to current cell value
+        const cellValue = getCellValue(rowIndex, colIndex);
+        setFormulaInput(cellValue);
       };
 
       const handleColumnClick = (colIndex: number) => {
         setSelectedColumn(colIndex);
         setSelectedCell(null);
         setSelectedRow(null);
+        setIsEditingFormula(false);
+        setCalculatedValue(null);
+        setFormulaInput('');
       };
 
       const handleRowClick = (rowIndex: number) => {
         setSelectedRow(rowIndex);
         setSelectedCell(null);
         setSelectedColumn(null);
+        setIsEditingFormula(false);
+        setCalculatedValue(null);
+        setFormulaInput('');
+      };
+
+      const getCellKey = (rowIndex: number, colIndex: number): string => {
+        return `${activeSheetIndex}-${rowIndex}-${colIndex}`;
       };
 
       const getCellValue = (rowIndex: number, colIndex: number): string => {
+        // Check if cell has been edited
+        const cellKey = getCellKey(rowIndex, colIndex);
+        if (editedCells[cellKey] !== undefined) {
+          return editedCells[cellKey];
+        }
+
+        // Otherwise return original value
         const row = activeSheet.data[rowIndex];
         if (!row) return '';
         const cell = row[colIndex];
         return cell !== null && cell !== undefined ? String(cell) : '';
       };
 
+      // Parse cell reference like "A1" to {row: 0, col: 0}
+      const parseCellReference = (ref: string): {row: number, col: number} | null => {
+        const match = ref.match(/^([A-Z]+)(\d+)$/);
+        if (!match) return null;
+
+        const colLetter = match[1];
+        const rowNum = parseInt(match[2], 10) - 1;
+
+        // Convert column letter to index
+        let colIndex = 0;
+        for (let i = 0; i < colLetter.length; i++) {
+          colIndex = colIndex * 26 + (colLetter.charCodeAt(i) - 64);
+        }
+        colIndex -= 1;
+
+        return { row: rowNum, col: colIndex };
+      };
+
+      // Evaluate formula
+      const evaluateFormula = (formula: string): string => {
+        if (!formula.startsWith('=')) {
+          return formula;
+        }
+
+        try {
+          // Remove the = sign
+          let expression = formula.substring(1);
+
+          // Replace cell references with their values
+          const cellRefRegex = /([A-Z]+\d+)/g;
+          expression = expression.replace(cellRefRegex, (match) => {
+            const cellPos = parseCellReference(match);
+            if (!cellPos) return '0';
+
+            const value = getCellValue(cellPos.row, cellPos.col);
+            const numValue = parseFloat(value);
+            return isNaN(numValue) ? '0' : String(numValue);
+          });
+
+          // Handle SUM function
+          if (expression.toUpperCase().includes('SUM')) {
+            const sumMatch = expression.match(/SUM\(([A-Z]+\d+):([A-Z]+\d+)\)/i);
+            if (sumMatch) {
+              const start = parseCellReference(sumMatch[1]);
+              const end = parseCellReference(sumMatch[2]);
+
+              if (start && end) {
+                let sum = 0;
+                for (let r = start.row; r <= end.row; r++) {
+                  for (let c = start.col; c <= end.col; c++) {
+                    const val = parseFloat(getCellValue(r, c));
+                    if (!isNaN(val)) sum += val;
+                  }
+                }
+                return String(sum);
+              }
+            }
+          }
+
+          // Evaluate the mathematical expression
+          // eslint-disable-next-line no-eval
+          const result = eval(expression);
+          return String(result);
+        } catch (e) {
+          return '#ERROR';
+        }
+      };
+
+      const handleFormulaChange = (value: string) => {
+        setFormulaInput(value);
+        setIsEditingFormula(true);
+
+        // Calculate if it's a formula
+        if (value.startsWith('=')) {
+          const result = evaluateFormula(value);
+          setCalculatedValue(result);
+        } else {
+          setCalculatedValue(null);
+        }
+      };
+
+      const handleFormulaKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && selectedCell) {
+          // Save the formula or value to the selected cell
+          const cellKey = getCellKey(selectedCell.row, selectedCell.col);
+
+          if (formulaInput.startsWith('=')) {
+            // Evaluate and save the result
+            const result = evaluateFormula(formulaInput);
+            setEditedCells({...editedCells, [cellKey]: result});
+          } else {
+            // Save the raw value
+            setEditedCells({...editedCells, [cellKey]: formulaInput});
+          }
+
+          setIsEditingFormula(false);
+          setCalculatedValue(null);
+        }
+      };
+
+      const handleCellMouseDown = (rowIndex: number, colIndex: number, e: React.MouseEvent) => {
+        // If editing a cell with formula or formula bar active
+        const inFormulaMode = (editingCell && cellInputValue.includes('=')) || (isEditingFormula && formulaInput.includes('='));
+
+        if (inFormulaMode) {
+          setRangeStart({ row: rowIndex, col: colIndex });
+          setRangeEnd({ row: rowIndex, col: colIndex });
+          setIsSelectingRange(true);
+          e.preventDefault();
+        }
+      };
+
+      const handleCellMouseEnter = (rowIndex: number, colIndex: number) => {
+        if (isSelectingRange && rangeStart) {
+          setRangeEnd({ row: rowIndex, col: colIndex });
+        }
+      };
+
+      const handleCellMouseUp = () => {
+        if (isSelectingRange && rangeStart && rangeEnd) {
+          const startAddr = `${getColumnLetter(rangeStart.col)}${rangeStart.row + 1}`;
+          const endAddr = `${getColumnLetter(rangeEnd.col)}${rangeEnd.row + 1}`;
+
+          // Check if it's a single cell or range
+          const rangeText = (rangeStart.row === rangeEnd.row && rangeStart.col === rangeEnd.col)
+            ? startAddr
+            : `${startAddr}:${endAddr}`;
+
+          // Insert into cell input or formula bar
+          if (editingCell && cellInputValue.includes('=')) {
+            setCellInputValue(cellInputValue + rangeText);
+          } else if (isEditingFormula && formulaInput.includes('=')) {
+            setFormulaInput(formulaInput + rangeText);
+          }
+
+          setIsSelectingRange(false);
+          setRangeStart(null);
+          setRangeEnd(null);
+        }
+      };
+
+      const handleCellDoubleClick = (rowIndex: number, colIndex: number) => {
+        setEditingCell({ row: rowIndex, col: colIndex });
+        setCellInputValue(getCellValue(rowIndex, colIndex));
+        setRangeStart(null);
+        setRangeEnd(null);
+        setIsSelectingRange(false);
+      };
+
+      const handleCellInputChange = (value: string) => {
+        setCellInputValue(value);
+
+        // Live calculation preview if it's a formula
+        if (value.startsWith('=')) {
+          const result = evaluateFormula(value);
+          setCalculatedValue(result);
+        } else {
+          setCalculatedValue(null);
+        }
+      };
+
+      const handleCellInputKeyDown = (e: React.KeyboardEvent, rowIndex: number, colIndex: number) => {
+        if (e.key === 'Enter') {
+          const cellKey = getCellKey(rowIndex, colIndex);
+
+          if (cellInputValue.startsWith('=')) {
+            // Evaluate and save the result
+            const result = evaluateFormula(cellInputValue);
+            setEditedCells({...editedCells, [cellKey]: result});
+          } else {
+            // Save the raw value
+            setEditedCells({...editedCells, [cellKey]: cellInputValue});
+          }
+
+          setEditingCell(null);
+          setCellInputValue('');
+          setCalculatedValue(null);
+        } else if (e.key === 'Escape') {
+          setEditingCell(null);
+          setCellInputValue('');
+          setCalculatedValue(null);
+        }
+      };
+
+      const handleCellInputBlur = (rowIndex: number, colIndex: number) => {
+        const cellKey = getCellKey(rowIndex, colIndex);
+
+        if (cellInputValue.startsWith('=')) {
+          const result = evaluateFormula(cellInputValue);
+          setEditedCells({...editedCells, [cellKey]: result});
+        } else if (cellInputValue !== '') {
+          setEditedCells({...editedCells, [cellKey]: cellInputValue});
+        }
+
+        setEditingCell(null);
+        setCellInputValue('');
+        setCalculatedValue(null);
+      };
+
       const getFormulaBarValue = (): string => {
+        if (isEditingFormula) {
+          return formulaInput;
+        }
         if (selectedCell) {
           return getCellValue(selectedCell.row, selectedCell.col);
         }
@@ -250,20 +606,33 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       return (
         <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
           {/* Formula Bar */}
-          <div className="border-b-2 border-gray-300 bg-white px-3 py-2 flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded border border-gray-300" style={{ minWidth: '60px', textAlign: 'center' }}>
-                {getSelectedCellAddress() || 'A1'}
-              </span>
+          <div className="border-b-2 border-gray-300 bg-white px-3 py-2">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded border border-gray-300" style={{ minWidth: '60px', textAlign: 'center' }}>
+                  {getSelectedCellAddress() || 'A1'}
+                </span>
+              </div>
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={isEditingFormula ? formulaInput : getFormulaBarValue()}
+                  onChange={(e) => handleFormulaChange(e.target.value)}
+                  onKeyDown={handleFormulaKeyDown}
+                  onFocus={() => setIsEditingFormula(true)}
+                  placeholder="Enter formula (e.g., =A1+B1 or =SUM(A1:A5)) and press Enter"
+                  className="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <input
-                type="text"
-                value={getFormulaBarValue()}
-                readOnly
-                placeholder="Select a cell to view its value"
-                className="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50"
-              />
+            {calculatedValue !== null && (
+              <div className="text-xs text-gray-600 bg-green-50 px-3 py-1 rounded border border-green-200">
+                <span className="font-semibold">Result: </span>
+                <span className="text-green-700 font-mono">{calculatedValue}</span>
+              </div>
+            )}
+            <div className="text-xs text-gray-500 mt-1">
+              💡 Double-click cell → type <code className="bg-gray-100 px-1 rounded">=</code> → click cells or drag range → type operators (+, -, *, /) → press Enter
             </div>
           </div>
 
@@ -337,20 +706,47 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                           const isInSelectedColumn = selectedColumn === colIndex;
                           const isInSelectedRow = selectedRow === rowIndex;
 
+                          const isEditing = editingCell?.row === rowIndex && editingCell?.col === colIndex;
+
+                          // Check if cell is in selected range
+                          const isInRange = rangeStart && rangeEnd &&
+                            rowIndex >= Math.min(rangeStart.row, rangeEnd.row) &&
+                            rowIndex <= Math.max(rangeStart.row, rangeEnd.row) &&
+                            colIndex >= Math.min(rangeStart.col, rangeEnd.col) &&
+                            colIndex <= Math.max(rangeStart.col, rangeEnd.col);
+
                           return (
                             <td
                               key={colIndex}
                               onClick={() => handleCellClick(rowIndex, colIndex)}
-                              className={`border border-gray-300 px-3 py-2 text-sm text-gray-900 cursor-pointer transition-colors ${
+                              onMouseDown={(e) => handleCellMouseDown(rowIndex, colIndex, e)}
+                              onMouseEnter={() => handleCellMouseEnter(rowIndex, colIndex)}
+                              onMouseUp={handleCellMouseUp}
+                              onDoubleClick={() => handleCellDoubleClick(rowIndex, colIndex)}
+                              className={`border border-gray-300 px-3 py-2 text-sm text-gray-900 cursor-pointer transition-colors select-none ${
                                 isSelected
                                   ? 'bg-indigo-100 ring-2 ring-inset ring-indigo-500'
-                                  : isInSelectedColumn || isInSelectedRow
-                                    ? 'bg-indigo-50'
-                                    : 'hover:bg-gray-100'
+                                  : isInRange
+                                    ? 'bg-blue-200'
+                                    : isInSelectedColumn || isInSelectedRow
+                                      ? 'bg-indigo-50'
+                                      : 'hover:bg-gray-100'
                               }`}
                               style={{ minWidth: '120px', width: '120px' }}
                             >
-                              {row[colIndex] !== null && row[colIndex] !== undefined ? String(row[colIndex]) : ''}
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  value={cellInputValue}
+                                  onChange={(e) => handleCellInputChange(e.target.value)}
+                                  onKeyDown={(e) => handleCellInputKeyDown(e, rowIndex, colIndex)}
+                                  onBlur={() => handleCellInputBlur(rowIndex, colIndex)}
+                                  autoFocus
+                                  className="w-full px-1 py-0 text-sm border-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+                                />
+                              ) : (
+                                getCellValue(rowIndex, colIndex)
+                              )}
                             </td>
                           );
                         })}
