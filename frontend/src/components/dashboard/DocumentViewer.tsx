@@ -54,8 +54,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   const [rangeStart, setRangeStart] = useState<{row: number, col: number} | null>(null);
   const [rangeEnd, setRangeEnd] = useState<{row: number, col: number} | null>(null);
   const [isSelectingRange, setIsSelectingRange] = useState(false);
-  const [excelViewMode, setExcelViewMode] = useState<'data' | 'preview'>('preview'); // 'data' for editable, 'preview' for full Excel
-  const [excelBlobUrl, setExcelBlobUrl] = useState<string | null>(null);
   const [excelArrayBuffer, setExcelArrayBuffer] = useState<ArrayBuffer | null>(null);
   const spreadRef = useRef<GC.Spread.Sheets.Workbook | null>(null);
 
@@ -108,9 +106,8 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     return () => {
       if (pdfBlob) URL.revokeObjectURL(pdfBlob);
       if (imageBlob) URL.revokeObjectURL(imageBlob);
-      if (excelBlobUrl) URL.revokeObjectURL(excelBlobUrl);
     };
-  }, [pdfBlob, imageBlob, excelBlobUrl]);
+  }, [pdfBlob, imageBlob]);
 
 
   const handleDocumentClick = async (doc: DocumentItem) => {
@@ -133,8 +130,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     setRangeStart(null);
     setRangeEnd(null);
     setIsSelectingRange(false);
-    setExcelViewMode('data');
-    setExcelBlobUrl(null);
     setExcelArrayBuffer(null);
 
     try {
@@ -265,8 +260,13 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
             const excelIO = new ExcelIO.IO();
             console.log('ExcelIO instance created');
 
+            // Convert ArrayBuffer to Blob
+            const blob = new Blob([excelArrayBuffer], {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+
             excelIO.open(
-              excelArrayBuffer,
+              blob,
               (json: any) => {
                 console.log('Excel file loaded by ExcelIO');
                 spread.fromJSON(json);
@@ -318,7 +318,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     if (selectedDocument.type === 'excel' && excelSheets.length > 0) {
         const activeSheet = excelSheets[activeSheetIndex];
         const maxCols = activeSheet.data.length > 0
-          ? Math.max(...activeSheet.data.map(row => row.length))
+          ? Math.max(...activeSheet.data.map(r => r.length))
           : 0;
 
       const handleCellClick = (rowIndex: number, colIndex: number) => {
