@@ -210,6 +210,18 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
 
     if (selectedDocument.type === 'excel') {
       console.log('Rendering Excel preview, excelBlob:', excelBlob ? `${excelBlob.size} bytes` : 'null', 'spreadReady:', spreadReady);
+
+      if (!excelBlob) {
+        return (
+          <div className="flex items-center justify-center py-24">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 font-medium">Loading Excel file...</p>
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
           {/* Formula Bar */}
