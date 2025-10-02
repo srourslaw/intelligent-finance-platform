@@ -1,9 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
-import * as GC from '@mescius/spread-sheets';
-import { SpreadSheets, Worksheet } from '@mescius/spread-sheets-react';
-import '@mescius/spread-sheets/styles/gc.spread.sheets.excel2013white.css';
-import * as ExcelIO from '@mescius/spread-excelio';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -37,11 +33,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   // Preview state
   const [pdfBlob, setPdfBlob] = useState<string | null>(null);
   const [imageBlob, setImageBlob] = useState<string | null>(null);
-  const spreadRef = useRef<GC.Spread.Sheets.Workbook | null>(null);
-  const formulaBarRef = useRef<HTMLDivElement>(null);
-  const [excelModified, setExcelModified] = useState(false);
-  const [excelBlob, setExcelBlob] = useState<Blob | null>(null);
-  const [spreadReady, setSpreadReady] = useState(false);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -95,25 +86,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     };
   }, [pdfBlob, imageBlob]);
 
-  // Load Excel file when blob is ready and SpreadJS is initialized
-  useEffect(() => {
-    if (excelBlob && spreadReady && spreadRef.current) {
-      console.log('Loading Excel blob into SpreadJS...');
-      const excelIO = new ExcelIO.IO();
-      excelIO.open(excelBlob, (json: any) => {
-        console.log('Excel loaded successfully, applying to spread');
-        if (spreadRef.current) {
-          spreadRef.current.fromJSON(json);
-          setPreviewLoading(false);
-        }
-      }, (error: any) => {
-        console.error('Excel load error:', error);
-        console.error('Error details:', JSON.stringify(error));
-        setError(`Failed to load Excel file: ${error?.message || 'Unknown error'}`);
-        setPreviewLoading(false);
-      });
-    }
-  }, [excelBlob, spreadReady]);
 
   const handleDocumentClick = async (doc: DocumentItem) => {
     setSelectedDocument(doc);
@@ -121,7 +93,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     setError(null);
     setPdfBlob(null);
     setImageBlob(null);
-    setExcelBlob(null);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
@@ -142,12 +113,6 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const blobUrl = URL.createObjectURL(blob);
         setPdfBlob(blobUrl);
-      } else if (doc.type === 'excel') {
-        // Store blob for SpreadJS to load when initialized
-        const blob = new Blob([arrayBuffer], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
-        setExcelBlob(blob);
       } else if (doc.type === 'image') {
         const blob = new Blob([arrayBuffer]);
         const blobUrl = URL.createObjectURL(blob);
