@@ -209,6 +209,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     }
 
     if (selectedDocument.type === 'excel') {
+      console.log('Rendering Excel preview, excelBlob:', excelBlob ? `${excelBlob.size} bytes` : 'null', 'spreadReady:', spreadReady);
       return (
         <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
           {/* Formula Bar */}
