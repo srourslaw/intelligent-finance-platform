@@ -18,10 +18,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",  # Vite default port
+        "http://localhost:5174",  # Vite alternate port
         "http://localhost:3000",  # Alternative dev port
         "https://intelligent-finance-platform.vercel.app",  # Vercel production
         "https://intelligent-finance-platform-git-main-hussein-srours-projects.vercel.app",  # Vercel preview
-        "https://intelligent-finance-platform-*.vercel.app",  # Vercel previews
+        "https://*.vercel.app",  # All Vercel previews
     ],
     allow_credentials=True,
     allow_methods=["*"],
