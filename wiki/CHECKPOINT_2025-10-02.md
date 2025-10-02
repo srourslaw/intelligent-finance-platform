@@ -12,9 +12,15 @@
 - **Document List API**: Returns all files from `backend/projects/{project-id}/data/`
 - **Download API**: Serves files via FastAPI `FileResponse`
 
-### 📋 What's In Progress
-- **Render Deployment**: Backend ready, needs service creation from Render dashboard
-- **Vercel Environment Variable**: Needs `VITE_API_URL` set to Render backend URL once deployed
+### 📋 Current State - October 2, 2025
+- **Local Environment**: ✅ FULLY WORKING (backend on 8000, frontend on 5174)
+- **Production Frontend**: ✅ Deployed on Vercel
+- **Production Backend**: ❌ NOT DEPLOYED - blocking all production functionality
+- **Document Viewer Features**: ✅ ALL IMPLEMENTED
+  - PDF preview with iframe
+  - Excel viewer with SpreadJS (formula bar, sheet tabs, save functionality)
+  - Image preview working
+  - Download functionality working
 
 ### 🎯 What's Next (Priority Order)
 1. **Deploy Backend to Render**:
@@ -82,7 +88,22 @@ const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 - Detects file types (pdf, excel, image, other)
 - Returns metadata (filename, path, type, size, modified, folder)
 
-### 🔴 Why Production Isn't Working Yet
+### 🔴 Production Blocker - Backend Not Deployed
+
+**Symptoms**:
+- Vercel production site loads
+- When clicking on Excel file in Document Viewer, page goes blank
+- Console errors:
+  ```
+  TypeError: undefined is not an object (evaluating 'qe.Ut.do')
+  TypeError: undefined is not an object (evaluating 'this.sheet.name')
+  ```
+
+**Root Cause**:
+1. Backend NOT deployed to Render (service doesn't exist)
+2. Frontend fetch to backend returns 404
+3. SpreadJS component receives undefined data
+4. SpreadJS crashes trying to access properties on undefined
 
 **Current State**:
 - ✅ Frontend: Deployed on Vercel (https://intelligent-finance-platform.vercel.app)
@@ -90,29 +111,53 @@ const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 - ❌ Backend: NOT deployed to Render (service doesn't exist)
 - ❌ Environment Variable: VITE_API_URL not set in Vercel
 
-**What Happens Now**:
-1. User visits Vercel frontend
-2. Frontend tries to call `http://localhost:8000/api` (default fallback)
-3. Request fails (localhost doesn't exist in production)
-4. Document viewer shows error: "Failed to load documents"
-
 **After Render Deployment**:
 1. Backend running at: `https://intelligent-finance-platform-backend.onrender.com`
 2. Vercel env var set: `VITE_API_URL=https://intelligent-finance-platform-backend.onrender.com/api`
-3. Frontend calls Render backend
-4. Documents load correctly ✅
+3. Frontend calls Render backend successfully
+4. Documents load and preview correctly ✅
 
-### 📊 Session Stats
-- **Duration**: ~1.5 hours
-- **Commits**: 2 (055ad30, fc58d4a)
-- **Files Changed**: 3
-- **Lines Added**: ~100
+**Attempted Fix** (Reverted):
+- Tried adding error handling and conditional rendering for formula bar
+- Hit JSX syntax error during implementation
+- Reverted to working commit (194fccd)
+
+### 📊 Complete Session Stats
+- **Duration**: ~3 hours total
+- **Major Features Implemented**:
+  - SpreadJS Excel viewer with full spreadsheet interface
+  - Formula bar with FormulaTextBox component
+  - Sheet tab navigation for multi-sheet Excel files
+  - Column headers (A, B, C...) and row numbers
+  - Cell change tracking
+  - Save & Download modified Excel files
+  - Image preview with Authorization header
+  - PDF preview with iframe
+
+- **Commits**: 5 total
+  - 194fccd - Proper PDF and Excel preview implementation
+  - 0a8213f - Show download button for Excel, iframe for PDF only
+  - addb908 - Use Office Online viewer for Excel files
+  - ab09fec - Remove unused state setters
+  - 18190fe - Simplify to iframe-based viewer for both PDF and Excel
+
+- **Files Modified**:
+  - frontend/src/components/dashboard/DocumentViewer.tsx (major rewrite)
+  - backend/app/main.py (CORS updates)
+
+- **Dependencies Added**:
+  - @mescius/spread-sheets@18.2.3
+  - @mescius/spread-sheets-react@18.2.3
+  - @mescius/spread-excelio@18.2.3
+
 - **Issues Fixed**:
+  - TypeScript type error (ArrayBuffer → Blob for ExcelIO)
+  - Image preview not displaying (added Authorization header + blob URL)
+  - Formula bar missing (implemented FormulaTextBox component)
+  - Excel showing only first sheet (enabled tabStripVisible)
+  - Missing column headers and row numbers (SpreadJS built-in)
   - CORS for localhost:5174
   - Vercel wildcard domain pattern
-- **Documentation Created**:
-  - RENDER_DEPLOYMENT_INSTRUCTIONS.md
-  - Updated DEPLOYMENT_STATUS.md
 
 ### 🚀 How to Resume Next Session
 1. Check if backend is deployed: `curl https://intelligent-finance-platform-backend.onrender.com/api/health`
