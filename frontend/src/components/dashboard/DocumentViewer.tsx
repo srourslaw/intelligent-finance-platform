@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FileText, Download, FolderOpen, File, Image, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { getDocumentList, getDocumentDownloadUrl } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -33,6 +34,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
   // Preview state
   const [pdfBlob, setPdfBlob] = useState<string | null>(null);
   const [imageBlob, setImageBlob] = useState<string | null>(null);
+  const [excelData, setExcelData] = useState<any[][]>([]);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -93,6 +95,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
     setError(null);
     setPdfBlob(null);
     setImageBlob(null);
+    setExcelData([]);
 
     try {
       const url = getDocumentDownloadUrl(projectId, doc.path);
@@ -113,6 +116,11 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const blobUrl = URL.createObjectURL(blob);
         setPdfBlob(blobUrl);
+      } else if (doc.type === 'excel') {
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        setExcelData(jsonData as any[][]);
       } else if (doc.type === 'image') {
         const blob = new Blob([arrayBuffer]);
         const blobUrl = URL.createObjectURL(blob);
@@ -173,18 +181,32 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
       );
     }
 
-    if (selectedDocument.type === 'excel') {
-      const downloadUrl = getDocumentDownloadUrl(projectId, selectedDocument.path);
-      const viewUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(downloadUrl)}&embedded=true`;
-
+    if (selectedDocument.type === 'excel' && excelData.length > 0) {
       return (
         <div className="border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white">
-          <iframe
-            src={viewUrl}
-            className="w-full"
-            style={{ height: '700px' }}
-            title={selectedDocument.filename}
-          />
+          <div className="border-b border-gray-300 bg-gray-50 p-2">
+            <span className="text-sm font-medium text-gray-700">Excel Preview (First Sheet Only)</span>
+          </div>
+          <div className="overflow-auto" style={{ maxHeight: '700px' }}>
+            <table className="min-w-full divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-200">
+                {excelData.map((row, rowIndex) => (
+                  <tr key={rowIndex} className={rowIndex === 0 ? 'bg-gray-50' : ''}>
+                    {row.map((cell, cellIndex) => (
+                      <td
+                        key={cellIndex}
+                        className={`px-4 py-2 whitespace-nowrap text-sm ${
+                          rowIndex === 0 ? 'font-semibold text-gray-900' : 'text-gray-700'
+                        } border-r border-gray-200`}
+                      >
+                        {cell !== null && cell !== undefined ? String(cell) : ''}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       );
     }
