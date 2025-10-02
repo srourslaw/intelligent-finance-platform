@@ -688,7 +688,7 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
                     </tr>
                   </thead>
                   <tbody className="bg-white">
-                    {activeSheet.data.map((row, rowIndex) => (
+                    {activeSheet.data.map((_row, rowIndex) => (
                       <tr key={rowIndex}>
                         {/* Row number */}
                         <td
