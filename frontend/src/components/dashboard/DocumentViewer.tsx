@@ -199,14 +199,28 @@ export function DocumentViewer({ projectId }: DocumentViewerProps) {
           <SpreadSheets
             workbookInitialized={(spread: GC.Spread.Sheets.Workbook) => {
               spreadRef.current = spread;
-              // Configure SpreadJS options
+
+              // Configure SpreadJS options for full Excel-like experience
               spread.options.allowUserZoom = true;
               spread.options.scrollbarMaxAlign = true;
+              spread.options.scrollbarShowMax = true;
+
+              // Show sheet tabs at bottom
               spread.options.tabStripVisible = true;
               spread.options.newTabVisible = false;
               spread.options.tabEditable = false;
+              spread.options.tabStripRatio = 0.08;  // Tab strip height
+
+              // Show formula bar at top
+              spread.options.showFormulaBar = true;
+
+              // Additional Excel-like features
+              spread.options.allowUserResize = true;
+              spread.options.allowCopyPasteExcelStyle = true;
+              spread.options.showVerticalScrollbar = true;
+              spread.options.showHorizontalScrollbar = true;
             }}
-            hostStyle={{ height: '700px', width: '100%' }}
+            hostStyle={{ height: '750px', width: '100%' }}
           >
             <Worksheet />
           </SpreadSheets>
