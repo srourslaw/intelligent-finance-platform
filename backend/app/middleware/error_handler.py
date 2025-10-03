@@ -11,20 +11,33 @@ Provides:
 import time
 import traceback
 import logging
+import os
+from pathlib import Path
 from datetime import datetime
 from typing import Callable
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
+# Create logs directory if it doesn't exist
+LOGS_DIR = Path('logs')
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
 # Configure logging
+handlers = [logging.StreamHandler()]
+
+# Only add file handler if we can write to disk
+try:
+    log_file = LOGS_DIR / 'app.log'
+    handlers.append(logging.FileHandler(log_file))
+except (OSError, PermissionError) as e:
+    # On ephemeral filesystems (like Render), log to stdout only
+    print(f"Warning: Could not create log file: {e}. Logging to stdout only.")
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/app.log'),
-        logging.StreamHandler()
-    ]
+    handlers=handlers
 )
 
 logger = logging.getLogger(__name__)
@@ -144,10 +157,6 @@ def setup_error_handling(app):
         from app.middleware.error_handler import setup_error_handling
         setup_error_handling(app)
     """
-
-    # Ensure logs directory exists
-    import os
-    os.makedirs('logs', exist_ok=True)
 
     # Add middlewares (order matters - first added = last executed)
     app.add_middleware(PerformanceMonitoringMiddleware)
