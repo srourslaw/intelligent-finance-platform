@@ -6,6 +6,7 @@ import {
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
 import { FinancialStatements } from '../components/dashboard/FinancialStatements';
+import { FileExtraction } from '../components/dashboard/FileExtraction';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -507,6 +508,9 @@ export function Dashboard() {
 
         {/* AI-Consolidated Financial Statements */}
         <FinancialStatements projectId={selectedProjectId} />
+
+        {/* File Extraction & AI Classification */}
+        <FileExtraction />
       </main>
     </div>
   );
