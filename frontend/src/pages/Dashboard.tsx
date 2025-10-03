@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-  DollarSign, TrendingDown, TrendingUp, AlertTriangle, Calendar, CheckCircle2, LogOut, ArrowLeft,
-  Activity, Target, Clock, Briefcase, PieChart as PieChartIcon, BarChart3, Users, FileText
+  DollarSign, TrendingDown, TrendingUp, AlertTriangle, LogOut, ArrowLeft,
+  Activity, Target, Clock, Briefcase, PieChart as PieChartIcon, BarChart3, FileText
 } from 'lucide-react';
-import { KPICard } from '../components/dashboard/KPICard';
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
 import { FinancialStatements } from '../components/dashboard/FinancialStatements';
@@ -12,11 +11,9 @@ import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, PolarGrid,
+  PieChart, Pie, Cell, RadarChart, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
-
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
 
 export function Dashboard() {
   const { token, logout, user } = useAuth();
@@ -417,7 +414,7 @@ export function Dashboard() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={(entry) => `${entry.name}: ${formatCurrency(entry.value)}`}
+                  label={(entry) => `${entry.name}: ${formatCurrency(entry.value as number)}`}
                   outerRadius={120}
                   fill="#8884d8"
                   dataKey="value"

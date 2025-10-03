@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend, ComposedChart, Area } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend, ComposedChart, Line } from 'recharts';
 import { getBudgetData } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
-import { TrendingUp, TrendingDown, DollarSign, AlertTriangle, Target, Zap, Shield, TrendingUpIcon, Activity, Eye } from 'lucide-react';
+import { DollarSign, AlertTriangle, Target, Zap, Shield, TrendingUpIcon, Activity, Eye } from 'lucide-react';
 
 interface BudgetCategory {
   category: string;
@@ -98,15 +98,11 @@ export function BudgetTreemap({ projectId }: BudgetTreemapProps) {
   const budgetUtilization = (totalActual / totalBudget) * 100;
   const forecastOverrun = totalForecast - totalBudget;
   const costPerformanceIndex = totalBudget / totalForecast; // CPI
-  const schedulePerformanceIndex = 0.87; // Mock - you can calculate from actual project data
 
   // Risk categories
   const highRiskCategories = categories.filter(c => c.variance < -5000 || c.percentComplete > 110);
   const mediumRiskCategories = categories.filter(c => (c.variance < -1000 && c.variance >= -5000) || (c.percentComplete > 100 && c.percentComplete <= 110));
   const lowRiskCategories = categories.filter(c => c.variance >= -1000 && c.percentComplete <= 100);
-
-  // Budget burn rate
-  const avgBurnRate = totalActual / Math.max(...categories.map(c => c.percentComplete / 100));
 
   // Top spending categories
   const topSpending = [...categories].sort((a, b) => b.actual - a.actual).slice(0, 3);

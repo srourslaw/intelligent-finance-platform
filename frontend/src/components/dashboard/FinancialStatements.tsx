@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area
+  PieChart, Pie, Cell, Legend
 } from 'recharts';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
@@ -283,7 +283,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ projectId }) 
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={(entry) => `${entry.name}: ${formatPercent((entry.value / totals.total_assets) * 100)}`}
+                      label={(entry) => `${entry.name}: ${formatPercent(((entry.value as number) / totals.total_assets) * 100)}`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -395,7 +395,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ projectId }) 
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={(entry) => `${entry.name.split(' ')[0]}: ${formatPercent((entry.value / totals.total_assets) * 100)}`}
+                      label={(entry) => `${(entry.name || '').split(' ')[0]}: ${formatPercent(((entry.value as number) / totals.total_assets) * 100)}`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -836,7 +836,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ projectId }) 
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={(entry) => `${entry.name}: ${formatCurrency(entry.value)}`}
+                  label={(entry) => `${entry.name}: ${formatCurrency(entry.value as number)}`}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
