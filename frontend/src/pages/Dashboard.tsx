@@ -11,6 +11,8 @@ import { AggregatedFinancials } from '../components/dashboard/AggregatedFinancia
 import { TransactionEditor } from '../components/dashboard/TransactionEditor';
 import { ConflictResolution } from '../components/dashboard/ConflictResolution';
 import { BatchJobs } from '../components/dashboard/BatchJobs';
+import { EmailIntegration } from '../components/dashboard/EmailIntegration';
+import { CloudWebhooks } from '../components/dashboard/CloudWebhooks';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -524,6 +526,12 @@ export function Dashboard() {
 
         {/* Batch Jobs & Scheduling */}
         <BatchJobs />
+
+        {/* Email Integration */}
+        <EmailIntegration />
+
+        {/* Cloud Storage Webhooks */}
+        <CloudWebhooks />
 
         {/* Aggregated Financial Data from Multiple Files */}
         <AggregatedFinancials />
