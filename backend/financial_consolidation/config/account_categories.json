@@ -1,0 +1,358 @@
+{
+  "current_assets": {
+    "cash_and_equivalents": {
+      "keywords": ["cash", "bank", "petty cash", "cash on hand", "cash in bank", "savings", "operating account", "payroll account"],
+      "exclude": ["cash flow", "cash basis"],
+      "gl_codes": ["1100", "1110", "1120", "1130"],
+      "template_line": "Cash and Cash Equivalents"
+    },
+    "short_term_investments": {
+      "keywords": ["short term investment", "marketable securities", "treasury bill", "money market", "commercial paper"],
+      "gl_codes": ["1150", "1160"],
+      "template_line": "Short-term Investments"
+    },
+    "accounts_receivable": {
+      "keywords": ["receivable", "debtors", "accounts receivable", "AR", "trade receivable", "notes receivable"],
+      "exclude": ["accounts payable"],
+      "gl_codes": ["1200", "1210", "1220"],
+      "template_line": "Accounts Receivable"
+    },
+    "allowance_doubtful": {
+      "keywords": ["allowance", "doubtful", "bad debt allowance", "provision for doubtful"],
+      "gl_codes": ["1290"],
+      "template_line": "Allowance for Doubtful Accounts",
+      "contra": true
+    },
+    "inventory": {
+      "keywords": ["inventory", "stock", "raw materials", "WIP", "work in progress", "finished goods", "merchandise"],
+      "gl_codes": ["1300", "1310", "1320", "1330"],
+      "template_line": "Inventory"
+    },
+    "prepaid_expenses": {
+      "keywords": ["prepaid", "prepayment", "prepaid rent", "prepaid insurance", "prepaid rates", "prepaid expense"],
+      "gl_codes": ["1400", "1410", "1420", "1430"],
+      "template_line": "Prepaid Expenses"
+    },
+    "other_current_assets": {
+      "keywords": ["other current", "current asset", "deposit", "advance"],
+      "gl_codes": ["1490"],
+      "template_line": "Other Current Assets"
+    }
+  },
+  "non_current_assets": {
+    "land": {
+      "keywords": ["land", "property - land"],
+      "gl_codes": ["1500", "1510"],
+      "template_line": "Land"
+    },
+    "buildings": {
+      "keywords": ["building", "property - building", "structure"],
+      "gl_codes": ["1520", "1530"],
+      "template_line": "Buildings"
+    },
+    "leasehold_improvements": {
+      "keywords": ["leasehold", "fit out", "fitout", "tenant improvement"],
+      "gl_codes": ["1540"],
+      "template_line": "Leasehold Improvements"
+    },
+    "machinery_equipment": {
+      "keywords": ["machinery", "equipment", "plant", "production equipment", "manufacturing equipment"],
+      "gl_codes": ["1550", "1560"],
+      "template_line": "Machinery and Equipment"
+    },
+    "vehicles": {
+      "keywords": ["vehicle", "motor vehicle", "car", "truck", "delivery vehicle", "forklift"],
+      "gl_codes": ["1570"],
+      "template_line": "Motor Vehicles"
+    },
+    "furniture_fixtures": {
+      "keywords": ["furniture", "fixture", "office furniture", "desk", "chair"],
+      "gl_codes": ["1580"],
+      "template_line": "Furniture and Fixtures"
+    },
+    "computer_equipment": {
+      "keywords": ["computer", "laptop", "desktop", "server", "IT equipment", "hardware"],
+      "gl_codes": ["1590"],
+      "template_line": "Computer Equipment"
+    },
+    "accumulated_depreciation": {
+      "keywords": ["accumulated depreciation", "depreciation - accumulated"],
+      "gl_codes": ["1599", "1595"],
+      "template_line": "Accumulated Depreciation",
+      "contra": true
+    },
+    "intangible_assets": {
+      "keywords": ["intangible", "goodwill", "patent", "trademark", "copyright", "software", "license"],
+      "gl_codes": ["1600", "1610", "1620"],
+      "template_line": "Intangible Assets"
+    },
+    "long_term_investments": {
+      "keywords": ["long term investment", "investment property", "investment in subsidiary"],
+      "gl_codes": ["1700"],
+      "template_line": "Long-term Investments"
+    }
+  },
+  "current_liabilities": {
+    "bank_overdraft": {
+      "keywords": ["bank overdraft", "overdraft"],
+      "gl_codes": ["2050"],
+      "template_line": "Bank Overdraft"
+    },
+    "accounts_payable": {
+      "keywords": ["payable", "creditors", "accounts payable", "AP", "trade payable"],
+      "exclude": ["accounts receivable"],
+      "gl_codes": ["2100", "2110"],
+      "template_line": "Accounts Payable"
+    },
+    "credit_card": {
+      "keywords": ["credit card", "corporate card"],
+      "gl_codes": ["2120"],
+      "template_line": "Credit Card Debt"
+    },
+    "gst_payable": {
+      "keywords": ["GST", "VAT", "sales tax", "GST collected", "GST payable", "tax collected"],
+      "gl_codes": ["2200", "2210"],
+      "template_line": "GST/VAT Payable"
+    },
+    "income_tax_payable": {
+      "keywords": ["income tax payable", "tax payable", "corporate tax"],
+      "gl_codes": ["2220"],
+      "template_line": "Income Tax Payable"
+    },
+    "payg_withholding": {
+      "keywords": ["PAYG", "withholding", "employee tax"],
+      "gl_codes": ["2230"],
+      "template_line": "PAYG Withholding"
+    },
+    "superannuation_payable": {
+      "keywords": ["superannuation", "super", "retirement", "pension payable"],
+      "gl_codes": ["2240"],
+      "template_line": "Superannuation Payable"
+    },
+    "workcover_payable": {
+      "keywords": ["workcover", "workers compensation", "workers comp"],
+      "gl_codes": ["2250"],
+      "template_line": "Workcover Payable"
+    },
+    "accrued_expenses": {
+      "keywords": ["accrued", "accrual", "accrued expense", "accrued salary", "accrued wage"],
+      "gl_codes": ["2300", "2310", "2320"],
+      "template_line": "Accrued Expenses"
+    },
+    "unearned_revenue": {
+      "keywords": ["unearned revenue", "deferred revenue", "customer deposit", "prepayment received"],
+      "gl_codes": ["2400"],
+      "template_line": "Unearned Revenue"
+    },
+    "current_portion_debt": {
+      "keywords": ["current portion", "current debt", "short term loan"],
+      "gl_codes": ["2500"],
+      "template_line": "Current Portion of Long-term Debt"
+    }
+  },
+  "long_term_liabilities": {
+    "mortgage_payable": {
+      "keywords": ["mortgage", "property loan"],
+      "gl_codes": ["2600"],
+      "template_line": "Mortgage Payable"
+    },
+    "equipment_finance": {
+      "keywords": ["equipment finance", "equipment lease", "equipment loan"],
+      "gl_codes": ["2610"],
+      "template_line": "Equipment Finance"
+    },
+    "vehicle_loans": {
+      "keywords": ["vehicle loan", "car loan", "motor vehicle finance"],
+      "gl_codes": ["2620"],
+      "template_line": "Motor Vehicle Loans"
+    },
+    "long_term_loans": {
+      "keywords": ["long term loan", "term loan", "bank loan"],
+      "gl_codes": ["2650"],
+      "template_line": "Long-term Bank Loans"
+    },
+    "lease_liabilities": {
+      "keywords": ["lease liability", "lease obligation", "right of use"],
+      "gl_codes": ["2700"],
+      "template_line": "Lease Liabilities"
+    }
+  },
+  "equity": {
+    "share_capital": {
+      "keywords": ["share capital", "common stock", "ordinary shares", "issued capital"],
+      "gl_codes": ["3100"],
+      "template_line": "Share Capital"
+    },
+    "retained_earnings": {
+      "keywords": ["retained earnings", "accumulated profit", "retained profit"],
+      "gl_codes": ["3200"],
+      "template_line": "Retained Earnings"
+    },
+    "current_year_profit": {
+      "keywords": ["current year", "current profit", "net income"],
+      "gl_codes": ["3300"],
+      "template_line": "Current Year Profit"
+    },
+    "reserves": {
+      "keywords": ["reserve", "revaluation reserve", "general reserve"],
+      "gl_codes": ["3400"],
+      "template_line": "Reserves"
+    },
+    "owners_equity": {
+      "keywords": ["owner equity", "proprietor", "capital contribution"],
+      "gl_codes": ["3500"],
+      "template_line": "Owner's Equity"
+    }
+  },
+  "revenue": {
+    "sales_revenue": {
+      "keywords": ["sales", "revenue", "income", "turnover", "construction revenue", "service revenue", "product sales"],
+      "exclude": ["interest income", "dividend income", "other income"],
+      "gl_codes": ["4100", "4110", "4120"],
+      "template_line": "Sales Revenue"
+    },
+    "variation_orders": {
+      "keywords": ["variation", "variation order", "change order", "extra work"],
+      "gl_codes": ["4150"],
+      "template_line": "Variation Orders"
+    },
+    "sales_returns": {
+      "keywords": ["sales return", "refund", "return"],
+      "gl_codes": ["4900"],
+      "template_line": "Sales Returns",
+      "contra": true
+    },
+    "sales_discounts": {
+      "keywords": ["sales discount", "discount given"],
+      "gl_codes": ["4910"],
+      "template_line": "Sales Discounts",
+      "contra": true
+    }
+  },
+  "cost_of_goods_sold": {
+    "materials": {
+      "keywords": ["materials", "raw materials", "supplies", "concrete", "timber", "steel", "building materials"],
+      "gl_codes": ["5100", "5110"],
+      "template_line": "Materials - COGS"
+    },
+    "direct_labor": {
+      "keywords": ["direct labor", "labour", "production wage", "manufacturing labor"],
+      "gl_codes": ["5200"],
+      "template_line": "Direct Labor - COGS"
+    },
+    "subcontractors": {
+      "keywords": ["subcontractor", "sub-contractor", "trade contractor"],
+      "gl_codes": ["5300"],
+      "template_line": "Subcontractors - COGS"
+    },
+    "manufacturing_overhead": {
+      "keywords": ["manufacturing overhead", "factory overhead", "production overhead"],
+      "gl_codes": ["5400"],
+      "template_line": "Manufacturing Overhead"
+    }
+  },
+  "operating_expenses": {
+    "salaries_wages": {
+      "keywords": ["salary", "wage", "payroll", "staff cost", "employee cost"],
+      "exclude": ["direct labor", "production wage"],
+      "gl_codes": ["6100", "6110"],
+      "template_line": "Salaries and Wages"
+    },
+    "employee_benefits": {
+      "keywords": ["employee benefit", "super", "superannuation", "pension", "health insurance", "benefit"],
+      "gl_codes": ["6120"],
+      "template_line": "Employee Benefits"
+    },
+    "rent_expense": {
+      "keywords": ["rent", "lease expense", "rental"],
+      "exclude": ["prepaid rent", "rental income"],
+      "gl_codes": ["6200"],
+      "template_line": "Rent Expense"
+    },
+    "utilities": {
+      "keywords": ["utilities", "electricity", "gas", "water", "power"],
+      "gl_codes": ["6210"],
+      "template_line": "Utilities"
+    },
+    "insurance": {
+      "keywords": ["insurance", "insurance premium", "liability insurance", "property insurance"],
+      "exclude": ["prepaid insurance"],
+      "gl_codes": ["6300"],
+      "template_line": "Insurance"
+    },
+    "marketing": {
+      "keywords": ["marketing", "advertising", "promotion", "marketing expense"],
+      "gl_codes": ["6400"],
+      "template_line": "Marketing and Advertising"
+    },
+    "professional_fees": {
+      "keywords": ["professional fees", "accounting", "legal", "consulting", "audit", "tax preparation"],
+      "gl_codes": ["6500"],
+      "template_line": "Professional Fees"
+    },
+    "office_supplies": {
+      "keywords": ["office supplies", "stationery", "supplies"],
+      "gl_codes": ["6600"],
+      "template_line": "Office Supplies"
+    },
+    "depreciation": {
+      "keywords": ["depreciation", "depreciation expense"],
+      "gl_codes": ["6700"],
+      "template_line": "Depreciation"
+    },
+    "amortization": {
+      "keywords": ["amortization", "amortisation"],
+      "gl_codes": ["6710"],
+      "template_line": "Amortization"
+    },
+    "repairs_maintenance": {
+      "keywords": ["repairs", "maintenance", "repair and maintenance", "R&M"],
+      "gl_codes": ["6800"],
+      "template_line": "Repairs and Maintenance"
+    },
+    "bank_charges": {
+      "keywords": ["bank charge", "bank fee", "transaction fee", "account fee"],
+      "gl_codes": ["6900"],
+      "template_line": "Bank Charges"
+    },
+    "permits_approvals": {
+      "keywords": ["permit", "approval", "license", "council fee", "DA", "development application"],
+      "gl_codes": ["6250"],
+      "template_line": "Permits and Approvals"
+    },
+    "design_fees": {
+      "keywords": ["design", "architect", "engineering", "drafting", "design fee"],
+      "gl_codes": ["6260"],
+      "template_line": "Design and Engineering Fees"
+    }
+  },
+  "other_income": {
+    "interest_income": {
+      "keywords": ["interest income", "interest received", "interest revenue"],
+      "gl_codes": ["7100"],
+      "template_line": "Interest Income"
+    },
+    "dividend_income": {
+      "keywords": ["dividend", "dividend income"],
+      "gl_codes": ["7110"],
+      "template_line": "Dividend Income"
+    },
+    "gain_on_sale": {
+      "keywords": ["gain on sale", "profit on sale", "disposal gain"],
+      "gl_codes": ["7200"],
+      "template_line": "Gain on Sale of Assets"
+    }
+  },
+  "other_expenses": {
+    "interest_expense": {
+      "keywords": ["interest expense", "interest paid", "interest cost", "finance charge"],
+      "gl_codes": ["8100"],
+      "template_line": "Interest Expense"
+    },
+    "loss_on_sale": {
+      "keywords": ["loss on sale", "disposal loss", "asset write-off"],
+      "gl_codes": ["8200"],
+      "template_line": "Loss on Sale of Assets"
+    }
+  }
+}
