@@ -1,0 +1,65 @@
+{
+  "consolidated_data": {
+    "current_assets": {
+      "Accounts Receivable": 751421.0,
+      "Other Current Assets": 152554.0
+    },
+    "non_current_assets": {
+      "Land": 3071610.0,
+      "Leasehold Improvements": 280300.0,
+      "Furniture and Fixtures": 12000.0,
+      "Buildings": 138800.0
+    },
+    "current_liabilities": {
+      "Accounts Payable": 187083.0,
+      "GST/VAT Payable": 119058.0,
+      "Superannuation Payable": 32000.0
+    },
+    "long_term_liabilities": {},
+    "equity": {},
+    "revenue": {
+      "Sales Revenue": 400000.0,
+      "Variation Orders": 99600.0
+    },
+    "cost_of_goods_sold": {
+      "Materials - COGS": 1165754.0,
+      "Direct Labor - COGS": 65800.0,
+      "Subcontractors - COGS": 175000.0
+    },
+    "operating_expenses": {
+      "Design and Engineering Fees": 116700.0,
+      "Permits and Approvals": 378800.0,
+      "Professional Fees": 45700.0,
+      "Insurance": 3850.0,
+      "Utilities": 235004.0
+    },
+    "other_income": {},
+    "other_expenses": {
+      "Interest Expense": 9445.0
+    }
+  },
+  "totals": {
+    "current_assets": 903975.0,
+    "non_current_assets": 3502710.0,
+    "current_liabilities": 338141.0,
+    "long_term_liabilities": 0,
+    "equity": 0,
+    "revenue": 499600.0,
+    "cost_of_goods_sold": 1406554.0,
+    "operating_expenses": 780054.0,
+    "other_income": 0,
+    "other_expenses": 9445.0,
+    "total_assets": 4406685.0,
+    "total_liabilities": 338141.0,
+    "total_equity": 0,
+    "total_revenue": 499600.0,
+    "total_cogs": 1406554.0,
+    "total_operating_expenses": 780054.0,
+    "total_other_income": 0,
+    "total_other_expenses": 9445.0,
+    "gross_profit": -906954.0,
+    "operating_income": -1687008.0,
+    "net_income": -1696453.0,
+    "balance_check": 4068544.0
+  }
+}
