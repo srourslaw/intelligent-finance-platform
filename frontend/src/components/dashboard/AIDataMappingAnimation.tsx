@@ -25,6 +25,7 @@ interface Particle {
   layer: number;
   color: string;
   size: number;
+  matrixCell?: number; // Track which matrix cell to light up
 }
 
 interface Neuron {
@@ -561,15 +562,16 @@ export function AIDataMappingAnimation() {
 
   // Neural network layers configuration (4 layers + matrix in center)
   const layerConfig = [
-    { name: 'Input\nLayer', neurons: 10, color: '#3B82F6' },
-    { name: 'Processing\nLayer', neurons: 10, color: '#EF4444' },
-    { name: 'Output\nLayer', neurons: 10, color: '#10B981' },
-    { name: 'Mapping\nLayer', neurons: 10, color: '#10B981' },
+    { name: 'INPUT LAYER', neurons: 12, color: '#3B82F6' }, // Blue-500
+    { name: 'PROCESSING LAYER', neurons: 12, color: '#EF4444' }, // Red-500
+    { name: 'OUTPUT LAYER', neurons: 12, color: '#8B5CF6' }, // Violet-500
+    { name: 'MAPPING LAYER', neurons: 12, color: '#10B981' }, // Emerald-500
   ];
 
   const matrixSize = 10; // 10x10 attention matrix
   const [matrixCells, setMatrixCells] = useState<Set<number>>(new Set());
   const outputHubRef = useRef<{ x: number; y: number; activation: number }>({ x: 0, y: 0, activation: 0 });
+  const matrixAnimationRef = useRef<Set<number>>(new Set());
 
   const initializeNeurons = (width: number, height: number) => {
     const layers: Neuron[][] = [];
@@ -600,7 +602,7 @@ export function AIDataMappingAnimation() {
           y: startY + (i + 1) * neuronSpacing,
           activation: 0,
           targetActivation: 0,
-          radius: 6,
+          radius: 6, // Smaller cleaner neurons
         });
       }
       layers.push(neurons);
@@ -688,7 +690,7 @@ export function AIDataMappingAnimation() {
             targetX: neuron.x,
             targetY: neuron.y,
             progress: 0,
-            speed: 0.05 + Math.random() * 0.02, // Much faster speed
+            speed: 0.025, // Fast continuous speed (matching HTML)
             layer: 0,
             color: fileColor,
             size: 3 + Math.random() * 1.5,
@@ -710,7 +712,7 @@ export function AIDataMappingAnimation() {
           targetX: toNeuron.x,
           targetY: toNeuron.y,
           progress: 0,
-          speed: 0.06 + Math.random() * 0.02,
+          speed: 0.025, // Fast continuous speed
           layer: 1,
           color: '#EF4444',
           size: 3 + Math.random() * 1,
@@ -725,7 +727,7 @@ export function AIDataMappingAnimation() {
       // Calculate matrix position
       const matrixCenterX = (layer2[0].x + layer3[0].x) / 2;
       const matrixCenterY = height / 2;
-      const cellSize = 18;
+      const cellSize = 20; // Match HTML example (20px)
       const gap = 3;
       const totalSize = matrixSize * (cellSize + gap) - gap;
       const matrixStartX = matrixCenterX - totalSize / 2;
@@ -757,7 +759,7 @@ export function AIDataMappingAnimation() {
           targetX: cellX,
           targetY: cellY,
           progress: 0,
-          speed: 0.06 + Math.random() * 0.02,
+          speed: 0.025, // Fast continuous speed
           layer: 2,
           color: '#A78BFA',
           size: 3 + Math.random() * 1,
@@ -778,7 +780,7 @@ export function AIDataMappingAnimation() {
           targetX: toNeuron.x,
           targetY: toNeuron.y,
           progress: 0,
-          speed: 0.06 + Math.random() * 0.02,
+          speed: 0.025, // Fast continuous speed
           layer: 3,
           color: '#8B5CF6',
           size: 3 + Math.random() * 1,
@@ -799,7 +801,7 @@ export function AIDataMappingAnimation() {
           targetX: toNeuron.x,
           targetY: toNeuron.y,
           progress: 0,
-          speed: 0.06 + Math.random() * 0.02,
+          speed: 0.025, // Fast continuous speed
           layer: 4,
           color: '#10B981',
           size: 3 + Math.random() * 1,
@@ -818,7 +820,7 @@ export function AIDataMappingAnimation() {
           targetX: hub.x,
           targetY: hub.y,
           progress: 0,
-          speed: 0.06 + Math.random() * 0.02,
+          speed: 0.025, // Fast continuous speed
           layer: 5,
           color: '#10B981',
           size: 3 + Math.random() * 1,
@@ -839,7 +841,7 @@ export function AIDataMappingAnimation() {
             targetX: targetX,
             targetY: targetY,
             progress: 0,
-            speed: 0.05 + Math.random() * 0.02,
+            speed: 0.025, // Fast continuous speed
             layer: 6,
             color: output.color,
             size: 3 + Math.random() * 1.5,
@@ -972,11 +974,22 @@ export function AIDataMappingAnimation() {
     const matrixCenterX = (layer2[0].x + neuronsRef.current[2][0].x) / 2;
     const matrixCenterY = height / 2;
 
-    const cellSize = 18;
+    const cellSize = 20; // Match HTML example (20px)
     const gap = 3;
     const totalSize = matrixSize * (cellSize + gap) - gap;
     const startX = matrixCenterX - totalSize / 2;
     const startY = matrixCenterY - totalSize / 2;
+
+    // VERY FAST random pulsing - cells turn on and off quickly
+    if (Math.random() < 0.3) { // 30% chance each frame for rapid flashing
+      const randomCell = Math.floor(Math.random() * (matrixSize * matrixSize));
+      const currentAnimating = matrixAnimationRef.current;
+      if (currentAnimating.has(randomCell)) {
+        currentAnimating.delete(randomCell); // Turn OFF
+      } else {
+        currentAnimating.add(randomCell); // Turn ON
+      }
+    }
 
     for (let row = 0; row < matrixSize; row++) {
       for (let col = 0; col < matrixSize; col++) {
@@ -984,19 +997,20 @@ export function AIDataMappingAnimation() {
         const x = startX + col * (cellSize + gap);
         const y = startY + row * (cellSize + gap);
 
-        const isActive = matrixCells.has(cellIdx);
+        // Cell is active if it's in the permanent set OR animating set
+        const isActive = matrixCells.has(cellIdx) || matrixAnimationRef.current.has(cellIdx);
 
         if (isActive) {
-          // Active cell with gradient
+          // Active cell with violet gradient (Violet-400 to Violet-500)
           const gradient = ctx.createLinearGradient(x, y, x + cellSize, y + cellSize);
-          gradient.addColorStop(0, '#A78BFA');
-          gradient.addColorStop(1, '#8B5CF6');
+          gradient.addColorStop(0, '#A78BFA'); // Violet-400
+          gradient.addColorStop(1, '#8B5CF6'); // Violet-500
           ctx.fillStyle = gradient;
-          ctx.shadowBlur = 12;
-          ctx.shadowColor = '#8B5CF6';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = 'rgba(139, 92, 246, 0.5)';
         } else {
-          // Inactive cell
-          ctx.fillStyle = '#F3F4F6';
+          // Inactive cell - Gray-200
+          ctx.fillStyle = '#E5E7EB';
           ctx.shadowBlur = 0;
         }
 
@@ -1007,11 +1021,11 @@ export function AIDataMappingAnimation() {
       }
     }
 
-    // Draw "Mapping Layer" label
-    ctx.fillStyle = '#6B7280';
+    // Draw "MAPPING LAYER" label
+    ctx.fillStyle = '#6B7280'; // Gray-500
     ctx.font = 'bold 10px Inter, system-ui, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Mapping Layer', matrixCenterX, startY - 15);
+    ctx.fillText('MAPPING LAYER', matrixCenterX, startY - 15);
   };
 
   const drawStaticConnections = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -1025,143 +1039,126 @@ export function AIDataMappingAnimation() {
     // Get matrix center position
     const matrixCenterX = (layer2[0].x + layer3[0].x) / 2;
     const matrixCenterY = height / 2;
-    const cellSize = 18;
+    const cellSize = 20; // Match HTML example (20px)
     const gap = 3;
     const totalSize = matrixSize * (cellSize + gap) - gap;
     const matrixStartX = matrixCenterX - totalSize / 2;
     const matrixStartY = matrixCenterY - totalSize / 2;
 
-    // Input files to Layer 1
+    // Input files to Layer 1 - Bright blue connections
     allFiles.forEach((file, fileIdx) => {
       if (file.yPosition) {
         const neuronIdx = fileIdx % layer1.length;
         const neuron = layer1[neuronIdx];
         if (neuron) {
-          drawCurvedConnection(ctx, 190, file.yPosition, neuron.x, neuron.y, '#3b82f6', 0.25);
+          drawCurvedConnection(ctx, 190, file.yPosition, neuron.x, neuron.y, '#93C5FD', 0.4);
         }
       }
     });
 
-    // Layer 1 to Layer 2 - FULLY CONNECTED
+    // Layer 1 to Layer 2 - FULLY CONNECTED - RED
     layer1.forEach(fromNeuron => {
       layer2.forEach(toNeuron => {
-        drawCurvedConnection(ctx, fromNeuron.x, fromNeuron.y, toNeuron.x, toNeuron.y, '#ef4444', 0.12);
+        drawCurvedConnection(ctx, fromNeuron.x, fromNeuron.y, toNeuron.x, toNeuron.y, '#FCA5A5', 0.3);
       });
     });
 
-    // Layer 2 to Matrix cells - FULLY CONNECTED (every neuron to every cell)
+    // Layer 2 to Matrix cells - FULLY CONNECTED - LIGHT PURPLE
     layer2.forEach(neuron => {
       for (let row = 0; row < matrixSize; row++) {
         for (let col = 0; col < matrixSize; col++) {
           const cellX = matrixStartX + col * (cellSize + gap) + cellSize / 2;
           const cellY = matrixStartY + row * (cellSize + gap) + cellSize / 2;
-          drawCurvedConnection(ctx, neuron.x, neuron.y, cellX, cellY, '#a78bfa', 0.08);
+          drawCurvedConnection(ctx, neuron.x, neuron.y, cellX, cellY, '#DDD6FE', 0.3);
         }
       }
     });
 
-    // Matrix cells to Layer 3 - FULLY CONNECTED (every cell to every neuron)
+    // Matrix cells to Layer 3 - FULLY CONNECTED - LIGHT PURPLE
     for (let row = 0; row < matrixSize; row++) {
       for (let col = 0; col < matrixSize; col++) {
         const cellX = matrixStartX + col * (cellSize + gap) + cellSize / 2;
         const cellY = matrixStartY + row * (cellSize + gap) + cellSize / 2;
 
         layer3.forEach(neuron => {
-          drawCurvedConnection(ctx, cellX, cellY, neuron.x, neuron.y, '#8b5cf6', 0.08);
+          drawCurvedConnection(ctx, cellX, cellY, neuron.x, neuron.y, '#DDD6FE', 0.3);
         });
       }
     }
 
-    // Layer 3 to Layer 4 - FULLY CONNECTED
+    // Layer 3 to Layer 4 - FULLY CONNECTED - GREEN
     layer3.forEach(fromNeuron => {
       layer4.forEach(toNeuron => {
-        drawCurvedConnection(ctx, fromNeuron.x, fromNeuron.y, toNeuron.x, toNeuron.y, '#10b981', 0.12);
+        drawCurvedConnection(ctx, fromNeuron.x, fromNeuron.y, toNeuron.x, toNeuron.y, '#86EFAC', 0.3);
       });
     });
 
-    // Layer 4 to Output Hub
+    // Layer 4 to Output Hub - Bright green connections
     const hub = outputHubRef.current;
     layer4.forEach(neuron => {
-      drawCurvedConnection(ctx, neuron.x, neuron.y, hub.x, hub.y, '#10b981', 0.2);
+      drawCurvedConnection(ctx, neuron.x, neuron.y, hub.x, hub.y, '#86EFAC', 0.4);
     });
 
-    // Output Hub to Outputs
+    // Output Hub to Outputs - Bright green connections
     outputs.forEach((output, idx) => {
       const outputX = width * 0.88;
       const outputY = height * 0.15 + (idx * height * 0.7) / (outputs.length + 1);
-      drawCurvedConnection(ctx, hub.x, hub.y, outputX - 5, outputY, '#10b981', 0.25);
+      drawCurvedConnection(ctx, hub.x, hub.y, outputX - 5, outputY, '#86EFAC', 0.4);
     });
   };
 
   const drawNeuralNetwork = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const now = Date.now();
-
-    // Draw neurons with matrix-style on/off pulsing
+    // Draw neurons with beat effect when particles hit
     neuronsRef.current.forEach((layer, layerIdx) => {
       layer.forEach((neuron, neuronIdx) => {
         // Smooth activation from particles
         neuron.activation += (neuron.targetActivation - neuron.activation) * 0.2;
 
-        // Matrix-style random pulsing (on/off effect)
-        const pulseFreq = 0.004 + (neuronIdx * 0.001);
-        const randomPulse = Math.sin(now * pulseFreq + neuronIdx * 0.8) > 0.3 ? 0.6 : 0;
+        // Calculate pulsing radius based on activation
+        const pulseRadius = neuron.radius + (neuron.activation * 4);
 
-        // Combine particle activation with random pulsing
-        const totalActivation = Math.max(neuron.activation, randomPulse);
-        const isActive = totalActivation > 0.3;
-
-        if (isActive) {
-          // Outer glow when active
-          const glowRadius = neuron.radius * 8;
-          const gradient = ctx.createRadialGradient(
-            neuron.x, neuron.y, 0,
-            neuron.x, neuron.y, glowRadius
-          );
-
-          const glowAlpha = Math.floor(totalActivation * 100).toString(16).padStart(2, '0');
-          gradient.addColorStop(0, `${layerConfig[layerIdx].color}${glowAlpha}`);
-          gradient.addColorStop(0.5, `${layerConfig[layerIdx].color}30`);
-          gradient.addColorStop(1, 'transparent');
-
-          ctx.fillStyle = gradient;
+        // Draw outer glow when active (beat effect)
+        if (neuron.activation > 0.1) {
+          const glowGradient = ctx.createRadialGradient(neuron.x, neuron.y, 0, neuron.x, neuron.y, pulseRadius + 8);
+          glowGradient.addColorStop(0, layerConfig[layerIdx].color + Math.floor(neuron.activation * 100).toString(16).padStart(2, '0'));
+          glowGradient.addColorStop(0.5, layerConfig[layerIdx].color + '20');
+          glowGradient.addColorStop(1, 'transparent');
+          ctx.fillStyle = glowGradient;
           ctx.beginPath();
-          ctx.arc(neuron.x, neuron.y, glowRadius, 0, Math.PI * 2);
+          ctx.arc(neuron.x, neuron.y, pulseRadius + 8, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        // Core neuron - bright when active, dim when inactive
-        ctx.fillStyle = isActive ? layerConfig[layerIdx].color : '#E5E7EB';
+        // Draw main neuron with pulsing size
+        ctx.fillStyle = layerConfig[layerIdx].color;
+        ctx.shadowBlur = neuron.activation > 0.1 ? 15 : 0;
+        ctx.shadowColor = layerConfig[layerIdx].color;
         ctx.beginPath();
-        const coreRadius = neuron.radius * (isActive ? 1.4 : 1);
-        ctx.arc(neuron.x, neuron.y, coreRadius, 0, Math.PI * 2);
+        ctx.arc(neuron.x, neuron.y, pulseRadius, 0, Math.PI * 2);
         ctx.fill();
-
-        // Inner highlight when very active
-        if (totalActivation > 0.6) {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-          ctx.beginPath();
-          ctx.arc(neuron.x - 1.5, neuron.y - 1.5, neuron.radius * 0.6, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        ctx.shadowBlur = 0;
 
         // Decay activation for next frame
         if (neuron.targetActivation > 0) {
-          neuron.targetActivation *= 0.92;
+          neuron.targetActivation *= 0.88;
         }
       });
     });
 
-    // Draw layer labels
+    // Draw layer labels (below each layer)
     neuronsRef.current.forEach((layer, idx) => {
       const avgY = layer.reduce((sum, n) => sum + n.y, 0) / layer.length;
-      ctx.fillStyle = '#6B7280';
-      ctx.font = 'bold 9px Inter, system-ui, sans-serif';
-      ctx.textAlign = 'center';
 
-      const lines = layerConfig[idx].name.split('\n');
-      lines.forEach((line, lineIdx) => {
-        ctx.fillText(line, layer[0].x, avgY + height * 0.38 + lineIdx * 11);
-      });
+      // Layer name (Gray-500)
+      ctx.fillStyle = '#6B7280';
+      ctx.font = 'bold 10px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(layerConfig[idx].name, layer[0].x, avgY + height * 0.38);
+
+      // Node count (Blue-500)
+      ctx.fillStyle = '#3B82F6';
+      ctx.font = '9px Inter, system-ui, sans-serif';
+      ctx.fillText(`${layerConfig[idx].neurons} NODES`, layer[0].x, avgY + height * 0.38 + 12);
     });
   };
 
@@ -1183,15 +1180,16 @@ export function AIDataMappingAnimation() {
       ctx.fill();
     }
 
-    // Draw core hub
+    // Draw core hub (Emerald-500 to Emerald-600 gradient)
     const gradient = ctx.createLinearGradient(hub.x - 10, hub.y - 10, hub.x + 10, hub.y + 10);
-    gradient.addColorStop(0, '#10b981');
-    gradient.addColorStop(1, '#059669');
+    gradient.addColorStop(0, '#10B981'); // Emerald-500
+    gradient.addColorStop(1, '#059669'); // Emerald-600
     ctx.fillStyle = gradient;
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = '#10b981';
+    ctx.shadowBlur = hub.activation > 0.1 ? 20 : 15;
+    ctx.shadowColor = '#10B981';
     ctx.beginPath();
-    ctx.arc(hub.x, hub.y, 10, 0, Math.PI * 2);
+    const hubRadius = 10 + (hub.activation * 2); // Hub pulses when active
+    ctx.arc(hub.x, hub.y, hubRadius, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
 
@@ -1204,8 +1202,11 @@ export function AIDataMappingAnimation() {
 
   const drawParticles = (ctx: CanvasRenderingContext2D) => {
     particlesRef.current.forEach((particle) => {
-      // Update particle position
+      // Update particle position (handle negative progress for staggered start)
       particle.progress = Math.min(1, particle.progress + particle.speed);
+
+      // Skip drawing if particle hasn't started yet (negative progress)
+      if (particle.progress < 0) return;
 
       // Cubic Bézier curve (4 control points) - matches example exactly
       const t = particle.progress;
@@ -1224,27 +1225,34 @@ export function AIDataMappingAnimation() {
                        3 * (1 - t) * Math.pow(t, 2) * particle.targetY +
                        Math.pow(t, 3) * particle.targetY;
 
-      // Draw particle with radial gradient glow
-      const gradient = ctx.createRadialGradient(currentX, currentY, 0, currentX, currentY, particle.size * 3);
+      // Draw particle with glow (like HTML)
+      ctx.beginPath();
+      ctx.arc(currentX, currentY, 5, 0, Math.PI * 2);
+
+      const gradient = ctx.createRadialGradient(currentX, currentY, 0, currentX, currentY, 5);
       gradient.addColorStop(0, particle.color);
-      gradient.addColorStop(0.7, particle.color + '00');
+      gradient.addColorStop(1, particle.color + '00');
 
       ctx.fillStyle = gradient;
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = 20;
       ctx.shadowColor = particle.color;
-      ctx.beginPath();
-      ctx.arc(currentX, currentY, particle.size * 3, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Bright solid core
-      ctx.fillStyle = particle.color;
-      ctx.beginPath();
-      ctx.arc(currentX, currentY, particle.size, 0, Math.PI * 2);
-      ctx.fill();
-
       // Activate target neuron or hub when particle reaches it
       if (particle.progress > 0.75) {
+        // Light up matrix cell if particle has one
+        if (particle.matrixCell !== undefined) {
+          const currentAnimating = matrixAnimationRef.current;
+          // Turn cell ON when particle arrives
+          currentAnimating.add(particle.matrixCell);
+
+          // Turn OFF after short time (automatic cleanup in draw function)
+          setTimeout(() => {
+            currentAnimating.delete(particle.matrixCell!);
+          }, 100); // Flash for 100ms
+        }
+
         // Check if targeting output hub
         const hub = outputHubRef.current;
         const hubDist = Math.sqrt(
@@ -1262,7 +1270,7 @@ export function AIDataMappingAnimation() {
               Math.pow(neuron.x - particle.targetX, 2) + Math.pow(neuron.y - particle.targetY, 2)
             );
             if (dist < 18) {
-              neuron.targetActivation = Math.min(1, neuron.targetActivation + 0.15);
+              neuron.targetActivation = Math.min(1, neuron.targetActivation + 0.5);
             }
           });
         }
@@ -1350,11 +1358,11 @@ export function AIDataMappingAnimation() {
 
     const { width, height } = canvas;
 
-    // Clear with elegant gradient background
+    // Clear with subtle gradient background (Gray-50 to Gray-100)
     const bgGradient = ctx.createLinearGradient(0, 0, width, height);
-    bgGradient.addColorStop(0, '#FAFBFC');
-    bgGradient.addColorStop(0.5, '#F3F4F6');
-    bgGradient.addColorStop(1, '#EEF2FF');
+    bgGradient.addColorStop(0, '#FAFBFC'); // Custom light gray
+    bgGradient.addColorStop(0.5, '#F9FAFB'); // Gray-50
+    bgGradient.addColorStop(1, '#F3F4F6'); // Gray-100
     ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, width, height);
 
@@ -1379,56 +1387,175 @@ export function AIDataMappingAnimation() {
     // Draw output files
     drawOutputFiles(ctx, width, height);
 
-    // Phase management
+    // Continuous particle creation (like HTML) - no phases, just continuous flow
     phaseTimerRef.current++;
 
-    if (currentPhase === 0) {
-      // File processing phase - very fast transitions
-      if (phaseTimerRef.current > 20) { // Reduced to 20 for faster animation
-        phaseTimerRef.current = 0;
-        const nextFileIndex = currentFileIndex + 1;
+    if (phaseTimerRef.current > 10 && currentFileIndex < allFiles.length) {
+      phaseTimerRef.current = 0;
 
-        if (nextFileIndex >= allFiles.length) {
-          // Move to neural network processing
-          setCurrentPhase(1);
-          setCurrentFileIndex(0);
-        } else {
-          setCurrentFileIndex(nextFileIndex);
-          // Mark file as processed
-          const newProcessed = new Set(processedFiles);
-          newProcessed.add(allFiles[currentFileIndex].path);
-          setProcessedFiles(newProcessed);
-          updateOutputs(newProcessed);
-        }
+      // Mark file as processed
+      const newProcessed = new Set(processedFiles);
+      newProcessed.add(allFiles[currentFileIndex].path);
+      setProcessedFiles(newProcessed);
+      updateOutputs(newProcessed);
 
-        createParticles(width, height, currentPhase, currentFileIndex);
+      // Create particles for ALL phases at once (continuous flow like HTML)
+      const file = allFiles[currentFileIndex];
+      const fileY = file.yPosition || height * 0.5;
+      const sourceX = 190;
+      const fileColor = getFileColor(file.type);
+      const nodeIdx = currentFileIndex % neuronsRef.current[0].length;
+
+      // Create complete particle chain immediately (like HTML does)
+      const particles: Particle[] = [];
+
+      // Create 3 particles per file - STAGGERED (like HTML)
+      for (let p = 0; p < 3; p++) {
+        // File to Layer 1
+        const node1 = neuronsRef.current[0][nodeIdx];
+        particles.push({
+          id: Date.now() + Math.random() + p * 0.1,
+          x: sourceX,
+          y: fileY,
+          targetX: node1.x,
+          targetY: node1.y,
+          progress: -p * 0.15, // STAGGER START (negative progress = delayed start)
+          speed: 0.025, // Match HTML speed
+          layer: 0,
+          color: '#3B82F6', // Blue-500 for input particles
+          size: 3,
+        });
       }
-    } else {
-      // Neural network processing phases - very fast transitions
-      if (phaseTimerRef.current > 25) { // Reduced to 25 for faster animation
-        phaseTimerRef.current = 0;
-        const nextPhase = currentPhase + 1;
 
-        // Phases: 0(file), 1(L1→L2), 2(L2→Matrix), 3(Matrix→L3), 4(L3→L4), 5(L4→Hub), 6(Hub→Output)
-        if (nextPhase > 6) {
-          // Continue cycling through network phases
-          setCurrentPhase(1);
-          // Clear some matrix cells for next cycle
-          const currentCells = new Set(matrixCells);
-          const cellsArray = Array.from(currentCells);
-          if (cellsArray.length > 20) {
-            // Remove oldest cells
-            for (let i = 0; i < 5; i++) {
-              currentCells.delete(cellsArray[i]);
-            }
-            setMatrixCells(currentCells);
-          }
-        } else {
-          setCurrentPhase(nextPhase);
-        }
-
-        createParticles(width, height, currentPhase, currentFileIndex);
+      // Create 2 particles for layers - STAGGERED (like HTML)
+      for (let p = 0; p < 2; p++) {
+        // Layer 1 to Layer 2
+        const node1 = neuronsRef.current[0][nodeIdx];
+        const node2 = neuronsRef.current[1][(nodeIdx + 1) % neuronsRef.current[1].length];
+        particles.push({
+          id: Date.now() + Math.random() + 10 + p * 0.1,
+          x: node1.x,
+          y: node1.y,
+          targetX: node2.x,
+          targetY: node2.y,
+          progress: -p * 0.15, // STAGGER START
+          speed: 0.025,
+          layer: 1,
+          color: '#EF4444', // Red-500 for processing particles
+          size: 3,
+        });
       }
+
+      // Layer 2 to Matrix - particles target RANDOM matrix cells
+      const layer2 = neuronsRef.current[1];
+      const layer3 = neuronsRef.current[2];
+      const matrixCenterX = (layer2[0].x + layer3[0].x) / 2;
+      const matrixCenterY = height / 2;
+      const cellSize = 20;
+      const gap = 3;
+      const totalSize = matrixSize * (cellSize + gap) - gap;
+      const matrixStartX = matrixCenterX - totalSize / 2;
+      const matrixStartY = matrixCenterY - totalSize / 2;
+
+      // Create 2 particles to RANDOM matrix cells - STAGGERED (like HTML)
+      const node2 = neuronsRef.current[1][(nodeIdx + 1) % neuronsRef.current[1].length];
+      for (let p = 0; p < 2; p++) {
+        // Pick random matrix cell
+        const randomCellIdx = Math.floor(Math.random() * (matrixSize * matrixSize));
+        const col = randomCellIdx % matrixSize;
+        const row = Math.floor(randomCellIdx / matrixSize);
+        const cellX = matrixStartX + col * (cellSize + gap) + cellSize / 2;
+        const cellY = matrixStartY + row * (cellSize + gap) + cellSize / 2;
+
+        particles.push({
+          id: Date.now() + Math.random() + 20 + p * 0.1,
+          x: node2.x,
+          y: node2.y,
+          targetX: cellX,
+          targetY: cellY,
+          progress: -p * 0.15, // STAGGER START
+          speed: 0.025,
+          layer: 2,
+          color: '#A78BFA', // Violet-400 for matrix input particles
+          size: 3,
+          matrixCell: randomCellIdx, // Track which cell to light up
+        });
+      }
+
+      // Create 2 particles from Matrix to Layer 3 - STAGGERED (like HTML)
+      const node3 = neuronsRef.current[2][nodeIdx];
+      for (let p = 0; p < 2; p++) {
+        particles.push({
+          id: Date.now() + Math.random() + 30 + p * 0.1,
+          x: matrixCenterX,
+          y: matrixCenterY,
+          targetX: node3.x,
+          targetY: node3.y,
+          progress: -p * 0.15, // STAGGER START
+          speed: 0.025,
+          layer: 3,
+          color: '#8B5CF6', // Violet-500 for matrix output particles
+          size: 3,
+        });
+      }
+
+      // Create 2 particles Layer 3 to Layer 4 - STAGGERED (like HTML)
+      const node4 = neuronsRef.current[3][nodeIdx];
+      for (let p = 0; p < 2; p++) {
+        particles.push({
+          id: Date.now() + Math.random() + 40 + p * 0.1,
+          x: node3.x,
+          y: node3.y,
+          targetX: node4.x,
+          targetY: node4.y,
+          progress: -p * 0.15, // STAGGER START
+          speed: 0.025,
+          layer: 4,
+          color: '#10B981', // Emerald-500 for output particles
+          size: 3,
+        });
+      }
+
+      // Create 2 particles Layer 4 to Hub - STAGGERED (like HTML)
+      const hub = outputHubRef.current;
+      for (let p = 0; p < 2; p++) {
+        particles.push({
+          id: Date.now() + Math.random() + 50 + p * 0.1,
+          x: node4.x,
+          y: node4.y,
+          targetX: hub.x,
+          targetY: hub.y,
+          progress: -p * 0.15, // STAGGER START
+          speed: 0.025,
+          layer: 5,
+          color: '#10B981', // Emerald-500 for output particles
+          size: 3,
+        });
+      }
+
+      // Create 2 particles Hub to Output - STAGGERED (like HTML)
+      const outputIdx = Math.floor(currentFileIndex / (allFiles.length / outputs.length));
+      if (outputIdx < outputs.length && outputs[outputIdx].isActive) {
+        const outputX = width * 0.88;
+        const outputY = height * 0.15 + (outputIdx * height * 0.7) / (outputs.length + 1);
+        for (let p = 0; p < 2; p++) {
+          particles.push({
+            id: Date.now() + Math.random() + 60 + p * 0.1,
+            x: hub.x,
+            y: hub.y,
+            targetX: outputX,
+            targetY: outputY,
+            progress: -p * 0.15, // STAGGER START
+            speed: 0.025,
+            layer: 6,
+            color: '#10B981', // Emerald-500 for output particles
+            size: 3,
+          });
+        }
+      }
+
+      particlesRef.current.push(...particles);
+      setCurrentFileIndex(currentFileIndex + 1);
     }
 
     animationRef.current = requestAnimationFrame(animate);
@@ -1552,12 +1679,9 @@ export function AIDataMappingAnimation() {
 
       {/* Progress indicators */}
       <div className="mt-4 grid grid-cols-6 gap-2 text-center">
-        <div className={`p-2 rounded-lg text-xs transition-all ${
-          currentPhase === 0 ? 'bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-600 shadow-md' :
-          'bg-gray-100 border border-gray-200'
-        }`}>
-          <div className="font-semibold text-gray-800">File Processing</div>
-          <div className="text-gray-600 mt-0.5">{processedFiles.size}/{allFiles.length}</div>
+        <div className="p-3 rounded-lg border-2 border-gray-300 bg-white shadow-sm">
+          <div className="text-xs font-medium text-gray-600">File Processing</div>
+          <div className="text-lg font-bold text-gray-900 mt-1">{processedFiles.size}/{allFiles.length}</div>
         </div>
         {layerConfig.map((layer, idx) => (
           <div
@@ -1574,8 +1698,11 @@ export function AIDataMappingAnimation() {
       </div>
 
       {/* Output status summary */}
-      <div className="mt-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
-        <div className="text-sm font-semibold text-gray-800 mb-2">Financial Output Status</div>
+      <div className="mt-4 p-4 bg-white rounded-lg border-2 border-gray-300 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-xs font-medium text-gray-600">Financial Analysis</div>
+          <div className="text-lg font-bold text-gray-900">{outputs.filter(o => o.isActive).length}/{outputs.length}</div>
+        </div>
         <div className="grid grid-cols-7 gap-2">
           {outputs.map((output, idx) => (
             <div
