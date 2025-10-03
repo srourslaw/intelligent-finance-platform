@@ -5,7 +5,7 @@ Processes Excel files and provides REST API for React dashboard
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation, batch, email, webhooks, system, automation, templates
+from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation, batch, email, webhooks, system, automation, templates, folder_watch
 from app.middleware import setup_error_handling
 
 
@@ -83,6 +83,7 @@ app.include_router(webhooks.router)  # Cloud storage webhooks (Dropbox, Google D
 app.include_router(automation.router)  # Automated file processing pipeline
 app.include_router(system.router)  # System health, monitoring, and configuration
 app.include_router(templates.router)  # Excel template population
+app.include_router(folder_watch.router)  # Local folder monitoring
 
 
 @app.get("/")

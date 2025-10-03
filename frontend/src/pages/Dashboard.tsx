@@ -15,6 +15,7 @@ import { EmailIntegration } from '../components/dashboard/EmailIntegration';
 import { CloudWebhooks } from '../components/dashboard/CloudWebhooks';
 import { SystemHealth } from '../components/dashboard/SystemHealth';
 import { TemplateGenerator } from '../components/dashboard/TemplateGenerator';
+import { FolderMonitoring } from '../components/dashboard/FolderMonitoring';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -540,6 +541,9 @@ export function Dashboard() {
 
         {/* Excel Template Generator */}
         <TemplateGenerator />
+
+        {/* Local Folder Monitoring */}
+        <FolderMonitoring />
 
         {/* Aggregated Financial Data from Multiple Files */}
         <AggregatedFinancials />
