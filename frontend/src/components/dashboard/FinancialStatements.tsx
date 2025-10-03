@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 interface FinancialStatementsProps {
   projectId?: string;
@@ -55,7 +55,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ projectId }) 
       const token = localStorage.getItem('token');
 
       const params = projectId ? { project_id: projectId } : {};
-      const response = await axios.get(`${API_BASE_URL}/api/financials/consolidated`, {
+      const response = await axios.get(`${API_BASE_URL}/financials/consolidated`, {
         headers: { Authorization: `Bearer ${token}` },
         params
       });
