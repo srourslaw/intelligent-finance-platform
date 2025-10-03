@@ -4,14 +4,36 @@ Processes Excel files and provides REST API for React dashboard
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation
+from contextlib import asynccontextmanager
+from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation, batch
 from app.middleware import setup_error_handling
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Manage application lifecycle (startup/shutdown).
+    """
+    # Startup
+    from batch.scheduler import get_scheduler
+    scheduler = get_scheduler()
+    scheduler.start()
+    print("✅ Batch scheduler started")
+
+    yield
+
+    # Shutdown
+    from batch.scheduler import shutdown_scheduler
+    shutdown_scheduler()
+    print("✅ Batch scheduler stopped")
+
 
 # Create FastAPI app
 app = FastAPI(
     title="Intelligent Finance Platform API",
     description="Backend API for construction project financial management",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Setup error handling and logging middleware
@@ -41,6 +63,7 @@ app.include_router(documents.router)
 app.include_router(financials.router)  # AI-consolidated financial data
 app.include_router(extraction.router)  # File extraction and AI classification
 app.include_router(aggregation.router)  # Aggregation and validation
+app.include_router(batch.router)  # Batch processing and scheduling
 
 
 @app.get("/")

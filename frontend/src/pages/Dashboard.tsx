@@ -10,6 +10,7 @@ import { FileExtraction } from '../components/dashboard/FileExtraction';
 import { AggregatedFinancials } from '../components/dashboard/AggregatedFinancials';
 import { TransactionEditor } from '../components/dashboard/TransactionEditor';
 import { ConflictResolution } from '../components/dashboard/ConflictResolution';
+import { BatchJobs } from '../components/dashboard/BatchJobs';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -520,6 +521,9 @@ export function Dashboard() {
 
         {/* Conflict Resolution */}
         <ConflictResolution />
+
+        {/* Batch Jobs & Scheduling */}
+        <BatchJobs />
 
         {/* Aggregated Financial Data from Multiple Files */}
         <AggregatedFinancials />

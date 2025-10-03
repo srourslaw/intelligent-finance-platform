@@ -22,3 +22,6 @@ anthropic==0.34.2
 
 # Utilities
 aiofiles==23.2.1
+
+# Batch processing and scheduling
+APScheduler==3.10.4
