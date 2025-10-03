@@ -3,6 +3,7 @@ import { DollarSign, TrendingDown, TrendingUp, AlertTriangle, Calendar, CheckCir
 import { KPICard } from '../components/dashboard/KPICard';
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
+import { FinancialStatements } from '../components/dashboard/FinancialStatements';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -239,6 +240,9 @@ export function Dashboard() {
 
         {/* Document Viewer */}
         <DocumentViewer projectId={selectedProjectId} />
+
+        {/* AI-Consolidated Financial Statements */}
+        <FinancialStatements projectId={selectedProjectId} />
 
         {/* Additional Info Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
