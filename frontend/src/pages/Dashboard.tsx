@@ -14,6 +14,7 @@ import { BatchJobs } from '../components/dashboard/BatchJobs';
 import { EmailIntegration } from '../components/dashboard/EmailIntegration';
 import { CloudWebhooks } from '../components/dashboard/CloudWebhooks';
 import { SystemHealth } from '../components/dashboard/SystemHealth';
+import { TemplateGenerator } from '../components/dashboard/TemplateGenerator';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -536,6 +537,9 @@ export function Dashboard() {
 
         {/* System Health & Monitoring */}
         <SystemHealth />
+
+        {/* Excel Template Generator */}
+        <TemplateGenerator />
 
         {/* Aggregated Financial Data from Multiple Files */}
         <AggregatedFinancials />
