@@ -7,6 +7,7 @@ import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
 import { FinancialStatements } from '../components/dashboard/FinancialStatements';
 import { FileExtraction } from '../components/dashboard/FileExtraction';
+import { AggregatedFinancials } from '../components/dashboard/AggregatedFinancials';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -511,6 +512,9 @@ export function Dashboard() {
 
         {/* File Extraction & AI Classification */}
         <FileExtraction />
+
+        {/* Aggregated Financial Data from Multiple Files */}
+        <AggregatedFinancials />
       </main>
     </div>
   );

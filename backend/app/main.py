@@ -4,7 +4,7 @@ Processes Excel files and provides REST API for React dashboard
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import projects, uploads, auth, documents, financials, extraction
+from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation
 
 # Create FastAPI app
 app = FastAPI(
@@ -36,6 +36,7 @@ app.include_router(uploads.router)
 app.include_router(documents.router)
 app.include_router(financials.router)  # AI-consolidated financial data
 app.include_router(extraction.router)  # File extraction and AI classification
+app.include_router(aggregation.router)  # Aggregation and validation
 
 
 @app.get("/")
