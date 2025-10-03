@@ -12,7 +12,7 @@ import logging
 from datetime import datetime
 import json
 
-from app.auth import get_current_user
+from app.auth_utils import get_current_user
 from app.services.template_populator import TemplatePopulator, populate_template_from_aggregation
 
 logger = logging.getLogger(__name__)

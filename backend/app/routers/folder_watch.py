@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 import json
 
-from app.auth import get_current_user
+from app.auth_utils import get_current_user
 
 logger = logging.getLogger(__name__)
 
