@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+interface FinancialStatementsProps {
+  projectId?: string;
+}
 
 interface ConsolidatedData {
   current_assets: Record<string, number>;
@@ -34,7 +38,7 @@ interface Totals {
   balance_check: number;
 }
 
-const FinancialStatements: React.FC = () => {
+const FinancialStatements: React.FC<FinancialStatementsProps> = ({ projectId }) => {
   const [consolidatedData, setConsolidatedData] = useState<ConsolidatedData | null>(null);
   const [totals, setTotals] = useState<Totals | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,8 +54,10 @@ const FinancialStatements: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
 
+      const params = projectId ? { project_id: projectId } : {};
       const response = await axios.get(`${API_BASE_URL}/api/financials/consolidated`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
+        params
       });
 
       setConsolidatedData(response.data.consolidated_data);
@@ -108,11 +114,6 @@ const FinancialStatements: React.FC = () => {
   const assetsPieData = [
     { name: 'Current Assets', value: totals.current_assets },
     { name: 'Non-Current Assets', value: totals.non_current_assets },
-  ];
-
-  const liabilitiesPieData = [
-    { name: 'Current Liabilities', value: totals.current_liabilities },
-    { name: 'Long-term Liabilities', value: totals.long_term_liabilities },
   ];
 
   const incomeData = [
@@ -226,12 +227,15 @@ const FinancialStatements: React.FC = () => {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    label={(props: any) => {
+                      const { name, percent } = props;
+                      return `${name}: ${(percent * 100).toFixed(0)}%`;
+                    }}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {assetsPieData.map((entry, index) => (
+                    {assetsPieData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -493,4 +497,5 @@ const FinancialStatements: React.FC = () => {
   );
 };
 
+export { FinancialStatements };
 export default FinancialStatements;
