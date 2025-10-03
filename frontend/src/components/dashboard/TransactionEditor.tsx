@@ -292,7 +292,7 @@ export function TransactionEditor() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredTransactions.map((txn, idx) => {
+                {filteredTransactions.map((txn) => {
                   const originalIndex = transactions.indexOf(txn);
                   const isEditing = editingIndex === originalIndex;
 

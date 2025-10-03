@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Check, X, ArrowRight, Info } from 'lucide-react';
+import { AlertTriangle, Check, ArrowRight, Info } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 
