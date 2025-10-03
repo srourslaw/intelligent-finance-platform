@@ -27,7 +27,6 @@ export function TemplateGenerator() {
   const [jobs, setJobs] = useState<Record<string, TemplateJob>>({});
   const [selectedTemplate, setSelectedTemplate] = useState<string>('default');
   const [loading, setLoading] = useState(false);
-  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTemplates();
@@ -69,8 +68,6 @@ export function TemplateGenerator() {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
-
-      setCurrentJobId(response.data.job_id);
 
       // Start polling for job completion
       pollJobStatus(response.data.job_id);
@@ -149,10 +146,6 @@ export function TemplateGenerator() {
         return 'bg-gray-100 text-gray-800';
     }
   };
-
-  // Get the latest job for demo project
-  const latestJob = Object.entries(jobs)
-    .sort((a, b) => new Date(b[1].started_at).getTime() - new Date(a[1].started_at).getTime())[0];
 
   return (
     <div className="space-y-6">
