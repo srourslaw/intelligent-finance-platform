@@ -1,0 +1,43 @@
+{
+  "invoice_number": "INV-2024-2089",
+  "supplier": "Blue Mountains Concrete Solutions",
+  "date": "2024-09-05",
+  "due_date": "2024-09-25",
+  "items": [
+    {
+      "description": "Strip footings - 45m3 N32 concrete",
+      "quantity": 45,
+      "unit_price": 285,
+      "amount": 12825
+    },
+    {
+      "description": "Concrete pump hire",
+      "quantity": 1,
+      "unit_price": 850,
+      "amount": 850
+    },
+    {
+      "description": "Reinforcement steel mesh & bars",
+      "quantity": 1,
+      "unit_price": 8950,
+      "amount": 8950
+    },
+    {
+      "description": "Formwork and boxing",
+      "quantity": 1,
+      "unit_price": 6500,
+      "amount": 6500
+    },
+    {
+      "description": "Labour - placement and finishing",
+      "quantity": 1,
+      "unit_price": 12800,
+      "amount": 12800
+    }
+  ],
+  "subtotal": 41925,
+  "gst": 4192.5,
+  "total": 46117.5,
+  "payment_status": "Paid",
+  "payment_date": "2024-09-18"
+}

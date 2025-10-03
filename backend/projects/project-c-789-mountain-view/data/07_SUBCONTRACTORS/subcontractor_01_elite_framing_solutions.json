@@ -1,0 +1,34 @@
+{
+  "contractor_name": "Elite Framing Solutions",
+  "trade": "Carpentry - Framing",
+  "contact": "James Robertson",
+  "phone": "0428 765 432",
+  "abn": "78 945 612 345",
+  "license": "LIC 187654",
+  "contract_value": 125000,
+  "scope": "Wall and roof framing, internal framing",
+  "start_date": "2024-09-15",
+  "completion_date": "2024-11-05",
+  "payment_terms": "Monthly progress claims",
+  "insurance_current": true,
+  "work_orders": [
+    {
+      "date": "2024-09-15",
+      "description": "Mobilization and frame ground floor",
+      "value": 42000,
+      "status": "In Progress"
+    },
+    {
+      "date": "2024-10-10",
+      "description": "Upper floor frame",
+      "value": 45000,
+      "status": "Scheduled"
+    },
+    {
+      "date": "2024-10-25",
+      "description": "Roof framing and completion",
+      "value": 38000,
+      "status": "Scheduled"
+    }
+  ]
+}

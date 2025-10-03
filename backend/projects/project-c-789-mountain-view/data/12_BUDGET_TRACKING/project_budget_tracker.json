@@ -1,0 +1,178 @@
+{
+  "project_name": "789 Mountain View Terrace",
+  "contract_value": 820000,
+  "contingency_percentage": 10,
+  "contingency_amount": 82000,
+  "total_project_budget": 902000,
+  "as_of_date": "2024-10-01",
+  "categories": [
+    {
+      "category": "Land Acquisition",
+      "budgeted": 418215,
+      "committed": 418215,
+      "spent": 418215,
+      "variance": 0,
+      "status": "Complete"
+    },
+    {
+      "category": "Design & Consultants",
+      "budgeted": 75000,
+      "committed": 73550,
+      "spent": 73550,
+      "variance": 1450,
+      "status": "Complete"
+    },
+    {
+      "category": "Permits & Approvals",
+      "budgeted": 28000,
+      "committed": 26950,
+      "spent": 26950,
+      "variance": 1050,
+      "status": "Complete"
+    },
+    {
+      "category": "Site Works",
+      "budgeted": 73500,
+      "committed": 67330,
+      "spent": 67330,
+      "variance": 6170,
+      "status": "Complete"
+    },
+    {
+      "category": "Foundations",
+      "budgeted": 78000,
+      "committed": 46118,
+      "spent": 46118,
+      "variance": 31882,
+      "status": "Under Budget"
+    },
+    {
+      "category": "Framing & Structure",
+      "budgeted": 125000,
+      "committed": 75680,
+      "spent": 0,
+      "variance": 49320,
+      "status": "In Progress"
+    },
+    {
+      "category": "Roofing",
+      "budgeted": 52000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 52000,
+      "status": "Not Started"
+    },
+    {
+      "category": "External Cladding",
+      "budgeted": 68000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 68000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Windows & Doors",
+      "budgeted": 85000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 85000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Plumbing",
+      "budgeted": 68000,
+      "committed": 24618,
+      "spent": 0,
+      "variance": 43382,
+      "status": "Materials Ordered"
+    },
+    {
+      "category": "Electrical",
+      "budgeted": 72000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 72000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Insulation",
+      "budgeted": 18000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 18000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Plasterboard",
+      "budgeted": 45000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 45000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Tiling",
+      "budgeted": 48000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 48000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Kitchen",
+      "budgeted": 55000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 55000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Bathrooms",
+      "budgeted": 48000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 48000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Flooring",
+      "budgeted": 42000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 42000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Painting",
+      "budgeted": 35000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 35000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Cabinetry",
+      "budgeted": 38000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 38000,
+      "status": "Not Started"
+    },
+    {
+      "category": "Fixtures & Fittings",
+      "budgeted": 28000,
+      "committed": 0,
+      "spent": 0,
+      "variance": 28000,
+      "status": "Not Started"
+    }
+  ],
+  "summary": {
+    "total_budgeted": 902000,
+    "total_committed": 732461,
+    "total_spent": 632163,
+    "remaining_budget": 269837,
+    "budget_utilization_percent": 70.1,
+    "project_completion_percent": 15
+  }
+}

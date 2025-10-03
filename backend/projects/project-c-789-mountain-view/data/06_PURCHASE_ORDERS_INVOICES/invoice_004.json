@@ -1,0 +1,43 @@
+{
+  "invoice_number": "INV-2024-8923",
+  "supplier": "Mountain Plumbing Supplies",
+  "date": "2024-09-25",
+  "due_date": "2024-10-15",
+  "items": [
+    {
+      "description": "Copper piping and fittings",
+      "quantity": 1,
+      "unit_price": 6800,
+      "amount": 6800
+    },
+    {
+      "description": "PVC drainage pipes and fittings",
+      "quantity": 1,
+      "unit_price": 2850,
+      "amount": 2850
+    },
+    {
+      "description": "Hot water system - Rheem 315L",
+      "quantity": 1,
+      "unit_price": 2950,
+      "amount": 2950
+    },
+    {
+      "description": "Bathroom fixtures - premium range",
+      "quantity": 1,
+      "unit_price": 8500,
+      "amount": 8500
+    },
+    {
+      "description": "Kitchen tapware - Grohe",
+      "quantity": 1,
+      "unit_price": 1280,
+      "amount": 1280
+    }
+  ],
+  "subtotal": 22380,
+  "gst": 2238,
+  "total": 24618,
+  "payment_status": "Pending",
+  "due_days_remaining": 12
+}

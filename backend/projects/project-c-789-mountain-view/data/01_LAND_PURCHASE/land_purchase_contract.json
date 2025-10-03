@@ -1,0 +1,16 @@
+{
+  "document_type": "Land Purchase Contract",
+  "date": "2024-06-15",
+  "seller": "Blue Mountains Land Trust",
+  "buyer": "Michael & Emma Chen",
+  "property_address": "789 Mountain View Terrace, Blue Mountains NSW 2780",
+  "land_area_sqm": 1200,
+  "purchase_price": 385000,
+  "deposit_paid": 38500,
+  "settlement_date": "2024-07-30",
+  "agent": "Mountain Realty Partners",
+  "agent_commission": 11550,
+  "legal_fees": 3200,
+  "stamp_duty": 18465,
+  "total_land_cost": 418215
+}

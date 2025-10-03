@@ -1,0 +1,13 @@
+{
+  "document_type": "Bushfire Attack Level Assessment",
+  "assessment_date": "2024-07-05",
+  "assessor": "Mountain Fire Safety Consultants",
+  "fee": 1850,
+  "bal_rating": "BAL-12.5",
+  "requirements": [
+    "Ember protection mesh on vents",
+    "Fire-rated windows and doors",
+    "Non-combustible wall cladding",
+    "Asset Protection Zone 20m minimum"
+  ]
+}

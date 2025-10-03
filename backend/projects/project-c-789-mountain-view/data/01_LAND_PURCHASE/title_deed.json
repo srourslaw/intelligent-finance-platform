@@ -1,0 +1,16 @@
+{
+  "document_type": "Certificate of Title",
+  "title_reference": "Vol 12456 Fol 789",
+  "registered_owners": [
+    "Michael Chen",
+    "Emma Chen"
+  ],
+  "date_registered": "2024-07-30",
+  "encumbrances": [
+    {
+      "type": "Mortgage",
+      "mortgagee": "Mountain View Credit Union",
+      "amount": 308000
+    }
+  ]
+}

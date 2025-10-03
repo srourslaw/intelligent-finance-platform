@@ -1,0 +1,14 @@
+{
+  "contractor_name": "Mountain View Roofing",
+  "trade": "Roofing",
+  "contact": "Tom Wilson",
+  "phone": "0438 234 567",
+  "abn": "23 789 456 123",
+  "license": "LIC 456789",
+  "contract_value": 52000,
+  "scope": "Colorbond roof with skylights",
+  "start_date": "2024-11-01",
+  "completion_date": "2024-12-15",
+  "payment_terms": "50% on start, 50% on completion",
+  "insurance_current": true
+}

@@ -1,0 +1,34 @@
+{
+  "contractor_name": "Alpine Plumbing Services",
+  "trade": "Plumbing",
+  "contact": "Robert Chen",
+  "phone": "0412 543 876",
+  "abn": "45 123 789 456",
+  "license": "LIC 234567",
+  "contract_value": 68000,
+  "scope": "All plumbing - rough-in and final fix",
+  "start_date": "2024-10-01",
+  "completion_date": "2025-03-15",
+  "payment_terms": "Stage payments",
+  "insurance_current": true,
+  "work_orders": [
+    {
+      "date": "2024-10-01",
+      "description": "Underground drainage",
+      "value": 12500,
+      "status": "Scheduled"
+    },
+    {
+      "date": "2024-11-15",
+      "description": "Rough-in plumbing",
+      "value": 28000,
+      "status": "Scheduled"
+    },
+    {
+      "date": "2025-02-01",
+      "description": "Final fix and commissioning",
+      "value": 27500,
+      "status": "Scheduled"
+    }
+  ]
+}
