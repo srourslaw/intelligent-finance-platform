@@ -8,6 +8,8 @@ import { DocumentViewer } from '../components/dashboard/DocumentViewer';
 import { FinancialStatements } from '../components/dashboard/FinancialStatements';
 import { FileExtraction } from '../components/dashboard/FileExtraction';
 import { AggregatedFinancials } from '../components/dashboard/AggregatedFinancials';
+import { TransactionEditor } from '../components/dashboard/TransactionEditor';
+import { ConflictResolution } from '../components/dashboard/ConflictResolution';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -512,6 +514,12 @@ export function Dashboard() {
 
         {/* File Extraction & AI Classification */}
         <FileExtraction />
+
+        {/* Transaction Editor */}
+        <TransactionEditor />
+
+        {/* Conflict Resolution */}
+        <ConflictResolution />
 
         {/* Aggregated Financial Data from Multiple Files */}
         <AggregatedFinancials />

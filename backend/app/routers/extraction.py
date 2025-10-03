@@ -343,6 +343,39 @@ async def get_extraction_result(
     return result
 
 
+@router.put("/result/{file_id}", response_model=ExtractionResult)
+async def update_extraction_result(
+    file_id: str,
+    updated_result: ExtractionResult,
+    user: dict = Depends(get_current_user)
+):
+    """
+    Update an extraction result with manually edited data.
+
+    This endpoint allows users to:
+    - Edit transaction details (description, category, amount, date)
+    - Add new transactions
+    - Delete transactions
+    - Modify confidence scores
+
+    The updated result is saved back to the extraction JSON file.
+    """
+
+    result_path = EXTRACTION_DIR / f"{file_id}.json"
+
+    if not result_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Extraction result not found for file_id: {file_id}"
+        )
+
+    # Save updated result
+    with result_path.open("w") as f:
+        json.dump(updated_result.model_dump(mode='json'), f, indent=2, default=str)
+
+    return updated_result
+
+
 @router.delete("/{file_id}")
 async def delete_extraction(
     file_id: str,

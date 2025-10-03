@@ -5,6 +5,7 @@ Processes Excel files and provides REST API for React dashboard
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation
+from app.middleware import setup_error_handling
 
 # Create FastAPI app
 app = FastAPI(
@@ -12,6 +13,9 @@ app = FastAPI(
     description="Backend API for construction project financial management",
     version="1.0.0"
 )
+
+# Setup error handling and logging middleware
+setup_error_handling(app)
 
 # Configure CORS for React frontend
 app.add_middleware(
