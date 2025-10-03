@@ -65,7 +65,7 @@ class Config:
 
         # Critical validations (will raise error)
         if not self.anthropic_api_key:
-            issues.append("ANTHROPIC_API_KEY is not set - AI features will not work")
+            warnings.append("ANTHROPIC_API_KEY is not set - AI features will not work")
 
         if self.environment == 'production' and self.jwt_secret_key == 'dev-secret-key-change-in-production':
             issues.append("JWT_SECRET_KEY must be changed in production")

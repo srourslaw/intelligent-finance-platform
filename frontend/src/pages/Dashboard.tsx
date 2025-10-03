@@ -16,6 +16,7 @@ import { CloudWebhooks } from '../components/dashboard/CloudWebhooks';
 import { SystemHealth } from '../components/dashboard/SystemHealth';
 import { TemplateGenerator } from '../components/dashboard/TemplateGenerator';
 import { FolderMonitoring } from '../components/dashboard/FolderMonitoring';
+import { AIDataMappingAnimation } from '../components/dashboard/AIDataMappingAnimation';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -247,6 +248,9 @@ export function Dashboard() {
 
       {/* Main Content */}
       <main className="max-w-[1600px] mx-auto px-6 lg:px-8 py-8 space-y-8">
+        {/* AI Data Mapping Animation */}
+        <AIDataMappingAnimation />
+
         {/* Critical Alerts */}
         {(!isProfitable || projectData.daysBehind > 0 || projectData.revenueLeakage > 0) && (
           <div className="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-lg">

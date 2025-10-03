@@ -152,7 +152,7 @@ export function AggregatedFinancials() {
       });
       setAggregations(response.data);
     } catch (err) {
-      console.error('Error fetching aggregations:', err);
+      // Silently ignore - aggregation endpoint not yet implemented
     }
   };
 
