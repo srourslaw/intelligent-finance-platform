@@ -13,6 +13,7 @@ import { ConflictResolution } from '../components/dashboard/ConflictResolution';
 import { BatchJobs } from '../components/dashboard/BatchJobs';
 import { EmailIntegration } from '../components/dashboard/EmailIntegration';
 import { CloudWebhooks } from '../components/dashboard/CloudWebhooks';
+import { SystemHealth } from '../components/dashboard/SystemHealth';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -532,6 +533,9 @@ export function Dashboard() {
 
         {/* Cloud Storage Webhooks */}
         <CloudWebhooks />
+
+        {/* System Health & Monitoring */}
+        <SystemHealth />
 
         {/* Aggregated Financial Data from Multiple Files */}
         <AggregatedFinancials />

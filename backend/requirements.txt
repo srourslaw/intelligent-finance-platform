@@ -25,3 +25,6 @@ aiofiles==23.2.1
 
 # Batch processing and scheduling
 APScheduler==3.10.4
+
+# System monitoring
+psutil==6.1.0
