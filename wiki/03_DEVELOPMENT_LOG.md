@@ -1369,3 +1369,257 @@ frontend/
 4. `a1908ba` - feat: Revamp Budget Breakdown section with comprehensive analytics
 5. `82c3e13` - feat: Transform Budget section into C-Suite Executive Analytics Dashboard
 
+---
+
+## 2025-10-03 - Session: Financial ETL System Planning
+
+### Session Duration
+Approximately 1 hour
+
+### Session Goals
+1. Review external Financial ETL System architecture proposal
+2. Critically analyze and sanitize the proposed plan
+3. Create clear, actionable implementation roadmap
+4. Document everything for session continuity
+5. Update wiki and checkpoint documentation
+
+### What Was Completed
+
+#### 1. Critical Analysis of Proposed ETL Plan
+**Reviewed**: 16-prompt implementation plan from external Claude AI conversation
+
+**Identified Strengths**:
+- File-by-file processing approach (scalable, traceable)
+- Structured JSON intermediate layer
+- AI classification with confidence scores
+- Full audit trail for financial data
+- Incremental processing philosophy
+
+**Identified Issues**:
+- ⚠️ Scope creep: 16 prompts covering 3-4 months of work
+- ⚠️ Over-engineering: Multi-tenant, white-label features not needed for MVP
+- ⚠️ Missing integration with existing dashboard
+- ⚠️ Render deployment constraints not addressed (ephemeral filesystem)
+- ⚠️ No clear MVP definition
+- ⚠️ Cost estimation missing for LLM API calls
+- ⚠️ File monitoring approach incompatible with Render
+
+#### 2. Created Sanitized Implementation Plan
+**Document**: `wiki/05_FINANCIAL_ETL_SYSTEM_PLAN.md`
+
+**Restructured to 3 Pragmatic Phases**:
+
+**Phase 1: MVP - Single File Processing (2 weeks)**
+- JSON schema design with Pydantic models
+- Excel extractor (pandas/openpyxl)
+- Simple file upload endpoint
+- Claude API integration for AI classification
+- React upload UI component
+- Display extracted JSON with confidence scores
+
+**Phase 2: Batch Processing & Aggregation (2 weeks)**
+- Multiple file uploads
+- PDF extractor (pdfplumber + OCR)
+- CSV extractor
+- Aggregation engine (combine JSONs, resolve conflicts)
+- Validation system (balance sheet validation, data quality checks)
+- Enhanced dashboard with drill-down capabilities
+
+**Phase 3: Automation & Production (2 weeks)**
+- Webhook/trigger system (alternative to file monitoring)
+- Email forwarding integration
+- Conflict resolution UI
+- Export templates (Excel, PDF, CSV)
+- Complete audit trail system
+- Error handling and recovery
+- Production deployment
+
+**Total Timeline**: 6 weeks (vs. 11+ weeks in original plan)
+
+#### 3. Key Technical Decisions Documented
+
+**Storage Strategy**:
+- Phase 1: File-based JSON in `backend/data/projects/{project_id}/extractions/`
+- Rationale: Simple, version-controllable, works on Render
+- Migration path: PostgreSQL if scaling beyond 1000s of files
+
+**AI Classification Approach**:
+- Hybrid system: Rule-based for obvious items + LLM for ambiguous
+- Phase 1: Use Claude API for all items (prove concept)
+- Phase 2: Optimize with rules to reduce costs 70%
+- Cost: $0.01-0.05 per file → optimized to $0.001-0.01 per file
+
+**File Monitoring Solution**:
+- Problem: Render ephemeral containers can't watch folders
+- Phase 1: Manual upload via dashboard
+- Phase 2: Email forwarding + Cloud storage webhooks (Google Drive, Dropbox)
+- Phase 3: API triggers via Zapier/Make.com
+
+**JSON Schema Structure**:
+```json
+{
+  "metadata": {...},
+  "extracted_data": {
+    "balance_sheet": {...},
+    "income_statement": {...},
+    "cash_flow": {...},
+    "transactions": [...]
+  },
+  "validation": {...},
+  "classification_stats": {...}
+}
+```
+
+#### 4. Scope Control (What We're NOT Building)
+
+Explicitly excluded to prevent scope creep:
+- ❌ Multi-tenant support
+- ❌ White-label customization
+- ❌ ML model training/retraining loops
+- ❌ QuickBooks/Xero integrations
+- ❌ Real-time file monitoring
+- ❌ Slack/Teams notifications
+- ❌ Mobile app
+- ❌ Advanced reporting engine
+
+**Maybe later (Phase 4+)**: Cloud storage monitoring, feedback loops, accounting software exports
+
+#### 5. Cost Analysis
+
+**Per File Costs**:
+- Excel extraction: Free (pandas/openpyxl)
+- PDF extraction: Free (pdfplumber) or $0.001 for OCR
+- AI classification: $0.01-0.05 (Claude API)
+- Storage: $0.0001
+- **Total**: ~$0.01-0.05 per file
+
+**Monthly Estimates**:
+- 100 files/month: $1-5
+- 1,000 files/month: $10-50
+- 10,000 files/month: $100-500
+
+**Optimization**: Hybrid approach reduces costs by 70%
+
+#### 6. Risk Mitigation Strategies
+
+| Risk | Mitigation |
+|------|------------|
+| AI classification inaccuracy | Show confidence scores, allow corrections, hybrid approach |
+| File format variations | Start with common formats, robust parsers, graceful degradation |
+| Render container restarts | Persistent storage, stateless design, idempotent operations |
+| API cost overruns | Per-project budgets, rate limiting, caching, hybrid classification |
+| Large file performance | Async processing, progress updates, timeout handling |
+
+#### 7. Success Metrics Defined
+
+**Phase 1**:
+- ✅ 1 file uploaded and extracted successfully
+- ✅ AI classification accuracy >90%
+- ✅ Processing time <30 seconds
+- ✅ JSON validates correctly
+
+**Phase 2**:
+- ✅ 20 files processed and aggregated
+- ✅ Balance Sheet balances correctly
+- ✅ 100% data lineage traceable
+- ✅ Aggregation handles duplicates
+
+**Phase 3**:
+- ✅ 100+ files processed reliably
+- ✅ <1% error rate
+- ✅ Average processing <20 seconds
+- ✅ Cost per file <$0.02
+- ✅ User satisfaction >4/5
+
+### Current Project State
+
+**Unchanged** - No code modifications in this session. This was pure planning and documentation.
+
+**Dashboard Features** (still working):
+- 7-tab Financial Statements
+- Enterprise Executive Dashboard
+- C-Suite Analytics
+- Document Viewer
+- All deployed on Vercel + Render
+
+### Code Changes Summary
+**Files Created**: 1
+- `wiki/05_FINANCIAL_ETL_SYSTEM_PLAN.md` (comprehensive 600+ line plan)
+
+**Files Modified**: 2
+- `wiki/CHECKPOINT_2025-10-03.md` (added ETL planning section)
+- `wiki/03_DEVELOPMENT_LOG.md` (this entry)
+
+**Code Changes**: None (planning phase only)
+
+### Technical Decisions Made
+
+1. **Phased Approach**: 3 phases × 2 weeks = 6 weeks total
+2. **MVP First**: Single file processing before batch
+3. **Storage**: File-based JSON, not database (initially)
+4. **AI**: Hybrid classification (rules + LLM)
+5. **Monitoring**: Manual upload → Email/Cloud → API triggers
+6. **Costs**: Budget $0.01-0.05 per file, optimize to $0.001-0.01
+
+### Challenges Encountered
+1. **Original plan too ambitious**: 16 prompts, 11+ weeks, over-engineered
+2. **Render constraints**: Can't do traditional file monitoring
+3. **Cost concerns**: Pure LLM approach too expensive at scale
+4. **Scope creep risk**: Many "nice-to-have" features that aren't MVP
+
+### Next Session Goals
+
+**Ready to Begin Phase 1 Implementation**:
+
+**Week 1**:
+1. Design complete JSON schema with Pydantic models
+2. Build Excel extractor (`backend/extraction/excel_extractor.py`)
+3. Create file upload endpoint (`backend/routes/upload.py`)
+4. Set up file storage structure
+
+**Week 2**:
+5. Integrate Claude API for classification (`backend/classification/ai_classifier.py`)
+6. Build React upload UI component
+7. Display extraction results with confidence scores
+8. End-to-end testing with sample files
+
+**Success Criteria**: Upload 1 Excel file → see extracted JSON → AI classifies correctly → view in dashboard
+
+### Current File Structure
+```
+intelligent-finance-platform/
+├── wiki/
+│   ├── 00_PROJECT_OVERVIEW.md
+│   ├── 01_ARCHITECTURE.md
+│   ├── 02_DATA_STRUCTURE.md
+│   ├── 03_DEVELOPMENT_LOG.md (this file)
+│   ├── 04_API_DOCUMENTATION.md
+│   ├── 05_FINANCIAL_ETL_SYSTEM_PLAN.md (NEW - comprehensive plan)
+│   ├── CHECKPOINT_2025-10-03.md (updated with ETL info)
+│
+├── frontend/ (React + Vercel)
+│   └── [existing dashboard - no changes]
+│
+├── backend/ (Python + Render)
+│   └── [existing API - no changes]
+│
+└── [existing files - no changes]
+```
+
+### Environment Setup Notes
+No changes to environment. Still using:
+- Backend: `python -m uvicorn main:app --reload` (port 8000)
+- Frontend: `npm run dev` (port 5173)
+
+### Git Commits Summary
+*Pending - will commit documentation updates next*
+
+### Documentation Status
+✅ **Complete**:
+- ETL System Plan (`wiki/05_FINANCIAL_ETL_SYSTEM_PLAN.md`)
+- Checkpoint updated with ETL initiative
+- Development log updated (this entry)
+
+**Next**: Commit to GitHub and ready to start Phase 1
+
+---

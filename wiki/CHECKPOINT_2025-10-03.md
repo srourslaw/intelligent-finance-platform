@@ -198,4 +198,50 @@ All npm packages are up to date. Key dependencies:
 **Files Created**: 1 (frontend/.env)
 **Lines of Code Added**: ~1,500+
 
-**Status**: ✅ All features working, ready for next phase of development
+**Status**: ✅ Dashboard complete, ETL system planning completed
+
+---
+
+## 🔄 New Initiative: Financial ETL System
+
+### What We're Building Next
+
+A **file-by-file financial data extraction pipeline** that:
+1. Accepts Excel, PDF, CSV files via upload
+2. Extracts structured data to JSON (one file at a time)
+3. Uses AI (Claude API) to classify line items
+4. Aggregates multiple files intelligently
+5. Feeds consolidated data to our existing dashboard
+
+### Why This Approach?
+
+**Traditional (Wrong)**: Dump 1000 files → ask AI to analyze everything → get confused/incomplete results
+
+**Our (Smart) Approach**: Process ONE file at a time → structured JSON → intelligent aggregation → complete audit trail
+
+### Implementation Plan Created
+
+See: `wiki/05_FINANCIAL_ETL_SYSTEM_PLAN.md`
+
+**3 Phases**:
+- **Phase 1 (2 weeks)**: MVP - Single file upload, extraction, AI classification
+- **Phase 2 (2 weeks)**: Batch processing, aggregation, validation
+- **Phase 3 (2 weeks)**: Automation, production hardening, deployment
+
+**Total Timeline**: 6 weeks to production-ready ETL system
+
+### Key Technical Decisions
+
+1. **Storage**: File-based JSON initially, PostgreSQL if needed later
+2. **AI Classification**: Hybrid (rules for obvious items, LLM for ambiguous)
+3. **File Monitoring**: Manual upload (Phase 1), Email/Cloud integration (Phase 2)
+4. **Cost**: ~$0.01-0.05 per file processed (Claude API)
+
+### Next Steps
+
+1. Begin Phase 1: JSON schema design
+2. Build Excel extractor
+3. Integrate Claude API for classification
+4. Create upload UI in React dashboard
+
+**Status**: 📋 Planning complete, ready to begin Phase 1 implementation
