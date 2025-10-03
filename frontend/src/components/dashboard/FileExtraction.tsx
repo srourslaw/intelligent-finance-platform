@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Upload, FileText, Check, X, AlertCircle, Loader2, Download, Eye, Trash2 } from 'lucide-react';
+import { Upload, FileText, Check, X, AlertCircle, Loader2, Eye, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -154,7 +154,7 @@ export function FileExtraction() {
     }).format(value);
   };
 
-  const getFileTypeIcon = (fileType: string) => {
+  const getFileTypeIcon = () => {
     return <FileText className="w-5 h-5" />;
   };
 
@@ -273,7 +273,7 @@ export function FileExtraction() {
               <div key={file.file_id} className="p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
-                    {getFileTypeIcon(file.file_type)}
+                    {getFileTypeIcon()}
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{file.filename}</p>
                       <p className="text-sm text-gray-500">
