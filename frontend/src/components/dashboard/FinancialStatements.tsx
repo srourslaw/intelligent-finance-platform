@@ -52,7 +52,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ projectId }) 
   const fetchConsolidatedData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
 
       const params = projectId ? { project_id: projectId } : {};
       const response = await axios.get(`${API_BASE_URL}/financials/consolidated`, {
