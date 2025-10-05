@@ -23,23 +23,29 @@
 
 ### Animation Mechanics
 ```typescript
-// Staggered start with negative progress
-for (let p = 0; p < 3; p++) {
-  particles.push({
-    // ... particle config
-    progress: -p * 0.15,  // Delayed start creates cascade
-    speed: 0.025,          // Smooth speed
-  });
+// Matrix cells light up FIRST (matching Animation.md reference)
+const cellsToActivate: number[] = [];
+for (let j = 0; j < 5; j++) {
+  const randomCellIdx = Math.floor(Math.random() * (matrixSize * matrixSize));
+  cellsToActivate.push(randomCellIdx);
+  matrixAnimationRef.current.add(randomCellIdx); // Light immediately
 }
 
-// Skip rendering until stagger delay passes
-if (particle.progress < 0) return;
+// THEN create particles to those cells
+cellsToActivate.forEach((cellIdx, idx) => {
+  for (let p = 0; p < 2; p++) {
+    particles.push({
+      progress: -(idx * 0.03 + p * 0.15), // Stagger timing
+      speed: 0.025,
+      matrixCell: cellIdx
+    });
+  }
+});
 
-// Glow rendering
-const gradient = ctx.createRadialGradient(x, y, 0, x, y, 5);
-gradient.addColorStop(0, color);
-gradient.addColorStop(1, color + '00');
-ctx.shadowBlur = 20;
+// Turn OFF cells when particles complete
+if (p.progress >= 1 && p.matrixCell !== undefined) {
+  matrixAnimationRef.current.delete(p.matrixCell);
+}
 ```
 
 ## 🔧 What's In Progress
@@ -93,11 +99,13 @@ The animation now exactly matches the HTML reference implementation provided by 
 - ✅ Animation rendering correctly in dashboard
 
 ## 📊 Session Metrics
-- **Duration**: ~1 hour
+- **Duration**: ~1.75 hours
 - **Files Modified**: 1
-- **Lines Changed**: ~300
-- **Commits**: 1
-- **Features Completed**: 1 (AI Data Mapping Animation perfected)
+- **Lines Changed**: ~400 total
+- **Commits**: 2
+- **Features Completed**:
+  - AI Data Mapping Animation (staggered particles)
+  - Matrix cell behavior refinement (cells light first)
 
 ## 🎯 Current Project Phase
 **Phase 3 Complete** - All core platform features implemented:

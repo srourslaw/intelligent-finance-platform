@@ -2267,3 +2267,133 @@ ctx.shadowColor = particle.color;
 
 **Major Achievement**: Successfully replicated HTML reference animation with staggered particles, glowing effects, and matrix ON/OFF flashing. Animation now provides smooth, visually appealing representation of AI data flow processing.
 
+---
+
+## 2025-10-04 - Session: AI Data Mapping Animation Matrix Refinement
+
+### What Was Completed
+- ✅ Fixed matrix cell lighting behavior to match Animation.md reference
+- ✅ Cells now light up FIRST before particles are created (matching reference logic)
+- ✅ Implemented proper cleanup - cells turn OFF when particles complete
+- ✅ Removed random pulsing - cells only activate when particles target them
+- ✅ Made connection lines thinner (1px) and sharper without shadow/blur
+- ✅ Changed inactive matrix cells to whiter background (Gray-100)
+- ✅ Removed shadow from matrix cells for cleaner appearance
+
+### Current Project State
+- **What's working**:
+  - Matrix cells light up immediately when file processing starts
+  - 5 random cells activate per file
+  - 2 particles per cell travel with stagger timing
+  - Cells turn OFF when particles complete (progress >= 1)
+  - No stuck cells or random pulsing
+  - Clean, sharp connection lines (1px, no shadow)
+  - Whiter inactive cells (Gray-100 vs Gray-200)
+
+- **What's in progress**:
+  - N/A - Matrix animation behavior fixed
+
+- **What's tested**:
+  - ✅ Matrix cells light up before particles arrive
+  - ✅ Cells turn off properly when particles complete
+  - ✅ No cells staying lit indefinitely
+  - ✅ Particle-to-cell matching works correctly
+  - ✅ Connection lines render sharply without blur
+
+- **What needs testing**:
+  - N/A - All features working as expected
+
+### Code Changes Summary
+- **Files modified**:
+  - `frontend/src/components/dashboard/AIDataMappingAnimation.tsx`
+    - Added `hasLitCell` property to Particle interface (currently unused but prepared for future)
+    - Changed drawCurvedConnection to use 1px lineWidth and shadowBlur = 0
+    - Removed random pulsing logic from drawAttentionMatrix
+    - Changed matrix cell activation from dual-Set to single matrixAnimationRef
+    - Changed inactive cells from Gray-200 (#E5E7EB) to Gray-100 (#F3F4F6)
+    - Removed shadow from active matrix cells
+    - Modified particle creation: cells light FIRST, then particles created
+    - Created 5 random cells per file (instead of 2 particles to random cells)
+    - Created 2 particles per activated cell with stagger: `-(idx * 0.03 + p * 0.15)`
+    - Removed particle-triggered cell lighting logic
+    - Added cell cleanup when particles complete (progress >= 1)
+
+### Technical Details
+
+**Animation Sequence (Matching Animation.md Reference)**:
+```
+1. File processing starts
+   ↓
+2. Pick 5 random matrix cells → Light them up immediately
+   ↓
+3. Create 2 particles per cell (staggered)
+   ↓
+4. Particles travel toward already-lit cells
+   ↓
+5. When particles arrive (progress >= 1) → Turn cell OFF
+```
+
+**Matrix Cell Activation Logic**:
+```typescript
+// FIRST: Activate 5 random matrix cells (they light up FIRST)
+const cellsToActivate: number[] = [];
+for (let j = 0; j < 5; j++) {
+  const randomCellIdx = Math.floor(Math.random() * (matrixSize * matrixSize));
+  cellsToActivate.push(randomCellIdx);
+  matrixAnimationRef.current.add(randomCellIdx); // Light immediately
+}
+
+// THEN: Create 2 particles to EACH activated cell
+cellsToActivate.forEach((cellIdx, idx) => {
+  for (let p = 0; p < 2; p++) {
+    particles.push({
+      // ... particle config
+      progress: -(idx * 0.03 + p * 0.15), // Stagger timing
+      matrixCell: cellIdx
+    });
+  }
+});
+```
+
+**Cell Cleanup on Particle Completion**:
+```typescript
+particlesRef.current = particlesRef.current.filter(p => {
+  if (p.progress >= 1) {
+    if (p.matrixCell !== undefined) {
+      matrixAnimationRef.current.delete(p.matrixCell); // Turn OFF
+    }
+    return false; // Remove particle
+  }
+  return true;
+});
+```
+
+**Visual Improvements**:
+- Connection lines: 1px width, shadowBlur = 0 (sharp, clean)
+- Inactive cells: #F3F4F6 (Gray-100, whiter)
+- Active cells: #A78BFA → #8B5CF6 gradient, no shadow
+
+### Performance Metrics
+- Cells per file: 5 random
+- Particles per cell: 2
+- Total particles per file: 10 (5 cells × 2 particles)
+- Stagger formula: `-(idx * 0.03 + p * 0.15)`
+- Cell ON duration: Until particle arrives (variable)
+- Particle speed: 0.025
+
+### Known Issues & Limitations
+- None identified - matrix animation working as designed per reference
+
+### Next Steps
+- Continue with other features or improvements as directed
+
+### Session Summary
+
+**Duration**: 45 minutes
+**Files Modified**: 1
+**Lines Changed**: ~100
+**Commits**: 1
+**Status**: ✅ Matrix Animation Behavior FIXED
+
+**Major Achievement**: Fixed matrix cell lighting to match Animation.md reference. Cells now light up FIRST before particles are created, creating proper visual sequence. Removed random pulsing and stuck cells. Connection lines now sharp and clean.
+
