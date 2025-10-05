@@ -1,17 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Folder,
-  FileSpreadsheet,
-  FileText,
   Brain,
   Play,
   Pause,
   RotateCcw,
-  ChevronRight,
-  ChevronDown,
-  FileImage,
-  CheckCircle2,
-  File
+  CheckCircle2
 } from 'lucide-react';
 
 interface Particle {
@@ -56,7 +49,7 @@ interface FinancialOutput {
 
 export function AIDataMappingAnimation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentPhase, setCurrentPhase] = useState(0);
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
@@ -621,18 +614,7 @@ export function AIDataMappingAnimation() {
     };
   };
 
-  const getFileIcon = (type: string) => {
-    switch (type) {
-      case 'folder': return Folder;
-      case 'excel': return FileSpreadsheet;
-      case 'pdf': return FileText;
-      case 'image': return FileImage;
-      case 'json': return File;
-      case 'csv': return FileSpreadsheet;
-      case 'md': return FileText;
-      default: return File;
-    }
-  };
+  // Removed unused getFileIcon function
 
   const getFileColor = (type: string) => {
     switch (type) {
@@ -875,7 +857,7 @@ export function AIDataMappingAnimation() {
     ctx.stroke();
   };
 
-  const drawFileTree = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+  const drawFileTree = (ctx: CanvasRenderingContext2D, _width: number, height: number) => {
     const startX = 10;
     let currentY = 40;
     const lineHeight = 12;
@@ -970,7 +952,7 @@ export function AIDataMappingAnimation() {
     renderNode(projectStructure, 0);
   };
 
-  const drawAttentionMatrix = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+  const drawAttentionMatrix = (ctx: CanvasRenderingContext2D, _width: number, height: number) => {
     if (neuronsRef.current.length < 2) return;
 
     const layer2 = neuronsRef.current[1];
@@ -1090,17 +1072,17 @@ export function AIDataMappingAnimation() {
     });
 
     // Output Hub to Outputs - Bright green connections
-    outputs.forEach((output, idx) => {
+    outputs.forEach((_output, idx) => {
       const outputX = width * 0.88;
       const outputY = height * 0.15 + (idx * height * 0.7) / (outputs.length + 1);
       drawCurvedConnection(ctx, hub.x, hub.y, outputX - 5, outputY, '#86EFAC', 0.4);
     });
   };
 
-  const drawNeuralNetwork = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+  const drawNeuralNetwork = (ctx: CanvasRenderingContext2D, _width: number, height: number) => {
     // Draw neurons with beat effect when particles hit
     neuronsRef.current.forEach((layer, layerIdx) => {
-      layer.forEach((neuron, neuronIdx) => {
+      layer.forEach((neuron, _neuronIdx) => {
         // Smooth activation from particles
         neuron.activation += (neuron.targetActivation - neuron.activation) * 0.2;
 
@@ -1391,7 +1373,7 @@ export function AIDataMappingAnimation() {
       const file = allFiles[currentFileIndex];
       const fileY = file.yPosition || height * 0.5;
       const sourceX = 190;
-      const fileColor = getFileColor(file.type);
+      // const fileColor = getFileColor(file.type); // Unused
       const nodeIdx = currentFileIndex % neuronsRef.current[0].length;
 
       // Create complete particle chain immediately (like HTML does)
