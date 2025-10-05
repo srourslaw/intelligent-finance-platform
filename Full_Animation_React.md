@@ -1,0 +1,429 @@
+import { useState, useEffect, useRef } from 'react';
+
+const FinancialTransformer = () => {
+  const canvasRef = useRef(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const [speed, setSpeed] = useState(400);
+  const [fileCounter, setFileCounter] = useState('0/82');
+  const [outputCounter, setOutputCounter] = useState('0/7');
+  const [progress, setProgress] = useState(0);
+  const particlesRef = useRef([]);
+  const speedLabels = { 700: 'Slow', 400: 'Normal', 200: 'Fast', 80: 'Ultra' };
+
+  const fileStructure = [
+    { folder: '01_LAND_PURCHASE', files: ['Land_Contract_FINAL_v3.pdf', 'Land_Costs.xlsx', 'Legal_Fees_Invoice.pdf', 'Soil_Test_Report.pdf', 'Survey_Report_Aug2024.pdf', 'Title_Deed.pdf'] },
+    { folder: '02_PERMITS_APPROVALS', files: ['Building_Permit_Application.pdf', 'Building_Permit_APPROVED.pdf', 'Council_Fees_Receipt.pdf', 'Development_Approval.pdf', 'Energy_Rating_Certificate.pdf'] },
+    { folder: '03_DESIGN_DRAWINGS', files: ['Architect_Invoice_1.pdf', 'HOUSE_A_PLANS_FINAL.pdf', 'HOUSE_A_PLANS_REV_A.pdf', 'Design_Fees.xlsx'] },
+    { folder: '04_FINANCE_INSURANCE', files: ['Loan_Agreement.pdf', 'Contract_Works_Insurance.pdf', 'Financing_Costs_Summary.xlsx', 'Interest_Calculations.xlsx'] },
+    { folder: '05_QUOTES_ESTIMATES', files: ['Initial_Project_Budget.xlsx', 'Quotes_Comparison.xlsx'] },
+    { folder: '06_PURCHASE_ORDERS', files: ['Purchase_Orders_Master.xlsx', 'Materials_Purchases_Summary.xlsx', 'Tax_Invoice_BM-1234.pdf', 'Tax_Invoice_PP-9012.pdf', 'Paid_Invoices_Register.xlsx'] },
+    { folder: '07_SUBCONTRACTORS', files: ['Contract_Electrician.pdf', 'Contract_Framer.pdf', 'Contract_Plumber.pdf', 'Subcontractor_Register.xlsx'] },
+    { folder: '08_LABOUR_TIMESHEETS', files: ['Labour_Costs_Summary.xlsx', 'Timesheets_Aug_2024.xlsx', 'Timesheets_Sept_2024.xlsx', 'Employee_Wage_Rates.xlsx'] },
+    { folder: '09_SITE_REPORTS', files: ['Site_Diary_August.xlsx', 'Site_Diary_September.xlsx', 'Weather_Delays_Log.xlsx', 'Weekly_Progress_Report.pdf'] },
+    { folder: '10_VARIATIONS', files: ['Variation_Order_Register.xlsx', 'VO_Impact_on_Budget.xlsx'] },
+    { folder: '11_CLIENT_BILLING', files: ['Client_Payment_Tracker.xlsx', 'Payment_Schedule.xlsx', 'AR_Aging_Report.xlsx', 'Revenue_Recognition_Schedule.xlsx'] },
+    { folder: '12_BUDGET_TRACKING', files: ['MASTER_PROJECT_BUDGET.xlsx', 'Budget_vs_Actual.xlsx', 'Cashflow_Forecast.xlsx', 'Monthly_Financial_Summary.xlsx', 'Profit_Margin_Calculation.xlsx'] },
+    { folder: '13_SCHEDULE_TIMELINE', files: ['Project_Schedule_Gantt.xlsx', 'Critical_Path_Analysis.xlsx', 'Milestone_Tracker.xlsx', 'Delays_Log.xlsx'] },
+    { folder: '14_COMPLIANCE', files: ['Compliance_Checklist.xlsx'] },
+    { folder: '15_DEFECTS_SNAGGING', files: ['Defects_And_Snagging.xlsx', 'Defect_Rectification_Log.xlsx', 'Snagging_Items.xlsx'] },
+    { folder: '16_HANDOVER', files: ['Handover_Checklist.xlsx', 'Keys_Register.xlsx'] },
+    { folder: '17_GENERAL_LEDGER', files: ['Chart_of_Accounts.xlsx', 'Trial_Balance_Monthly.xlsx', 'Opening_Balances_June_2024.xlsx'] },
+    { folder: '18_MISC_RANDOM', files: ['Phone_Numbers_Contacts.xlsx', 'Todo_List.xlsx'] },
+    { folder: '19_MONTHLY_CLOSE', files: ['Balance_Sheet_Sept_2024.xlsx', 'Income_Statement_Sept_2024.xlsx', 'Cash_Flow_Statement_Sept_2024.xlsx', 'Balance_Sheet_Aug_2024.xlsx'] },
+    { folder: '20_BANK_RECONCILIATION', files: ['Bank_Reconciliation_Monthly.xlsx', 'Bank_Statement_Sept_2024.pdf', 'Bank_Statement_Aug_2024.pdf'] },
+    { folder: '21_FIXED_ASSETS', files: ['Fixed_Assets_Register.xlsx'] }
+  ];
+
+  const outputs = ['Balance Sheet', 'Income Statement', 'Cash Flow Statement', 'Equity Statement', 'Ratios Dashboard', 'Assumptions', 'Instructions'];
+  const totalFiles = fileStructure.reduce((acc, f) => acc + f.files.length, 0);
+  const nodesPerLayer = 12;
+  const matrixSize = 10;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    const updateCanvasSize = () => {
+      const viz = document.querySelector('.viz-container');
+      if (viz) {
+        const rect = viz.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+    };
+    
+    // Initial size
+    setTimeout(updateCanvasSize, 100);
+    window.addEventListener('resize', updateCanvasSize);
+
+    const animate = () => {
+      if (canvas.width > 0 && canvas.height > 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawAllConnections(ctx);
+        particlesRef.current = particlesRef.current.filter(p => p.active);
+        particlesRef.current.forEach(p => drawParticle(ctx, p));
+      }
+      requestAnimationFrame(animate);
+    };
+    
+    const animationId = requestAnimationFrame(animate);
+    
+    return () => {
+      window.removeEventListener('resize', updateCanvasSize);
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
+  const getPosition = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    const vizRect = document.querySelector('.viz-container').getBoundingClientRect();
+    
+    // For file items, get position from right edge
+    if (id.startsWith('file-')) {
+      return {
+        x: rect.right - vizRect.left,
+        y: rect.top - vizRect.top + rect.height / 2
+      };
+    }
+    
+    // For output items, get position from left edge
+    if (id.startsWith('output-')) {
+      return {
+        x: rect.left - vizRect.left,
+        y: rect.top - vizRect.top + rect.height / 2
+      };
+    }
+    
+    // For all other elements (nodes, matrix, hub), use center
+    return {
+      x: rect.left - vizRect.left + rect.width / 2,
+      y: rect.top - vizRect.top + rect.height / 2
+    };
+  };
+
+  const drawCurve = (ctx, start, end, color, opacity = 0.2, width = 1) => {
+    if (!start || !end) return;
+    const dx = end.x - start.x;
+    const cp1x = start.x + dx * 0.3;
+    const cp2x = start.x + dx * 0.7;
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.bezierCurveTo(cp1x, start.y, cp2x, end.y, end.x, end.y);
+    const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
+    ctx.strokeStyle = color + hexOpacity;
+    ctx.lineWidth = width;
+    ctx.stroke();
+  };
+
+  const drawAllConnections = (ctx) => {
+    // Files to Layer 1 - draw all connections
+    let fileIdx = 0;
+    fileStructure.forEach(group => {
+      group.files.forEach(() => {
+        const nodeIdx = fileIdx % nodesPerLayer;
+        const filePos = getPosition(`file-${fileIdx}`);
+        const nodePos = getPosition(`node-1-${nodeIdx}`);
+        if (filePos && nodePos) {
+          drawCurve(ctx, filePos, nodePos, '#3b82f6', 0.25, 1.5);
+        }
+        fileIdx++;
+      });
+    });
+
+    // Layer 1 to Layer 2 - fully connected
+    for (let i = 0; i < nodesPerLayer; i++) {
+      for (let j = 0; j < nodesPerLayer; j++) {
+        const n1 = getPosition(`node-1-${i}`);
+        const n2 = getPosition(`node-2-${j}`);
+        if (n1 && n2) drawCurve(ctx, n1, n2, '#ef4444', 0.12, 1);
+      }
+    }
+
+    // Layer 2 to Matrix - fully connected
+    for (let i = 0; i < nodesPerLayer; i++) {
+      for (let j = 0; j < matrixSize; j++) {
+        const cellIdx = Math.floor(j * matrixSize + matrixSize / 2);
+        const n2 = getPosition(`node-2-${i}`);
+        const cell = getPosition(`cell-${cellIdx}`);
+        if (n2 && cell) drawCurve(ctx, n2, cell, '#a78bfa', 0.12, 1);
+      }
+    }
+
+    // Matrix to Layer 3 - fully connected
+    for (let i = 0; i < matrixSize; i++) {
+      const cellIdx = Math.floor(i * matrixSize + matrixSize / 2);
+      for (let j = 0; j < nodesPerLayer; j++) {
+        const cell = getPosition(`cell-${cellIdx}`);
+        const n3 = getPosition(`node-3-${j}`);
+        if (cell && n3) drawCurve(ctx, cell, n3, '#8b5cf6', 0.12, 1);
+      }
+    }
+
+    // Layer 3 to Layer 4 - fully connected
+    for (let i = 0; i < nodesPerLayer; i++) {
+      for (let j = 0; j < nodesPerLayer; j++) {
+        const n3 = getPosition(`node-3-${i}`);
+        const n4 = getPosition(`node-4-${j}`);
+        if (n3 && n4) drawCurve(ctx, n3, n4, '#10b981', 0.12, 1);
+      }
+    }
+
+    // Layer 4 to Output Hub
+    const hubPos = getPosition('outputHub');
+    if (hubPos) {
+      for (let i = 0; i < nodesPerLayer; i++) {
+        const n4 = getPosition(`node-4-${i}`);
+        if (n4) drawCurve(ctx, n4, hubPos, '#10b981', 0.2, 1.5);
+      }
+      
+      // Output Hub to Outputs
+      outputs.forEach((_, i) => {
+        const outPos = getPosition(`output-${i}`);
+        if (outPos) drawCurve(ctx, hubPos, outPos, '#10b981', 0.25, 1.5);
+      });
+    }
+  };
+
+  const createParticle = (startId, endId, color) => ({ start: startId, end: endId, progress: 0, speed: 0.025, color, active: true });
+
+  const updateParticle = (p) => {
+    p.progress += p.speed;
+    if (p.progress >= 1) { p.active = false; return null; }
+    const start = getPosition(p.start);
+    const end = getPosition(p.end);
+    if (!start || !end) return null;
+    const t = p.progress;
+    const dx = end.x - start.x;
+    const cp1x = start.x + dx * 0.3;
+    const cp2x = start.x + dx * 0.7;
+    const x = Math.pow(1-t, 3) * start.x + 3 * Math.pow(1-t, 2) * t * cp1x + 3 * (1-t) * t * t * cp2x + Math.pow(t, 3) * end.x;
+    const y = Math.pow(1-t, 3) * start.y + 3 * Math.pow(1-t, 2) * t * start.y + 3 * (1-t) * t * t * end.y + Math.pow(t, 3) * end.y;
+    return { x, y };
+  };
+
+  const drawParticle = (ctx, p) => {
+    const pos = updateParticle(p);
+    if (!pos) return;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
+    const gradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 5);
+    gradient.addColorStop(0, p.color);
+    gradient.addColorStop(1, p.color + '00');
+    ctx.fillStyle = gradient;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = p.color;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  };
+
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const startAnimation = async () => {
+    if (isRunning) return;
+    setIsRunning(true);
+    let processedFiles = 0;
+    
+    for (let folderIdx = 0; folderIdx < fileStructure.length; folderIdx++) {
+      const folder = fileStructure[folderIdx];
+      document.getElementById(`folder-${folderIdx}`)?.classList.add('active');
+
+      for (let fileIdx = 0; fileIdx < folder.files.length; fileIdx++) {
+        const globalFileIdx = processedFiles;
+        const fileEl = document.getElementById(`file-${globalFileIdx}`);
+        fileEl?.classList.add('active');
+        const nodeIdx = globalFileIdx % nodesPerLayer;
+        
+        for (let p = 0; p < 3; p++) setTimeout(() => particlesRef.current.push(createParticle(`file-${globalFileIdx}`, `node-1-${nodeIdx}`, '#3b82f6')), p * 50);
+        document.getElementById(`node-1-${nodeIdx}`)?.classList.add('active');
+        await sleep(speed / 6);
+
+        const node2Idx = (nodeIdx + 2) % nodesPerLayer;
+        for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`node-1-${nodeIdx}`, `node-2-${node2Idx}`, '#ef4444')), p * 60);
+        document.getElementById(`node-2-${node2Idx}`)?.classList.add('active');
+        await sleep(speed / 6);
+
+        for (let j = 0; j < 5; j++) {
+          const cellIdx = Math.floor(Math.random() * (matrixSize * matrixSize));
+          document.getElementById(`cell-${cellIdx}`)?.classList.add('active');
+          setTimeout(() => {
+            particlesRef.current.push(createParticle(`node-2-${node2Idx}`, `cell-${cellIdx}`, '#a78bfa'));
+            particlesRef.current.push(createParticle(`node-2-${node2Idx}`, `cell-${cellIdx}`, '#a78bfa'));
+          }, j * 30);
+        }
+        await sleep(speed / 6);
+
+        const node3Idx = (nodeIdx + 1) % nodesPerLayer;
+        for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`cell-${nodeIdx * matrixSize}`, `node-3-${node3Idx}`, '#8b5cf6')), p * 60);
+        document.getElementById(`node-3-${node3Idx}`)?.classList.add('active');
+        await sleep(speed / 6);
+
+        for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`node-3-${node3Idx}`, `node-4-${nodeIdx}`, '#10b981')), p * 60);
+        document.getElementById(`node-4-${nodeIdx}`)?.classList.add('active');
+        await sleep(speed / 6);
+
+        for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`node-4-${nodeIdx}`, 'outputHub', '#10b981')), p * 60);
+        document.getElementById('outputHub')?.classList.add('active');
+        await sleep(speed / 6);
+
+        const outputIdx = Math.floor(processedFiles / (totalFiles / outputs.length));
+        if (outputIdx < outputs.length) {
+          for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle('outputHub', `output-${outputIdx}`, '#10b981')), p * 60);
+          setTimeout(() => document.getElementById(`output-${outputIdx}`)?.classList.add('active'), speed / 3);
+        }
+
+        setTimeout(() => {
+          fileEl?.classList.remove('active');
+          document.getElementById(`node-1-${nodeIdx}`)?.classList.remove('active');
+          document.getElementById(`node-2-${node2Idx}`)?.classList.remove('active');
+          document.getElementById(`node-3-${node3Idx}`)?.classList.remove('active');
+          document.getElementById(`node-4-${nodeIdx}`)?.classList.remove('active');
+          document.getElementById('outputHub')?.classList.remove('active');
+          document.querySelectorAll('.matrix-cell.active').forEach(el => el.classList.remove('active'));
+        }, speed);
+
+        processedFiles++;
+        setFileCounter(`${processedFiles}/${totalFiles}`);
+        setProgress(processedFiles / totalFiles * 100);
+        await sleep(speed / 8);
+      }
+      document.getElementById(`folder-${folderIdx}`)?.classList.remove('active');
+    }
+    setOutputCounter(`${outputs.length}/${outputs.length}`);
+    setIsRunning(false);
+  };
+
+  const resetAll = () => {
+    document.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
+    setProgress(0);
+    setFileCounter(`0/${totalFiles}`);
+    setOutputCounter('0/7');
+    particlesRef.current = [];
+  };
+
+  const toggleSpeed = () => {
+    const speeds = [700, 400, 200, 80];
+    const idx = speeds.indexOf(speed);
+    setSpeed(speeds[(idx + 1) % speeds.length]);
+  };
+
+  return (
+    <div style={{ background: '#fafbfc', padding: '20px', minHeight: '100vh', position: 'relative' }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, height: '3px', background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)', width: `${progress}%`, transition: 'width 0.3s', zIndex: 1000 }} />
+      
+      <div style={{ maxWidth: '1800px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', padding: '20px 0 40px' }}>
+          <h1 style={{ fontSize: '2.2em', color: '#1f2937', marginBottom: '8px', fontWeight: 700 }}>Financial Data Transformer</h1>
+          <p style={{ color: '#6b7280', fontSize: '1em' }}>Neural Network Processing • Real-time Data Flow Visualization</p>
+        </div>
+
+        <div className="viz-container" style={{ display: 'grid', gridTemplateColumns: '220px 1fr 220px', gap: '120px', position: 'relative', minHeight: '800px', padding: '60px 20px' }}>
+          <canvas ref={canvasRef} id="mainCanvas" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }} />
+
+          <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '3px', maxHeight: '750px', overflowY: 'auto', paddingRight: '10px', perspective: '1000px' }}>
+            <div style={{ fontSize: '0.75em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '16px', paddingBottom: '10px', borderBottom: '2px solid #e5e7eb', textAlign: 'center' }}>
+              File Processing
+              <span style={{ display: 'block', fontSize: '1.1em', color: '#3b82f6', fontWeight: 700, marginTop: '6px' }}>{fileCounter}</span>
+            </div>
+            {fileStructure.map((group, groupIdx) => {
+              const startIndex = fileStructure.slice(0, groupIdx).reduce((acc, f) => acc + f.files.length, 0);
+              return (
+                <div key={groupIdx} style={{ marginBottom: '4px', transformStyle: 'preserve-3d' }}>
+                  <div id={`folder-${groupIdx}`} className="folder-header" style={{ fontSize: '0.6em', color: '#ed8936', fontWeight: 600, padding: '3px 6px', cursor: 'pointer', transition: 'all 0.2s', borderRadius: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    📁 {group.folder}
+                  </div>
+                  <div style={{ marginLeft: '12px', marginTop: '2px', display: 'flex', flexDirection: 'column', gap: '1px', transformStyle: 'preserve-3d' }}>
+                    {group.files.map((file, fileIdx) => (
+                      <div key={fileIdx} id={`file-${startIndex + fileIdx}`} className="file-item" style={{ fontSize: '0.55em', color: '#6b7280', padding: '2px 6px', cursor: 'pointer', transition: 'all 0.2s', borderRadius: '2px', transform: 'translateZ(0px)', display: 'flex', alignItems: 'center' }}>
+                        <span>📄 {file}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '80px', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <div id="layer1" style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', marginLeft: '-40px' }}>
+                <div style={{ position: 'absolute', top: '-45px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.7em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  Input Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.95em', marginTop: '2px' }}>12 nodes</span>
+                </div>
+                {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-1-${i}`} className="neural-node layer1" style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#3b82f6', transition: 'all 0.3s' }} />)}
+              </div>
+
+              <div id="layer2" style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '-45px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.7em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  Processing Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.95em', marginTop: '2px' }}>12 nodes</span>
+                </div>
+                {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-2-${i}`} className="neural-node layer2" style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#ef4444', transition: 'all 0.3s' }} />)}
+              </div>
+
+              <div style={{ position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '-45px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.7em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>Mapping Layer</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 20px)', gap: '3px' }}>
+                  {[...Array(matrixSize * matrixSize)].map((_, i) => <div key={i} id={`cell-${i}`} className="matrix-cell" style={{ width: '20px', height: '20px', background: '#f3f4f6', borderRadius: '3px', transition: 'all 0.3s' }} />)}
+                </div>
+              </div>
+
+              <div id="layer3" style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', marginRight: '-40px' }}>
+                <div style={{ position: 'absolute', top: '-45px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.7em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  Processing Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.95em', marginTop: '2px' }}>12 nodes</span>
+                </div>
+                {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-3-${i}`} className="neural-node layer3" style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#9ca3af', transition: 'all 0.3s' }} />)}
+              </div>
+
+              <div id="layer4" style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '-45px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.7em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  Output Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.95em', marginTop: '2px' }}>12 nodes</span>
+                </div>
+                {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-4-${i}`} className="neural-node layer4" style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#10b981', transition: 'all 0.3s' }} />)}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
+            <div id="outputHub" style={{ width: '20px', height: '20px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '50%', position: 'absolute', left: '-50px', top: '50%', transform: 'translateY(-50%)', boxShadow: '0 0 20px rgba(16, 185, 129, 0.4)', zIndex: 3 }} />
+            <div style={{ fontSize: '0.75em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '16px', paddingBottom: '10px', borderBottom: '2px solid #e5e7eb', textAlign: 'center', width: '100%' }}>
+              Financial Analysis
+              <span style={{ display: 'block', fontSize: '1.1em', color: '#3b82f6', fontWeight: 700, marginTop: '6px' }}>{outputCounter}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
+              {outputs.map((item, i) => (
+                <div key={i} id={`output-${i}`} className="output-item" style={{ fontSize: '0.8em', color: '#374151', padding: '8px 12px', cursor: 'pointer', transition: 'all 0.3s', borderRadius: '6px', opacity: 0.4, textAlign: 'center', border: '2px solid transparent' }}>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', background: 'white', border: '1px solid #e5e7eb', borderRadius: '50px', padding: '12px 25px', display: 'flex', gap: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', zIndex: 100 }}>
+          <button onClick={startAnimation} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>▶ Start</button>
+          <button onClick={resetAll} style={{ background: '#f3f4f6', color: '#374151', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>↻ Reset</button>
+          <button onClick={toggleSpeed} style={{ background: '#f3f4f6', color: '#374151', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>⚡ {speedLabels[speed]}</button>
+        </div>
+      </div>
+
+      <style>{`
+        .folder-header:hover { background: #fff7ed; transform: translateZ(5px); }
+        .folder-header.active { background: #fed7aa; color: #9a3412; transform: translateZ(10px); }
+        .file-item:hover { background: #f3f4f6; color: #374151; transform: translateZ(8px) translateX(2px); }
+        .file-item.active { background: #dbeafe; color: #1e40af; font-weight: 600; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); transform: translateZ(15px) translateX(5px) scale(1.05); }
+        .neural-node.active { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); animation: nodePulse 1s ease-in-out infinite; }
+        @keyframes nodePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+        .matrix-cell.active { background: #8b5cf6 !important; box-shadow: 0 0 20px rgba(139, 92, 246, 0.8); animation: matrixGlow 1s ease-in-out infinite; }
+        @keyframes matrixGlow { 0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.8); } 50% { box-shadow: 0 0 30px rgba(139, 92, 246, 1); } }
+        .output-item.active { opacity: 1; background: #dcfce7; color: #166534; font-weight: 600; transform: translateX(-3px); border: 2px solid #10b981; }
+        #outputHub.active { animation: hubPulse 1s ease-in-out infinite; }
+        @keyframes hubPulse { 0%, 100% { transform: translateY(-50%) scale(1); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); } 50% { transform: translateY(-50%) scale(1.2); box-shadow: 0 0 30px rgba(16, 185, 129, 0.8); } }
+      `}</style>
+    </div>
+  );
+};
+
+export default FinancialTransformer;

@@ -50,7 +50,9 @@ interface FinancialOutput {
 export function AIDataMappingAnimation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
+  const fileListRef = useRef<HTMLDivElement>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [scrollOffset, setScrollOffset] = useState(0);
   const [currentPhase, setCurrentPhase] = useState(0);
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [processedFiles, setProcessedFiles] = useState(new Set<string>());
@@ -836,6 +838,33 @@ export function AIDataMappingAnimation() {
     particlesRef.current = particles;
   };
 
+  // Calculate file Y position in the HTML sidebar (accounting for scroll)
+  const getFileYPosition = (filePath: string): number => {
+    const headerHeight = 35;
+    const lineHeight = 10;
+    let itemIndex = 0;
+
+    const findPosition = (node: FileNode): number | null => {
+      const currentIndex = itemIndex;
+      itemIndex++;
+
+      if (node.path === filePath) {
+        return headerHeight + (currentIndex * lineHeight) - scrollOffset;
+      }
+
+      if (node.children) {
+        for (const child of node.children) {
+          const result = findPosition(child);
+          if (result !== null) return result;
+        }
+      }
+
+      return null;
+    };
+
+    return findPosition(projectStructure) || 0;
+  };
+
   const drawCurvedConnection = (
     ctx: CanvasRenderingContext2D,
     x1: number,
@@ -1018,13 +1047,53 @@ export function AIDataMappingAnimation() {
     const matrixStartY = matrixCenterY - totalSize / 2;
 
     // Input files to Layer 1 - Bright blue connections
+    // Calculate file positions based on HTML list structure
+    const headerHeight = 35; // Header "PROJECT DIRECTORY" + file count
+    const lineHeight = 10; // Height per line (text-[8px] leading-tight with py-0)
+    const startX = 224; // Width of sidebar (w-56) = 224px
+
+    // Count total items (folders + files) to get accurate Y positions
+    let itemIndex = 0;
+    const countItems = (node: FileNode): void => {
+      itemIndex++; // Count this item (folder or file)
+      if (node.children) {
+        node.children.forEach(child => countItems(child));
+      }
+    };
+
+    // Build map of file path to Y position (accounting for scroll)
+    const filePositions = new Map<string, number>();
+    itemIndex = 0;
+    const mapPositions = (node: FileNode): void => {
+      const yPos = headerHeight + (itemIndex * lineHeight) - scrollOffset;
+      if (node.type !== 'folder') {
+        filePositions.set(node.path, yPos);
+      }
+      itemIndex++;
+      if (node.children) {
+        node.children.forEach(child => mapPositions(child));
+      }
+    };
+    mapPositions(projectStructure);
+
+    // Draw connections from files to Input Layer (matching reference)
     allFiles.forEach((file, fileIdx) => {
-      if (file.yPosition) {
-        const neuronIdx = fileIdx % layer1.length;
-        const neuron = layer1[neuronIdx];
-        if (neuron) {
-          drawCurvedConnection(ctx, 190, file.yPosition, neuron.x, neuron.y, '#93C5FD', 0.4);
-        }
+      const neuronIdx = fileIdx % layer1.length;
+      const neuron = layer1[neuronIdx];
+      const fileY = filePositions.get(file.path);
+      if (neuron && fileY) {
+        // Use blue #3b82f6 with 15% opacity (0.15) and 1px width (matching reference)
+        const dx = neuron.x - startX;
+        const cp1x = startX + dx * 0.3;
+        const cp2x = startX + dx * 0.7;
+
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.moveTo(startX, fileY);
+        ctx.bezierCurveTo(cp1x, fileY, cp2x, neuron.y, neuron.x, neuron.y);
+        ctx.strokeStyle = '#3b82f6' + Math.floor(0.15 * 255).toString(16).padStart(2, '0');
+        ctx.lineWidth = 1;
+        ctx.stroke();
       }
     });
 
@@ -1336,8 +1405,8 @@ export function AIDataMappingAnimation() {
     ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, width, height);
 
-    // Draw file tree on canvas
-    drawFileTree(ctx, width, height);
+    // File tree now rendered as HTML sidebar (removed canvas drawing)
+    // drawFileTree(ctx, width, height);
 
     // Draw all static connections first (always visible)
     drawStaticConnections(ctx, width, height);
@@ -1371,9 +1440,8 @@ export function AIDataMappingAnimation() {
 
       // Create particles for ALL phases at once (continuous flow like HTML)
       const file = allFiles[currentFileIndex];
-      const fileY = file.yPosition || height * 0.5;
-      const sourceX = 190;
-      // const fileColor = getFileColor(file.type); // Unused
+      const fileY = getFileYPosition(file.path); // Calculate Y position from HTML sidebar
+      const sourceX = 224; // Width of sidebar (w-56)
       const nodeIdx = currentFileIndex % neuronsRef.current[0].length;
 
       // Create complete particle chain immediately (like HTML does)
@@ -1650,12 +1718,74 @@ export function AIDataMappingAnimation() {
         </div>
       </div>
 
-      {/* Full-width Neural Network Canvas with Integrated File Tree */}
-      <canvas
-        ref={canvasRef}
-        className="w-full rounded-lg border border-gray-300 shadow-inner"
-        style={{ height: '600px' }}
-      />
+      {/* Canvas with Scrollable File Sidebar Overlay */}
+      <div className="relative">
+        <canvas
+          ref={canvasRef}
+          className="w-full rounded-lg border border-gray-300 shadow-inner"
+          style={{ height: '600px' }}
+        />
+
+        {/* Scrollable File List Sidebar - Flush with canvas */}
+        <div className="absolute left-0 top-0 bottom-0 w-56 bg-transparent overflow-hidden flex flex-col">
+          <div className="px-2 py-1.5 bg-transparent">
+            <div className="text-[9px] font-bold text-gray-700">PROJECT DIRECTORY</div>
+            <div className="text-[8px] text-gray-500">{allFiles.length} files</div>
+          </div>
+
+          <div
+            ref={fileListRef}
+            className="flex-1 overflow-y-auto px-1 py-0 space-y-0"
+            onScroll={(e) => setScrollOffset(e.currentTarget.scrollTop)}
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(209, 213, 219, 0.2) transparent'
+            }}
+          >
+            {(() => {
+              const renderNode = (node: FileNode, depth: number = 0): React.ReactNode[] => {
+                const results: React.ReactNode[] = [];
+                const isProcessed = node.type !== 'folder' && processedFiles.has(node.path);
+                const isCurrentFile = node.type !== 'folder' &&
+                                     isAnimating &&
+                                     allFiles[currentFileIndex]?.path === node.path;
+
+                results.push(
+                  <div
+                    key={node.path}
+                    className={`text-[8px] leading-tight py-0 transition-all ${
+                      isCurrentFile ? 'font-bold text-blue-700' :
+                      isProcessed ? 'text-green-700' :
+                      node.type === 'folder' ? 'font-semibold text-gray-800' :
+                      'text-gray-600'
+                    }`}
+                    style={{ paddingLeft: `${depth * 6 + 2}px` }}
+                  >
+                    {node.type === 'folder' ? '📁' :
+                     node.type === 'excel' ? '📊' :
+                     node.type === 'pdf' ? '📄' :
+                     node.type === 'image' ? '🖼️' :
+                     node.type === 'csv' ? '📈' :
+                     node.type === 'json' ? '📋' :
+                     node.type === 'md' ? '📝' : '📄'}{' '}
+                    {node.name}
+                  </div>
+                );
+
+                if (node.children) {
+                  node.children.forEach(child => {
+                    results.push(...renderNode(child, depth + 1));
+                  });
+                }
+
+                return results;
+              };
+
+              return renderNode(projectStructure);
+            })()}
+          </div>
+        </div>
+      </div>
 
       {/* Progress indicators */}
       <div className="mt-4 grid grid-cols-6 gap-2 text-center">
