@@ -26,6 +26,7 @@ interface Particle {
   color: string;
   size: number;
   matrixCell?: number; // Track which matrix cell to light up
+  hasLitCell?: boolean; // Track if particle has already lit the cell
 }
 
 interface Neuron {
@@ -864,11 +865,13 @@ export function AIDataMappingAnimation() {
   ) => {
     const controlX = (x1 + x2) / 2;
 
+    // Sharp, thin lines without shadow or blur
+    ctx.shadowBlur = 0;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.bezierCurveTo(controlX, y1, controlX, y2, x2, y2);
     ctx.strokeStyle = `${color}${Math.floor(alpha * 255).toString(16).padStart(2, '0')}`;
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1; // Thinner lines
     ctx.stroke();
   };
 
@@ -980,38 +983,25 @@ export function AIDataMappingAnimation() {
     const startX = matrixCenterX - totalSize / 2;
     const startY = matrixCenterY - totalSize / 2;
 
-    // VERY FAST random pulsing - cells turn on and off quickly
-    if (Math.random() < 0.3) { // 30% chance each frame for rapid flashing
-      const randomCell = Math.floor(Math.random() * (matrixSize * matrixSize));
-      const currentAnimating = matrixAnimationRef.current;
-      if (currentAnimating.has(randomCell)) {
-        currentAnimating.delete(randomCell); // Turn OFF
-      } else {
-        currentAnimating.add(randomCell); // Turn ON
-      }
-    }
-
+    // Draw matrix cells
     for (let row = 0; row < matrixSize; row++) {
       for (let col = 0; col < matrixSize; col++) {
         const cellIdx = row * matrixSize + col;
         const x = startX + col * (cellSize + gap);
         const y = startY + row * (cellSize + gap);
 
-        // Cell is active if it's in the permanent set OR animating set
-        const isActive = matrixCells.has(cellIdx) || matrixAnimationRef.current.has(cellIdx);
+        // Cell is ONLY active when a particle is arriving (from matrixAnimationRef)
+        const isActive = matrixAnimationRef.current.has(cellIdx);
 
         if (isActive) {
-          // Active cell with violet gradient (Violet-400 to Violet-500)
+          // Active cell with violet gradient (Violet-400 to Violet-500) - NO SHADOW
           const gradient = ctx.createLinearGradient(x, y, x + cellSize, y + cellSize);
           gradient.addColorStop(0, '#A78BFA'); // Violet-400
           gradient.addColorStop(1, '#8B5CF6'); // Violet-500
           ctx.fillStyle = gradient;
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = 'rgba(139, 92, 246, 0.5)';
         } else {
-          // Inactive cell - Gray-200
-          ctx.fillStyle = '#E5E7EB';
-          ctx.shadowBlur = 0;
+          // Inactive cell - More white (Gray-100)
+          ctx.fillStyle = '#F3F4F6'; // Gray-100 (whiter)
         }
 
         ctx.beginPath();
@@ -1240,19 +1230,7 @@ export function AIDataMappingAnimation() {
       ctx.shadowBlur = 0;
 
       // Activate target neuron or hub when particle reaches it
-      if (particle.progress > 0.75) {
-        // Light up matrix cell if particle has one
-        if (particle.matrixCell !== undefined) {
-          const currentAnimating = matrixAnimationRef.current;
-          // Turn cell ON when particle arrives
-          currentAnimating.add(particle.matrixCell);
-
-          // Turn OFF after short time (automatic cleanup in draw function)
-          setTimeout(() => {
-            currentAnimating.delete(particle.matrixCell!);
-          }, 100); // Flash for 100ms
-        }
-
+      if (particle.progress > 0.75 && particle.progress < 1.0) {
         // Check if targeting output hub
         const hub = outputHubRef.current;
         const hubDist = Math.sqrt(
@@ -1277,7 +1255,17 @@ export function AIDataMappingAnimation() {
       }
     });
 
-    particlesRef.current = particlesRef.current.filter(p => p.progress < 1);
+    // Remove completed particles and turn off their matrix cells
+    particlesRef.current = particlesRef.current.filter(p => {
+      if (p.progress >= 1) {
+        // Turn off the matrix cell when particle completes
+        if (p.matrixCell !== undefined) {
+          matrixAnimationRef.current.delete(p.matrixCell);
+        }
+        return false; // Remove particle
+      }
+      return true; // Keep particle
+    });
   };
 
   const drawOutputFiles = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -1457,30 +1445,40 @@ export function AIDataMappingAnimation() {
       const matrixStartX = matrixCenterX - totalSize / 2;
       const matrixStartY = matrixCenterY - totalSize / 2;
 
-      // Create 2 particles to RANDOM matrix cells - STAGGERED (like HTML)
-      const node2 = neuronsRef.current[1][(nodeIdx + 1) % neuronsRef.current[1].length];
-      for (let p = 0; p < 2; p++) {
-        // Pick random matrix cell
+      // FIRST: Activate 5 random matrix cells (they light up FIRST)
+      const cellsToActivate: number[] = [];
+      for (let j = 0; j < 5; j++) {
         const randomCellIdx = Math.floor(Math.random() * (matrixSize * matrixSize));
-        const col = randomCellIdx % matrixSize;
-        const row = Math.floor(randomCellIdx / matrixSize);
+        cellsToActivate.push(randomCellIdx);
+        // Light up the cell immediately
+        matrixAnimationRef.current.add(randomCellIdx);
+      }
+
+      // THEN: Create 2 particles to EACH activated cell with stagger
+      const node2 = neuronsRef.current[1][(nodeIdx + 1) % neuronsRef.current[1].length];
+      cellsToActivate.forEach((cellIdx, idx) => {
+        const col = cellIdx % matrixSize;
+        const row = Math.floor(cellIdx / matrixSize);
         const cellX = matrixStartX + col * (cellSize + gap) + cellSize / 2;
         const cellY = matrixStartY + row * (cellSize + gap) + cellSize / 2;
 
-        particles.push({
-          id: Date.now() + Math.random() + 20 + p * 0.1,
-          x: node2.x,
-          y: node2.y,
-          targetX: cellX,
-          targetY: cellY,
-          progress: -p * 0.15, // STAGGER START
-          speed: 0.025,
-          layer: 2,
-          color: '#A78BFA', // Violet-400 for matrix input particles
-          size: 3,
-          matrixCell: randomCellIdx, // Track which cell to light up
-        });
-      }
+        // Create 2 particles per cell
+        for (let p = 0; p < 2; p++) {
+          particles.push({
+            id: Date.now() + Math.random() + 20 + idx * 10 + p * 0.1,
+            x: node2.x,
+            y: node2.y,
+            targetX: cellX,
+            targetY: cellY,
+            progress: -(idx * 0.03 + p * 0.15), // Stagger by cell index + particle index
+            speed: 0.025,
+            layer: 2,
+            color: '#A78BFA',
+            size: 3,
+            matrixCell: cellIdx, // Track which cell (but cell is already lit)
+          });
+        }
+      });
 
       // Create 2 particles from Matrix to Layer 3 - STAGGERED (like HTML)
       const node3 = neuronsRef.current[2][nodeIdx];
