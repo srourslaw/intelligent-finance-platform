@@ -2397,3 +2397,120 @@ particlesRef.current = particlesRef.current.filter(p => {
 
 **Major Achievement**: Fixed matrix cell lighting to match Animation.md reference. Cells now light up FIRST before particles are created, creating proper visual sequence. Removed random pulsing and stuck cells. Connection lines now sharp and clean.
 
+---
+
+## 2025-10-04 - Session: Scrollable File Sidebar with Synced Connections
+
+### What Was Completed
+- ✅ Replaced canvas-drawn file tree with HTML scrollable sidebar overlay
+- ✅ Implemented scroll tracking to sync connection lines with file positions
+- ✅ Added file-to-Input-Layer connections matching reference specification
+- ✅ Particles now spawn from actual file positions (dynamic Y based on file)
+- ✅ Connection lines move with scroll to stay perfectly aligned
+- ✅ Very compact design with tiny fonts and thin scrollbar
+- ✅ File highlighting (blue=current, green=processed)
+
+### Current Project State
+- **What's working**:
+  - HTML sidebar overlay on left side of canvas (224px wide)
+  - Scrollable list showing all 142 files across 21 folders
+  - Connection lines from each file to Input Layer nodes
+  - Lines use blue #3b82f6 with 15% opacity, 1px width
+  - Bezier curves with control points at 30% and 70%
+  - Scroll tracking updates line positions in real-time
+  - Particles spawn from correct file position (not hardcoded)
+  - Thin scrollbar with 20% opacity (very subtle)
+  - File distribution: `fileIdx % 12` cycles through 12 Input Layer nodes
+
+- **What's in progress**:
+  - N/A - Scrollable sidebar feature complete
+
+- **What's tested**:
+  - ✅ Sidebar scrolls smoothly through all files
+  - ✅ Connection lines stay aligned when scrolling
+  - ✅ Particles spawn from actual file being processed
+  - ✅ File highlighting works correctly
+  - ✅ All 142 files visible in list
+
+- **What needs testing**:
+  - N/A - All features working
+
+### Code Changes Summary
+- **Files modified**:
+  - `frontend/src/components/dashboard/AIDataMappingAnimation.tsx`
+    - Added `fileListRef` and `scrollOffset` state for scroll tracking
+    - Created `getFileYPosition()` function to calculate file Y positions
+    - Modified `drawStaticConnections()` to draw from file positions
+    - Added scroll offset to all Y position calculations
+    - Removed canvas file tree drawing (`drawFileTree` commented out)
+    - Changed particle spawn from hardcoded (190, fileY) to dynamic (224, getFileYPosition())
+    - Added HTML sidebar overlay with `absolute` positioning
+    - Implemented recursive `renderNode()` to display folder structure
+    - Added `onScroll` handler to track scroll position
+    - Used inline bezier curve drawing (not helper function) for file connections
+    - File connections: `#3b82f6` + `Math.floor(0.15 * 255).toString(16)`
+
+### Technical Details
+
+**File Position Calculation**:
+```typescript
+const getFileYPosition = (filePath: string): number => {
+  const headerHeight = 35;
+  const lineHeight = 10;
+  // Recursively find file in tree structure
+  // Return headerHeight + (itemIndex * lineHeight) - scrollOffset
+};
+```
+
+**Connection Drawing (Matching Reference)**:
+```typescript
+// Blue #3b82f6 with 15% opacity, 1px width
+const dx = neuron.x - startX;
+const cp1x = startX + dx * 0.3;  // Control point 1
+const cp2x = startX + dx * 0.7;  // Control point 2
+
+ctx.bezierCurveTo(cp1x, fileY, cp2x, neuron.y, neuron.x, neuron.y);
+ctx.strokeStyle = '#3b82f6' + Math.floor(0.15 * 255).toString(16).padStart(2, '0');
+ctx.lineWidth = 1;
+```
+
+**Scroll Synchronization**:
+```typescript
+// HTML sidebar tracks scroll
+onScroll={(e) => setScrollOffset(e.currentTarget.scrollTop)}
+
+// All Y positions subtract scroll offset
+const yPos = headerHeight + (itemIndex * lineHeight) - scrollOffset;
+```
+
+**HTML Sidebar Styling**:
+- Width: `w-56` (224px)
+- Font: `text-[8px]` for files, `text-[9px]` for header
+- Scrollbar: `scrollbarColor: 'rgba(209, 213, 219, 0.2) transparent'`
+- Background: `bg-transparent` (no background)
+- Compact spacing: `py-0`, `space-y-0`, `leading-tight`
+
+### Performance Metrics
+- Total files displayed: 142
+- Sidebar width: 224px
+- Line height: 10px (very compact)
+- Scrollbar opacity: 20%
+- Connection line opacity: 15%
+- File indentation: `depth * 6 + 2px`
+
+### Known Issues & Limitations
+- None identified - scrollable sidebar working perfectly
+
+### Next Steps
+- Ready for new version/improvements as directed
+
+### Session Summary
+
+**Duration**: 1.5 hours
+**Files Modified**: 1
+**Lines Changed**: ~200
+**Commits**: 1
+**Status**: ✅ Scrollable File Sidebar COMPLETE
+
+**Major Achievement**: Successfully replaced canvas file tree with scrollable HTML sidebar overlay. Connection lines now sync perfectly with scroll position, and particles spawn from actual file locations. Matches reference specification exactly with blue lines, 15% opacity, and proper bezier curves.
+
