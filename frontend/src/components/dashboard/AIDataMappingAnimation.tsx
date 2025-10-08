@@ -456,7 +456,7 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
           </div>
         </div>
 
-        <div style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', background: 'white', border: '1px solid #e5e7eb', borderRadius: '50px', padding: '12px 25px', display: 'flex', gap: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', zIndex: 100 }}>
+        <div style={{ position: 'sticky', bottom: '30px', left: '50%', transform: 'translateX(-50%)', background: 'white', border: '1px solid #e5e7eb', borderRadius: '50px', padding: '12px 25px', display: 'flex', gap: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', zIndex: 100, marginTop: '30px', width: 'fit-content', marginLeft: 'auto', marginRight: 'auto' }}>
           <button onClick={startAnimation} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>▶ Start</button>
           <button onClick={resetAll} style={{ background: '#f3f4f6', color: '#374151', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>↻ Reset</button>
           <button onClick={toggleSpeed} style={{ background: '#f3f4f6', color: '#374151', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>⚡ {speedLabels[speed]}</button>
