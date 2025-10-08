@@ -173,6 +173,33 @@ export function Dashboard() {
     }).format(value);
   };
 
+  // Mock project structure for animation (can be replaced with real data from API)
+  const mockProjectStructure = {
+    name: projectData.name,
+    type: 'folder' as const,
+    path: '/',
+    isExpanded: true,
+    children: [
+      {
+        name: 'data',
+        type: 'folder' as const,
+        path: '/data',
+        isExpanded: true,
+        children: budgetSummary.categories.slice(0, 10).map((cat: any, idx: number) => ({
+          name: cat.category.replace(/ /g, '_'),
+          type: 'folder' as const,
+          path: `/data/${cat.category.replace(/ /g, '_')}`,
+          isExpanded: true,
+          children: [
+            { name: `${cat.category}_Budget.xlsx`, type: 'excel' as const, path: `/data/${cat.category.replace(/ /g, '_')}/${cat.category}_Budget.xlsx` },
+            { name: `${cat.category}_Actual.xlsx`, type: 'excel' as const, path: `/data/${cat.category.replace(/ /g, '_')}/${cat.category}_Actual.xlsx` },
+            { name: `${cat.category}_Invoice.pdf`, type: 'pdf' as const, path: `/data/${cat.category.replace(/ /g, '_')}/${cat.category}_Invoice.pdf` },
+          ]
+        }))
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100">
       {/* Enhanced Header */}
@@ -249,7 +276,7 @@ export function Dashboard() {
       {/* Main Content */}
       <main className="max-w-[1600px] mx-auto px-6 lg:px-8 py-8 space-y-8">
         {/* AI Data Mapping Animation */}
-        <AIDataMappingAnimation />
+        <AIDataMappingAnimation projectStructure={mockProjectStructure} />
 
         {/* Critical Alerts */}
         {(!isProfitable || projectData.daysBehind > 0 || projectData.revenueLeakage > 0) && (

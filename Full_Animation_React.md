@@ -120,70 +120,104 @@ const FinancialTransformer = () => {
   };
 
   const drawAllConnections = (ctx) => {
-    // Files to Layer 1 - draw all connections
+    // Files to Layer 1 - draw faint lines for all, will be highlighted when active
     let fileIdx = 0;
     fileStructure.forEach(group => {
       group.files.forEach(() => {
         const nodeIdx = fileIdx % nodesPerLayer;
         const filePos = getPosition(`file-${fileIdx}`);
         const nodePos = getPosition(`node-1-${nodeIdx}`);
+        const fileEl = document.getElementById(`file-${fileIdx}`);
+        const isActive = fileEl?.classList.contains('active');
+        
         if (filePos && nodePos) {
-          drawCurve(ctx, filePos, nodePos, '#3b82f6', 0.25, 1.5);
+          drawCurve(ctx, filePos, nodePos, '#3b82f6', isActive ? 0.6 : 0.05, isActive ? 1.2 : 1);
         }
         fileIdx++;
       });
     });
 
-    // Layer 1 to Layer 2 - fully connected
+    // Layer 1 to Layer 2 - pulse 4 red lines for each active input node
     for (let i = 0; i < nodesPerLayer; i++) {
+      const node1Active = document.getElementById(`node-1-${i}`)?.classList.contains('active');
+      
       for (let j = 0; j < nodesPerLayer; j++) {
         const n1 = getPosition(`node-1-${i}`);
         const n2 = getPosition(`node-2-${j}`);
-        if (n1 && n2) drawCurve(ctx, n1, n2, '#ef4444', 0.12, 1);
+        
+        // If input node is active, pulse 4 connections from it
+        const shouldPulse = node1Active && j < 4;
+        
+        if (n1 && n2) {
+          drawCurve(ctx, n1, n2, '#ef4444', shouldPulse ? 0.6 : 0.08, shouldPulse ? 1.5 : 0.8);
+        }
       }
     }
 
-    // Layer 2 to Matrix - fully connected
+    // Layer 2 to Matrix - only pulse the specific connections being used
     for (let i = 0; i < nodesPerLayer; i++) {
+      const node2Active = document.getElementById(`node-2-${i}`)?.classList.contains('active');
+      
       for (let j = 0; j < matrixSize; j++) {
         const cellIdx = Math.floor(j * matrixSize + matrixSize / 2);
         const n2 = getPosition(`node-2-${i}`);
         const cell = getPosition(`cell-${cellIdx}`);
-        if (n2 && cell) drawCurve(ctx, n2, cell, '#a78bfa', 0.12, 1);
+        const cellActive = document.getElementById(`cell-${cellIdx}`)?.classList.contains('active');
+        
+        // Only highlight if both connected elements are active
+        const isActive = node2Active && cellActive;
+        if (n2 && cell) drawCurve(ctx, n2, cell, '#a78bfa', isActive ? 0.5 : 0.08, isActive ? 1.2 : 0.8);
       }
     }
 
-    // Matrix to Layer 3 - fully connected
+    // Matrix to Layer 3 - only pulse the specific connections being used
     for (let i = 0; i < matrixSize; i++) {
       const cellIdx = Math.floor(i * matrixSize + matrixSize / 2);
+      const cellActive = document.getElementById(`cell-${cellIdx}`)?.classList.contains('active');
+      
       for (let j = 0; j < nodesPerLayer; j++) {
         const cell = getPosition(`cell-${cellIdx}`);
         const n3 = getPosition(`node-3-${j}`);
-        if (cell && n3) drawCurve(ctx, cell, n3, '#8b5cf6', 0.12, 1);
+        const node3Active = document.getElementById(`node-3-${j}`)?.classList.contains('active');
+        
+        // Only highlight if both connected elements are active
+        const isActive = cellActive && node3Active;
+        if (cell && n3) drawCurve(ctx, cell, n3, '#8b5cf6', isActive ? 0.5 : 0.08, isActive ? 1.2 : 0.8);
       }
     }
 
-    // Layer 3 to Layer 4 - fully connected
+    // Layer 3 to Layer 4 - only pulse the specific connections being used
     for (let i = 0; i < nodesPerLayer; i++) {
+      const node3Active = document.getElementById(`node-3-${i}`)?.classList.contains('active');
+      
       for (let j = 0; j < nodesPerLayer; j++) {
         const n3 = getPosition(`node-3-${i}`);
         const n4 = getPosition(`node-4-${j}`);
-        if (n3 && n4) drawCurve(ctx, n3, n4, '#10b981', 0.12, 1);
+        const node4Active = document.getElementById(`node-4-${j}`)?.classList.contains('active');
+        
+        // Only highlight if both connected nodes are active
+        const isActive = node3Active && node4Active;
+        if (n3 && n4) drawCurve(ctx, n3, n4, '#10b981', isActive ? 0.5 : 0.08, isActive ? 1.2 : 0.8);
       }
     }
 
-    // Layer 4 to Output Hub
+    // Layer 4 to Output Hub - only pulse when both are active
     const hubPos = getPosition('outputHub');
+    const hubActive = document.getElementById('outputHub')?.classList.contains('active');
     if (hubPos) {
       for (let i = 0; i < nodesPerLayer; i++) {
         const n4 = getPosition(`node-4-${i}`);
-        if (n4) drawCurve(ctx, n4, hubPos, '#10b981', 0.2, 1.5);
+        const node4Active = document.getElementById(`node-4-${i}`)?.classList.contains('active');
+        const isActive = node4Active && hubActive;
+        if (n4) drawCurve(ctx, n4, hubPos, '#10b981', isActive ? 0.6 : 0.15, isActive ? 1.5 : 1);
       }
       
-      // Output Hub to Outputs
+      // Output Hub to Outputs - only pulse when both are active
       outputs.forEach((_, i) => {
         const outPos = getPosition(`output-${i}`);
-        if (outPos) drawCurve(ctx, hubPos, outPos, '#10b981', 0.25, 1.5);
+        const outActive = document.getElementById(`output-${i}`)?.classList.contains('active');
+        const isActive = hubActive && outActive;
+        if (outPos) drawCurve(ctx, hubPos, outPos, '#10b981', isActive ? 0.7 : 0.2, isActive ? 1.5 : 1);
       });
     }
   };
