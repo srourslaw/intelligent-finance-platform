@@ -15,11 +15,13 @@ interface AIDataMappingAnimationProps {
 export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [speed, setSpeed] = useState(400);
   const [fileCounter, setFileCounter] = useState('0/0');
   const [outputCounter, setOutputCounter] = useState('0/7');
   const [progress, setProgress] = useState(0);
   const particlesRef = useRef<any[]>([]);
+  const isPausedRef = useRef(false);
   const speedLabels: Record<number, string> = { 700: 'Slow', 400: 'Normal', 200: 'Fast', 80: 'Ultra' };
 
   const outputs = ['Balance Sheet', 'Income Statement', 'Cash Flow Statement', 'Equity Statement', 'Ratios Dashboard', 'Assumptions', 'Instructions'];
@@ -274,18 +276,31 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
     ctx.shadowBlur = 0;
   };
 
-  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const sleep = (ms: number) => new Promise<void>(resolve => {
+    const checkPause = () => {
+      if (!isPausedRef.current) {
+        resolve();
+      } else {
+        setTimeout(checkPause, 50);
+      }
+    };
+    setTimeout(checkPause, ms);
+  });
 
   const startAnimation = async () => {
     if (isRunning) return;
     setIsRunning(true);
+    setIsPaused(false);
+    isPausedRef.current = false;
     let processedFiles = 0;
 
     for (let folderIdx = 0; folderIdx < fileStructure.length; folderIdx++) {
+      if (isPausedRef.current) break;
       const folder = fileStructure[folderIdx];
       document.getElementById(`folder-${folderIdx}`)?.classList.add('active');
 
       for (let fileIdx = 0; fileIdx < folder.files.length; fileIdx++) {
+        if (isPausedRef.current) break;
         const globalFileIdx = processedFiles;
         const fileEl = document.getElementById(`file-${globalFileIdx}`);
         fileEl?.classList.add('active');
@@ -346,11 +361,25 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
       }
       document.getElementById(`folder-${folderIdx}`)?.classList.remove('active');
     }
-    setOutputCounter(`${outputs.length}/${outputs.length}`);
-    setIsRunning(false);
+    if (!isPausedRef.current) {
+      setOutputCounter(`${outputs.length}/${outputs.length}`);
+      setIsRunning(false);
+    }
+  };
+
+  const togglePlayPause = () => {
+    if (!isRunning) {
+      startAnimation();
+    } else {
+      isPausedRef.current = !isPausedRef.current;
+      setIsPaused(isPausedRef.current);
+    }
   };
 
   const resetAll = () => {
+    isPausedRef.current = false;
+    setIsPaused(false);
+    setIsRunning(false);
     document.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
     setProgress(0);
     setFileCounter(`0/${totalFiles}`);
@@ -457,7 +486,9 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
         </div>
 
         <div style={{ position: 'sticky', bottom: '30px', left: '50%', transform: 'translateX(-50%)', background: 'white', border: '1px solid #e5e7eb', borderRadius: '50px', padding: '12px 25px', display: 'flex', gap: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', zIndex: 100, marginTop: '30px', width: 'fit-content', marginLeft: 'auto', marginRight: 'auto' }}>
-          <button onClick={startAnimation} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>▶ Start</button>
+          <button onClick={togglePlayPause} style={{ background: isRunning && !isPaused ? '#f59e0b' : '#3b82f6', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>
+            {isRunning && !isPaused ? '⏸ Pause' : '▶ Start'}
+          </button>
           <button onClick={resetAll} style={{ background: '#f3f4f6', color: '#374151', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>↻ Reset</button>
           <button onClick={toggleSpeed} style={{ background: '#f3f4f6', color: '#374151', border: 'none', padding: '8px 20px', borderRadius: '20px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s', fontSize: '0.85em' }}>⚡ {speedLabels[speed]}</button>
         </div>
