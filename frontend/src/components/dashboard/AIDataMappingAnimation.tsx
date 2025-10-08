@@ -22,6 +22,7 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   const [progress, setProgress] = useState(0);
   const particlesRef = useRef<any[]>([]);
   const isPausedRef = useRef(false);
+  const shouldStopRef = useRef(false);
   const speedLabels: Record<number, string> = { 700: 'Slow', 400: 'Normal', 200: 'Fast', 80: 'Ultra' };
 
   const outputs = ['Balance Sheet', 'Income Statement', 'Cash Flow Statement', 'Equity Statement', 'Ratios Dashboard', 'Assumptions', 'Instructions'];
@@ -278,7 +279,9 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
 
   const sleep = (ms: number) => new Promise<void>(resolve => {
     const checkPause = () => {
-      if (!isPausedRef.current) {
+      if (shouldStopRef.current) {
+        resolve(); // Exit immediately if stopped
+      } else if (!isPausedRef.current) {
         resolve();
       } else {
         setTimeout(checkPause, 50);
@@ -292,15 +295,16 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
     setIsRunning(true);
     setIsPaused(false);
     isPausedRef.current = false;
+    shouldStopRef.current = false;
     let processedFiles = 0;
 
     for (let folderIdx = 0; folderIdx < fileStructure.length; folderIdx++) {
-      if (isPausedRef.current) break;
+      if (isPausedRef.current || shouldStopRef.current) break;
       const folder = fileStructure[folderIdx];
       document.getElementById(`folder-${folderIdx}`)?.classList.add('active');
 
       for (let fileIdx = 0; fileIdx < folder.files.length; fileIdx++) {
-        if (isPausedRef.current) break;
+        if (isPausedRef.current || shouldStopRef.current) break;
         const globalFileIdx = processedFiles;
         const fileEl = document.getElementById(`file-${globalFileIdx}`);
         fileEl?.classList.add('active');
@@ -377,9 +381,13 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   };
 
   const resetAll = () => {
+    // Signal animation to stop
+    shouldStopRef.current = true;
     isPausedRef.current = false;
     setIsPaused(false);
     setIsRunning(false);
+
+    // Clear all visual states
     document.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
     setProgress(0);
     setFileCounter(`0/${totalFiles}`);
