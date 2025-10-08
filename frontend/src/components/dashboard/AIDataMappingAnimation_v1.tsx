@@ -886,6 +886,7 @@ export function AIDataMappingAnimation() {
     ctx.stroke();
   };
 
+  // @ts-ignore - Kept for reference, used in earlier version
   const drawFileTree = (ctx: CanvasRenderingContext2D, _width: number, height: number) => {
     const startX = 10;
     let currentY = 40;

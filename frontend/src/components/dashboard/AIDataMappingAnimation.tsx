@@ -30,14 +30,14 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   const buildFileStructure = (node: FileNode): { folder: string; files: string[] }[] => {
     const result: { folder: string; files: string[] }[] = [];
 
-    const traverse = (n: FileNode, parentPath: string = '') => {
+    const traverse = (n: FileNode) => {
       if (n.type === 'folder' && n.children) {
         const files: string[] = [];
         n.children.forEach(child => {
           if (child.type !== 'folder') {
             files.push(child.name);
           } else {
-            traverse(child, n.name);
+            traverse(child);
           }
         });
         if (files.length > 0) {

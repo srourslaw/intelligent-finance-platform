@@ -185,7 +185,7 @@ export function Dashboard() {
         type: 'folder' as const,
         path: '/data',
         isExpanded: true,
-        children: budgetSummary.categories.slice(0, 10).map((cat: any, idx: number) => ({
+        children: budgetSummary.categories.slice(0, 10).map((cat: any) => ({
           name: cat.category.replace(/ /g, '_'),
           type: 'folder' as const,
           path: `/data/${cat.category.replace(/ /g, '_')}`,
