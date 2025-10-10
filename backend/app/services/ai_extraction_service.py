@@ -1,7 +1,7 @@
 """
 AI-Powered Financial Document Extraction Service
 
-Uses Anthropic Claude API to intelligently parse financial documents
+Uses Google Gemini API to intelligently parse financial documents
 (invoices, receipts, purchase orders) into structured transaction data.
 
 Inspired by: https://github.com/Ramandsingh/nextjs_documents2
@@ -11,7 +11,14 @@ import os
 import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-from anthropic import Anthropic
+
+# Try importing Google Generative AI
+try:
+    import google.generativeai as genai
+    GENAI_AVAILABLE = True
+except ImportError:
+    GENAI_AVAILABLE = False
+
 from app.config import get_config
 
 config = get_config()
@@ -23,13 +30,20 @@ class AIExtractionService:
     """
 
     def __init__(self):
-        """Initialize the Anthropic client."""
+        """Initialize the Gemini client."""
         self.client = None
-        if config.anthropic_api_key:
+        self.model = None
+
+        # Use Gemini API key (free tier available)
+        gemini_api_key = os.environ.get("GEMINI_API_KEY", "AIzaSyCPvX2uauYs9VsXAn54aV2HQkV7Z757P_w")
+
+        if GENAI_AVAILABLE and gemini_api_key:
             try:
-                self.client = Anthropic(api_key=config.anthropic_api_key)
+                genai.configure(api_key=gemini_api_key)
+                self.model = genai.GenerativeModel('gemini-1.5-flash')
+                print("✅ Gemini AI initialized successfully")
             except Exception as e:
-                print(f"Failed to initialize Anthropic client: {e}")
+                print(f"Failed to initialize Gemini client: {e}")
 
     def extract_transactions(self, raw_text: str, document_type: str = "invoice") -> Dict[str, Any]:
         """
@@ -42,31 +56,41 @@ class AIExtractionService:
         Returns:
             Structured dictionary with extracted financial data
         """
-        if not self.client:
+        if not self.model:
             return self._fallback_extraction(raw_text)
 
         try:
             prompt = self._build_extraction_prompt(raw_text, document_type)
 
-            response = self.client.messages.create(
-                model="claude-3-5-sonnet-20241022",
-                max_tokens=4096,
-                temperature=0,  # Deterministic for consistent extraction
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
+            # Generate with Gemini
+            response = self.model.generate_content(
+                prompt,
+                generation_config={
+                    "temperature": 0,  # Deterministic for consistent extraction
+                    "max_output_tokens": 4096,
+                }
             )
 
+            # Extract JSON from response (Gemini may wrap it in markdown)
+            response_text = response.text.strip()
+
+            # Remove markdown code blocks if present
+            if response_text.startswith("```json"):
+                response_text = response_text[7:]
+            if response_text.startswith("```"):
+                response_text = response_text[3:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3]
+
+            response_text = response_text.strip()
+
             # Parse the JSON response
-            extracted_data = json.loads(response.content[0].text)
+            extracted_data = json.loads(response_text)
 
             # Add metadata
             extracted_data["extraction_metadata"] = {
                 "extracted_at": datetime.utcnow().isoformat(),
-                "model": "claude-3-5-sonnet-20241022",
+                "model": "gemini-1.5-flash",
                 "document_type": document_type,
                 "confidence": self._calculate_confidence(extracted_data)
             }
@@ -75,6 +99,8 @@ class AIExtractionService:
 
         except Exception as e:
             print(f"AI extraction failed: {e}")
+            import traceback
+            traceback.print_exc()
             return self._fallback_extraction(raw_text)
 
     def _build_extraction_prompt(self, raw_text: str, document_type: str) -> str:
@@ -196,7 +222,7 @@ IMPORTANT:
                 "model": "fallback",
                 "document_type": "unknown",
                 "confidence": 0.0,
-                "note": "AI extraction not available - ANTHROPIC_API_KEY not set"
+                "note": "AI extraction not available - Install: pip install google-generativeai"
             }
         }
 
