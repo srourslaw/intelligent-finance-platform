@@ -3,7 +3,17 @@ import {
   DollarSign, TrendingDown, TrendingUp, AlertTriangle, LogOut, ArrowLeft,
   Activity, Target, Clock, Briefcase, PieChart as PieChartIcon, BarChart3, FileText
 } from 'lucide-react';
+import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
+import { DocumentViewer } from '../components/dashboard/DocumentViewer';
+import { FinancialStatements } from '../components/dashboard/FinancialStatements';
 import { DemoFinancialWorkflow } from '../components/dashboard/DemoFinancialWorkflow';
+import { AggregatedFinancials } from '../components/dashboard/AggregatedFinancials';
+import { BatchJobs } from '../components/dashboard/BatchJobs';
+import { EmailIntegration } from '../components/dashboard/EmailIntegration';
+import { CloudWebhooks } from '../components/dashboard/CloudWebhooks';
+import { SystemHealth } from '../components/dashboard/SystemHealth';
+import { TemplateGenerator } from '../components/dashboard/TemplateGenerator';
+import { FolderMonitoring } from '../components/dashboard/FolderMonitoring';
 import { AIDataMappingAnimation } from '../components/dashboard/AIDataMappingAnimation';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
@@ -528,8 +538,38 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Demo Financial Workflow - Working demo with real data */}
+        {/* Budget Treemap */}
+        <BudgetTreemap projectId={selectedProjectId} />
+
+        {/* Document Viewer */}
+        <DocumentViewer projectId={selectedProjectId} />
+
+        {/* AI-Consolidated Financial Statements */}
+        <FinancialStatements projectId={selectedProjectId} />
+
+        {/* Demo Financial Workflow - Files, Transactions, Conflicts, Jobs */}
         <DemoFinancialWorkflow />
+
+        {/* Batch Jobs & Scheduling */}
+        <BatchJobs />
+
+        {/* Email Integration */}
+        <EmailIntegration />
+
+        {/* Cloud Storage Webhooks */}
+        <CloudWebhooks />
+
+        {/* System Health & Monitoring */}
+        <SystemHealth />
+
+        {/* Excel Template Generator */}
+        <TemplateGenerator />
+
+        {/* Local Folder Monitoring */}
+        <FolderMonitoring />
+
+        {/* Aggregated Financial Data from Multiple Files */}
+        <AggregatedFinancials />
       </main>
     </div>
   );

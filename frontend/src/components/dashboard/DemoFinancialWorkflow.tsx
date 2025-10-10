@@ -1,17 +1,19 @@
 import { useState } from 'react';
-import { FileText, CheckCircle2, AlertCircle, Eye, Edit2, GitCompare } from 'lucide-react';
+import { FileText, CheckCircle2, AlertCircle, Eye, Edit2, GitCompare, Clock } from 'lucide-react';
 import {
   DEMO_PROJECTS,
   DEMO_EXTRACTED_FILES,
   DEMO_TRANSACTIONS,
-  DEMO_CONFLICTS
+  DEMO_CONFLICTS,
+  DEMO_BATCH_JOBS
 } from '../../services/demoData';
 
 export function DemoFinancialWorkflow() {
   const [selectedProject, setSelectedProject] = useState(DEMO_PROJECTS[0].id);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [selectedTab, setSelectedTab] = useState<'files' | 'transactions' | 'conflicts'>('files');
+  const [selectedTab, setSelectedTab] = useState<'files' | 'transactions' | 'conflicts' | 'jobs'>('files');
 
+  const currentProject = DEMO_PROJECTS.find(p => p.id === selectedProject);
   const fileTransactions = selectedFile
     ? DEMO_TRANSACTIONS.filter(t => t.file_id === selectedFile)
     : DEMO_TRANSACTIONS;
@@ -33,38 +35,32 @@ export function DemoFinancialWorkflow() {
 
   return (
     <div className="space-y-6">
-      {/* Clear Title & Description */}
-      <div className="bg-white rounded-xl border-2 border-blue-200 p-6 mb-6">
-        <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">📊 Financial Data Processing Demo</h2>
-          <p className="text-gray-600 text-lg">
-            See how AI extracts and organizes financial data from construction project files
-          </p>
-        </div>
+      {/* Demo Mode Banner */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <h3 className="font-semibold text-blue-900 mb-1">📊 Demo Mode Active</h3>
+            <p className="text-sm text-blue-700 mb-3">
+              Exploring real construction project data from <strong>{currentProject?.name}</strong>.
+              This demonstrates the AI-powered financial extraction and processing workflow without needing a backend API.
+            </p>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">🎯 What This Shows:</h3>
-          <div className="grid md:grid-cols-2 gap-3 text-sm text-blue-800">
-            <div>✓ Upload Excel, PDF, or CSV files</div>
-            <div>✓ AI reads and extracts transaction data</div>
-            <div>✓ Edit and verify extracted information</div>
-            <div>✓ Detect duplicate entries across files</div>
-          </div>
-
-          {/* Project Selector */}
-          <div className="flex items-center gap-3 mt-4 pt-4 border-t border-blue-200">
-            <label className="text-sm font-semibold text-blue-900">Viewing Project:</label>
-            <select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              className="flex-1 px-3 py-2 border-2 border-blue-300 rounded-lg bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {DEMO_PROJECTS.map(project => (
-                <option key={project.id} value={project.id}>
-                  {project.name} — {project.client}
-                </option>
-              ))}
-            </select>
+            {/* Project Selector */}
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium text-blue-900">Select Project:</label>
+              <select
+                value={selectedProject}
+                onChange={(e) => setSelectedProject(e.target.value)}
+                className="px-3 py-1.5 border border-blue-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {DEMO_PROJECTS.map(project => (
+                  <option key={project.id} value={project.id}>
+                    {project.name} - {project.client}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -104,7 +100,18 @@ export function DemoFinancialWorkflow() {
               }`}
             >
               <GitCompare className="w-4 h-4" />
-              Duplicates ({DEMO_CONFLICTS.length})
+              Conflicts ({DEMO_CONFLICTS.length})
+            </button>
+            <button
+              onClick={() => setSelectedTab('jobs')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                selectedTab === 'jobs'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Clock className="w-4 h-4" />
+              Batch Jobs ({DEMO_BATCH_JOBS.filter(j => j.status === 'active').length})
             </button>
           </nav>
         </div>
@@ -113,12 +120,9 @@ export function DemoFinancialWorkflow() {
         <div className="p-6">
           {selectedTab === 'files' && (
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">📁 Step 1: Upload Files</h3>
-              <p className="text-base text-gray-700 mb-1">
-                You upload your messy Excel files, PDFs, or scanned receipts here.
-              </p>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">📁 Extracted Files</h3>
               <p className="text-sm text-gray-600 mb-4">
-                The AI automatically reads each file, identifies what type it is (invoice, receipt, budget), and gives a confidence score on how well it could read it.
+                Files uploaded from <strong>/{currentProject?.id}/data/</strong>. AI has extracted financial data, classified documents, and assigned confidence scores.
               </p>
 
               <div className="space-y-3">
@@ -174,13 +178,10 @@ export function DemoFinancialWorkflow() {
 
           {selectedTab === 'transactions' && (
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">✏️ Step 2: Review & Edit Transactions</h3>
-              <p className="text-base text-gray-700 mb-1">
-                The AI pulled out all the transactions from your files - dates, amounts, descriptions.
-              </p>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">✏️ Transaction Editor</h3>
               <p className="text-sm text-gray-600 mb-4">
-                You can review what it found and fix any mistakes. Green = income, Red = expenses.
-                {selectedFile && ` Currently showing only transactions from ${DEMO_EXTRACTED_FILES.find(f => f.file_id === selectedFile)?.filename}.`}
+                AI-extracted transactions from financial documents. Edit descriptions, amounts, or categories as needed.
+                {selectedFile && ` Showing transactions from ${DEMO_EXTRACTED_FILES.find(f => f.file_id === selectedFile)?.filename}.`}
               </p>
 
               {selectedFile && (
@@ -239,12 +240,9 @@ export function DemoFinancialWorkflow() {
 
           {selectedTab === 'conflicts' && (
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">⚖️ Step 3: Handle Duplicates</h3>
-              <p className="text-base text-gray-700 mb-1">
-                Sometimes the same transaction appears in multiple files (like an invoice in both your email and your budget sheet).
-              </p>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">⚖️ Conflict Resolution</h3>
               <p className="text-sm text-gray-600 mb-4">
-                The AI automatically picks the version it's most confident about, but you can choose a different one if you want.
+                Duplicate transactions found across multiple files. The system auto-selects the highest confidence version, but you can override.
               </p>
 
               <div className="space-y-4">
@@ -293,6 +291,57 @@ export function DemoFinancialWorkflow() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {selectedTab === 'jobs' && (
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">⏰ Scheduled Batch Jobs</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Automated tasks that run on a schedule to aggregate data, detect conflicts, and generate reports.
+              </p>
+
+              <div className="space-y-3">
+                {DEMO_BATCH_JOBS.map(job => (
+                  <div key={job.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{job.name}</h4>
+                          <p className="text-sm text-gray-600">{job.description}</p>
+                        </div>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        job.status === 'active'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {job.status.toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-4 mt-3 text-sm">
+                      <div>
+                        <div className="text-gray-600 font-medium">Schedule</div>
+                        <div className="text-gray-900 font-mono text-xs">{job.schedule}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 font-medium">Last Run</div>
+                        <div className="text-gray-900">{job.last_run ? formatDate(job.last_run) : 'Never'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 font-medium">Next Run</div>
+                        <div className="text-gray-900">{job.next_run ? formatDate(job.next_run) : 'N/A'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 font-medium">Success Rate</div>
+                        <div className="text-green-600 font-semibold">{Math.round(job.success_rate * 100)}%</div>
+                      </div>
                     </div>
                   </div>
                 ))}
