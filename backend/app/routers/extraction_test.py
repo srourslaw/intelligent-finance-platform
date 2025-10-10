@@ -10,7 +10,7 @@ import json
 import time
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
@@ -31,8 +31,8 @@ EXTRACTION_OUTPUT_DIR.mkdir(exist_ok=True)
 class Transaction(BaseModel):
     description: str
     amount: float
-    date: str | None = None
-    category: str | None = None
+    date: Optional[str] = None
+    category: Optional[str] = None
     confidence: float
 
 
@@ -44,13 +44,13 @@ class ExtractionMethodResult(BaseModel):
     processing_time: float
     text_preview: str
     transactions: List[Transaction]
-    saved_to: str | None = None
+    saved_to: Optional[str] = None
 
 
 class ComparisonResponse(BaseModel):
     file_name: str
-    mineru: ExtractionMethodResult | None
-    pdfplumber: ExtractionMethodResult | None
+    mineru: Optional[ExtractionMethodResult]
+    pdfplumber: Optional[ExtractionMethodResult]
 
 
 def save_extraction_to_json(
