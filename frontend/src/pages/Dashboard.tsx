@@ -6,10 +6,8 @@ import {
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
 import { FinancialStatements } from '../components/dashboard/FinancialStatements';
-import { FileExtraction } from '../components/dashboard/FileExtraction';
+import { DemoFinancialWorkflow } from '../components/dashboard/DemoFinancialWorkflow';
 import { AggregatedFinancials } from '../components/dashboard/AggregatedFinancials';
-import { TransactionEditor } from '../components/dashboard/TransactionEditor';
-import { ConflictResolution } from '../components/dashboard/ConflictResolution';
 import { BatchJobs } from '../components/dashboard/BatchJobs';
 import { EmailIntegration } from '../components/dashboard/EmailIntegration';
 import { CloudWebhooks } from '../components/dashboard/CloudWebhooks';
@@ -549,14 +547,8 @@ export function Dashboard() {
         {/* AI-Consolidated Financial Statements */}
         <FinancialStatements projectId={selectedProjectId} />
 
-        {/* File Extraction & AI Classification */}
-        <FileExtraction />
-
-        {/* Transaction Editor */}
-        <TransactionEditor />
-
-        {/* Conflict Resolution */}
-        <ConflictResolution />
+        {/* Demo Financial Workflow - Files, Transactions, Conflicts, Jobs */}
+        <DemoFinancialWorkflow />
 
         {/* Batch Jobs & Scheduling */}
         <BatchJobs />
