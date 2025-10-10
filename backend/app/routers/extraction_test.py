@@ -138,11 +138,15 @@ def save_extraction_to_json(
 
 
 @router.post("/test-comparison", response_model=ComparisonResponse)
-async def test_extraction_comparison(file: UploadFile = File(...)):
+async def test_extraction_comparison(
+    file: UploadFile = File(...)
+):
     """
     Test PDF extraction with both MinerU and pdfplumber, then save results.
 
     Returns comparison of both methods and saves structured JSON for financial statements.
+
+    NOTE: This endpoint does NOT require authentication for testing purposes.
     """
 
     if not file.filename or not file.filename.endswith('.pdf'):
