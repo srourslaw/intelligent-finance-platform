@@ -134,7 +134,7 @@ def save_extraction_to_json(
     with summary_file.open("w") as f:
         json.dump(summary, f, indent=2, default=str)
 
-    return str(output_file.relative_to(Path.cwd()))
+    return str(output_file)
 
 
 @router.post("/test-comparison", response_model=ComparisonResponse)
@@ -167,9 +167,20 @@ async def test_extraction_comparison(
         mineru_result = None
         try:
             start_time = time.time()
+
+            # Get MinerU service and extract raw text
+            mineru_service = get_mineru_service()
+            if mineru_service:
+                mineru_extraction = mineru_service.extract_pdf(str(temp_file))
+                raw_text = mineru_extraction.get('text', '')
+            else:
+                raw_text = "MinerU service not available"
+
+            processing_time_mineru = time.time() - start_time
+
+            # Also run through PDFExtractor to get structured transactions
             extractor_mineru = PDFExtractor(use_mineru=True)
             extraction_mineru = extractor_mineru.extract(str(temp_file))
-            processing_time_mineru = time.time() - start_time
 
             # Convert transactions to dict
             transactions_mineru = [
@@ -190,8 +201,8 @@ async def test_extraction_comparison(
                 "mineru",
                 {
                     "confidence": extraction_mineru.metadata.confidence_score,
-                    "text": str(extraction_mineru.extracted_data)[:1000],  # Preview
-                    "text_length": len(str(extraction_mineru.extracted_data)),
+                    "text": raw_text[:1000],  # Preview of raw text
+                    "text_length": len(raw_text),
                 },
                 transactions_mineru
             )
@@ -199,10 +210,10 @@ async def test_extraction_comparison(
             mineru_result = ExtractionMethodResult(
                 method="mineru",
                 confidence=extraction_mineru.metadata.confidence_score,
-                text_length=len(str(extraction_mineru.extracted_data)),
+                text_length=len(raw_text),
                 transactions_found=len(transactions_mineru),
                 processing_time=processing_time_mineru,
-                text_preview=str(extraction_mineru.extracted_data)[:500],
+                text_preview=raw_text[:500],
                 transactions=[
                     Transaction(
                         description=t["description"],
@@ -222,9 +233,19 @@ async def test_extraction_comparison(
         pdfplumber_result = None
         try:
             start_time = time.time()
+
+            # Extract raw text with pdfplumber
+            import pdfplumber
+            raw_text_pdf = ""
+            with pdfplumber.open(str(temp_file)) as pdf:
+                for page in pdf.pages:
+                    raw_text_pdf += page.extract_text() or ""
+
+            processing_time_pdf = time.time() - start_time
+
+            # Also run through PDFExtractor to get structured transactions
             extractor_pdf = PDFExtractor(use_mineru=False)
             extraction_pdf = extractor_pdf.extract(str(temp_file))
-            processing_time_pdf = time.time() - start_time
 
             # Convert transactions to dict
             transactions_pdf = [
@@ -245,8 +266,8 @@ async def test_extraction_comparison(
                 "pdfplumber",
                 {
                     "confidence": extraction_pdf.metadata.confidence_score,
-                    "text": str(extraction_pdf.extracted_data)[:1000],
-                    "text_length": len(str(extraction_pdf.extracted_data)),
+                    "text": raw_text_pdf[:1000],
+                    "text_length": len(raw_text_pdf),
                 },
                 transactions_pdf
             )
@@ -254,10 +275,10 @@ async def test_extraction_comparison(
             pdfplumber_result = ExtractionMethodResult(
                 method="pdfplumber",
                 confidence=extraction_pdf.metadata.confidence_score,
-                text_length=len(str(extraction_pdf.extracted_data)),
+                text_length=len(raw_text_pdf),
                 transactions_found=len(transactions_pdf),
                 processing_time=processing_time_pdf,
-                text_preview=str(extraction_pdf.extracted_data)[:500],
+                text_preview=raw_text_pdf[:500],
                 transactions=[
                     Transaction(
                         description=t["description"],
