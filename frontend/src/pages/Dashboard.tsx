@@ -15,6 +15,7 @@ import { SystemHealth } from '../components/dashboard/SystemHealth';
 import { TemplateGenerator } from '../components/dashboard/TemplateGenerator';
 import { FolderMonitoring } from '../components/dashboard/FolderMonitoring';
 import { AIDataMappingAnimation } from '../components/dashboard/AIDataMappingAnimation';
+import { PDFExtractionTest } from '../components/dashboard/PDFExtractionTest';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -570,6 +571,9 @@ export function Dashboard() {
 
         {/* Aggregated Financial Data from Multiple Files */}
         <AggregatedFinancials />
+
+        {/* MinerU PDF Extraction Test */}
+        <PDFExtractionTest />
       </main>
     </div>
   );
