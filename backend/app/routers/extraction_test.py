@@ -20,6 +20,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from extraction.extractors.pdf_extractor import PDFExtractor
 from app.services.mineru_service import get_mineru_service
+from app.services.ai_extraction_service import get_ai_extraction_service
 
 router = APIRouter(prefix="/api/extraction", tags=["extraction-test"])
 
@@ -176,40 +177,45 @@ async def test_extraction_comparison(
             else:
                 raw_text = "MinerU service not available"
 
+            # Use AI to extract structured financial data from raw text
+            ai_service = get_ai_extraction_service()
+            ai_extracted_data = ai_service.extract_transactions(raw_text, "invoice")
+
             processing_time_mineru = time.time() - start_time
 
-            # Also run through PDFExtractor to get structured transactions
-            extractor_mineru = PDFExtractor(use_mineru=True)
-            extraction_mineru = extractor_mineru.extract(str(temp_file))
-
-            # Convert transactions to dict
+            # Convert AI-extracted transactions to our format
             transactions_mineru = [
                 {
-                    "description": t.description,
-                    "amount": t.amount,
-                    "date": t.date.isoformat() if t.date else None,
-                    "category": t.category,
-                    "confidence": t.confidence,
-                    "transaction_type": t.transaction_type,
+                    "description": t.get("description", ""),
+                    "amount": t.get("amount", 0.0),
+                    "date": t.get("date"),
+                    "category": t.get("category", "other"),
+                    "confidence": t.get("confidence", 0.5),
+                    "transaction_type": "expense" if t.get("amount", 0) > 0 else "income",
+                    "quantity": t.get("quantity"),
+                    "unit_price": t.get("unit_price"),
                 }
-                for t in extraction_mineru.extracted_data.transactions
+                for t in ai_extracted_data.get("transactions", [])
             ]
 
-            # Save to JSON
+            confidence_score = ai_extracted_data.get("extraction_metadata", {}).get("confidence", 0.0)
+
+            # Save to JSON (including AI-extracted data)
             saved_path_mineru = save_extraction_to_json(
                 file.filename,
                 "mineru",
                 {
-                    "confidence": extraction_mineru.metadata.confidence_score,
+                    "confidence": confidence_score,
                     "text": raw_text[:1000],  # Preview of raw text
                     "text_length": len(raw_text),
+                    "ai_extracted_data": ai_extracted_data,  # Full AI extraction
                 },
                 transactions_mineru
             )
 
             mineru_result = ExtractionMethodResult(
                 method="mineru",
-                confidence=extraction_mineru.metadata.confidence_score,
+                confidence=confidence_score,
                 text_length=len(raw_text),
                 transactions_found=len(transactions_mineru),
                 processing_time=processing_time_mineru,
