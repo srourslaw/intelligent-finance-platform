@@ -4,6 +4,7 @@ import { Home } from './pages/Home';
 import { Dashboard } from './pages/Dashboard';
 import Login from './pages/Login';
 import Projects from './pages/Projects';
+import FinancialBuilder from './pages/FinancialBuilder';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -26,6 +27,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/financial-builder"
+            element={
+              <ProtectedRoute>
+                <FinancialBuilder />
               </ProtectedRoute>
             }
           />
