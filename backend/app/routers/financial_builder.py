@@ -3,6 +3,7 @@ Financial Builder API Endpoints
 Handles full pipeline: extraction → categorization → aggregation → Excel population
 """
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
@@ -48,6 +49,7 @@ class JobStatusResponse(BaseModel):
     failed_files: int
     progress_percent: float
     error_message: Optional[str]
+    metadata: Optional[str]  # JSON string with pipeline results
 
 
 @router.post("/{project_id}/parse-template", response_model=ParseTemplateResponse)
@@ -253,13 +255,19 @@ def run_pipeline_phases(
     db: Session
 ):
     """
-    Background task to run all pipeline phases sequentially.
+    Background task to run all pipeline phases sequentially with normalized data layer.
 
     Phases:
-    1. Extract all files (PDFs, Excel, CSV)
-    2. Categorize transactions using AI
-    3. Aggregate and calculate totals
-    4. Populate Excel financial model
+    1. Extract all files (PDFs, Excel, CSV) → raw text
+    2. Parse into normalized data points → structured table
+    3. Process data points (deduplicate, detect conflicts, validate)
+    4. Retrieve validated data points for categorization
+    5. Categorize transactions using AI
+    6. Populate Excel financial model
+
+    This implements the friend's feedback: each file processed once,
+    data stored in normalized table, conflicts can be manually resolved,
+    consistent results from same input data.
 
     Args:
         project_id: Project identifier
@@ -272,73 +280,82 @@ def run_pipeline_phases(
 
         # Phase 1: Extract files
         logger.info(f"[{project_id}] Phase 1: Extracting files...")
-        extractor = FileExtractor(project_id, db)
-        extractor.run_extraction(job_id)
+        try:
+            extractor = FileExtractor(project_id, db)
+            extractor.run_extraction(job_id)
 
-        # Wait for extraction to complete
-        job = db.query(ExtractionJob).filter(ExtractionJob.job_id == job_id).first()
-        if not job or job.status != JobStatus.COMPLETED:
-            logger.error(f"[{project_id}] Extraction phase failed or incomplete")
-            return
+            # Wait for extraction to complete
+            job = db.query(ExtractionJob).filter(ExtractionJob.job_id == job_id).first()
+            if not job or job.status != JobStatus.COMPLETED:
+                logger.error(f"[{project_id}] Extraction phase failed or incomplete")
+                return
 
-        logger.info(f"[{project_id}] Phase 1 complete: {job.processed_files} files extracted")
+            logger.info(f"[{project_id}] Phase 1 complete: {job.processed_files} files extracted")
+        except Exception as e:
+            logger.error(f"[{project_id}] Phase 1 ERROR: {e}", exc_info=True)
+            raise Exception(f"File extraction failed: {str(e)}")
 
-        # Phase 2: Retrieve extracted data
-        logger.info(f"[{project_id}] Phase 2: Retrieving extracted data...")
+        # Phase 2: Parse extracted data into normalized data points
+        logger.info(f"[{project_id}] Phase 2: Parsing extracted data into normalized data points...")
+        from app.services.transaction_parser import create_transaction_parser
+        from app.services.data_point_mapper import create_data_point_mapper
+
         extracted_data = db.query(ExtractedData).filter(
             ExtractedData.project_id == project_id,
             ExtractedData.extraction_status == "success"
         ).all()
 
-        # Convert extracted data to transactions list
-        transactions = []
+        # Parse each extracted file into data points
+        parser = create_transaction_parser(project_id)
+        all_data_points = []
+
         for data_record in extracted_data:
-            # Parse structured_data JSON
-            if data_record.structured_data:
-                try:
-                    structured = json.loads(data_record.structured_data)
-                    # Handle different extraction formats
-                    if 'transactions' in structured:
-                        for txn in structured['transactions']:
-                            transactions.append({
-                                'description': txn.get('description', ''),
-                                'amount': float(txn.get('amount', 0)),
-                                'vendor': txn.get('vendor', ''),
-                                'date': txn.get('date', ''),
-                                'source_file': data_record.file_name
-                            })
-                    elif 'rows' in structured:
-                        # Excel/CSV format
-                        for row in structured['rows']:
-                            transactions.append({
-                                'description': str(row.get('description', row.get('item', ''))),
-                                'amount': float(row.get('amount', row.get('cost', 0))),
-                                'vendor': str(row.get('vendor', '')),
-                                'date': str(row.get('date', '')),
-                                'source_file': data_record.file_name
-                            })
-                except Exception as e:
-                    logger.warning(f"Failed to parse structured data for {data_record.file_name}: {e}")
+            try:
+                data_points = parser.parse_extracted_data(data_record, data_record.id)
+                all_data_points.extend(data_points)
+            except Exception as e:
+                logger.error(f"Error parsing {data_record.file_name}: {e}", exc_info=True)
 
-        logger.info(f"[{project_id}] Phase 2 complete: {len(transactions)} transactions collected")
+        logger.info(f"[{project_id}] Phase 2 complete: {len(all_data_points)} data points parsed")
 
-        if not transactions:
-            logger.warning(f"[{project_id}] No transactions found, creating empty report")
-            transactions = []
+        # Phase 3: Process data points (deduplicate, detect conflicts, validate)
+        logger.info(f"[{project_id}] Phase 3: Processing data points (dedup, conflicts, validation)...")
+        mapper = create_data_point_mapper(db, project_id)
+        processed_points, conflicts = mapper.process_data_points(all_data_points)
 
-        # Phase 3: Categorize transactions
-        logger.info(f"[{project_id}] Phase 3: Categorizing {len(transactions)} transactions...")
+        logger.info(f"[{project_id}] Phase 3 complete: {len(processed_points)} data points processed, "
+                   f"{len(conflicts)} conflicts detected")
+
+        # Phase 4: Get validated data points for categorization
+        logger.info(f"[{project_id}] Phase 4: Retrieving validated data points...")
+        valid_data_points = mapper.get_data_points_for_processing()
+
+        # Convert data points to transaction format for categorization
+        transactions = []
+        for dp in valid_data_points:
+            transactions.append({
+                'description': dp.description,
+                'amount': dp.amount,
+                'vendor': dp.vendor or '',
+                'date': dp.transaction_date.isoformat() if dp.transaction_date else '',
+                'source_file': dp.source_file_name
+            })
+
+        logger.info(f"[{project_id}] Phase 4 complete: {len(transactions)} transactions ready for categorization")
+
+        # Phase 5: Categorize transactions
+        logger.info(f"[{project_id}] Phase 5: Categorizing {len(transactions)} transactions...")
         categorizer = create_categorizer(template_dict)
         categorized_transactions = categorizer.categorize_batch(transactions, use_llm=False)
 
         # Get summary statistics
         summary = categorizer.get_category_summary(categorized_transactions)
-        logger.info(f"[{project_id}] Phase 3 complete: {summary['total_transactions']} categorized, "
+        logger.info(f"[{project_id}] Phase 5 complete: {summary['total_transactions']} categorized, "
                    f"{summary['uncategorized_count']} uncategorized, "
                    f"avg confidence {summary['average_confidence']:.2%}")
 
-        # Phase 4: Populate Excel
-        logger.info(f"[{project_id}] Phase 4: Populating Excel financial model...")
+        # Phase 6: Populate Excel
+        logger.info(f"[{project_id}] Phase 6: Populating Excel financial model...")
 
         # Prepare data for Excel
         excel_data = {
@@ -354,19 +371,34 @@ def run_pipeline_phases(
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_path = output_dir / f"Financial_Model_{timestamp}.xlsx"
 
-        # Create Excel file
-        populator = create_excel_populator()
-        excel_path = populator.create_financial_model(
-            excel_data,
-            str(output_path),
-            project_name=project_id
-        )
-
-        logger.info(f"[{project_id}] Phase 4 complete: Excel generated at {excel_path}")
+        # Create Excel file with error handling
+        try:
+            populator = create_excel_populator()
+            excel_path = populator.create_financial_model(
+                excel_data,
+                str(output_path),
+                project_name=project_id
+            )
+            logger.info(f"[{project_id}] Phase 6 complete: Excel generated at {excel_path}")
+        except Exception as excel_error:
+            # Log the error but continue - we still have the categorized data
+            logger.error(f"[{project_id}] Excel generation error: {excel_error}", exc_info=True)
+            # Create a minimal Excel file as fallback
+            import openpyxl
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "Summary"
+            ws['A1'] = "Financial Model Generation Partially Failed"
+            ws['A2'] = f"Error: {str(excel_error)}"
+            ws['A3'] = f"Total Transactions: {len(transactions)}"
+            ws['A4'] = f"Categorized: {len(categorized_transactions)}"
+            wb.save(str(output_path))
+            excel_path = str(output_path)
+            logger.info(f"[{project_id}] Fallback Excel created at {excel_path}")
 
         # Update job with final results
         job.status = JobStatus.COMPLETED
-        job.metadata = json.dumps({
+        job.job_metadata = json.dumps({
             'total_transactions': len(transactions),
             'categorized': len(categorized_transactions),
             'uncategorized_count': summary['uncategorized_count'],
@@ -389,3 +421,61 @@ def run_pipeline_phases(
                 db.commit()
         except:
             pass
+
+
+@router.get("/{project_id}/download")
+async def download_excel(project_id: str):
+    """
+    Download the generated Excel financial model.
+    
+    Args:
+        project_id: Project identifier
+        
+    Returns:
+        Excel file download
+    """
+    try:
+        # Get the most recent completed job for this project
+        from app.database import SessionLocal
+        db = SessionLocal()
+        
+        job = db.query(ExtractionJob).filter(
+            ExtractionJob.project_id == project_id,
+            ExtractionJob.status == JobStatus.COMPLETED
+        ).order_by(ExtractionJob.created_at.desc()).first()
+        
+        db.close()
+        
+        if not job or not job.job_metadata:
+            raise HTTPException(status_code=404, detail="No completed pipeline found for this project")
+        
+        # Parse metadata to get excel_path
+        metadata = json.loads(job.job_metadata)
+        excel_path = metadata.get('excel_path')
+
+        if not excel_path:
+            raise HTTPException(status_code=404, detail="Excel file path not found in job metadata")
+
+        # Construct full path - handle both absolute and relative paths
+        file_path = Path(excel_path)
+        if not file_path.is_absolute():
+            # If relative, make it relative to backend directory
+            backend_dir = Path(__file__).parent.parent.parent
+            file_path = backend_dir / excel_path
+
+        # Check if file exists
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail=f"Excel file not found: {excel_path}")
+        
+        # Return file
+        return FileResponse(
+            path=str(file_path),
+            filename=f"Financial_Model_{project_id}.xlsx",
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Download error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to download file: {str(e)}")

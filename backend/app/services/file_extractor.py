@@ -320,6 +320,7 @@ class FileExtractor:
             'failed_files': job.failed_files,
             'progress_percent': job.progress_percent,
             'error_message': job.error_message,
+            'metadata': job.job_metadata,  # JSON string with pipeline results
             'created_at': job.created_at.isoformat() if job.created_at else None,
             'updated_at': job.updated_at.isoformat() if job.updated_at else None
         }

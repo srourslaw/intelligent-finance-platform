@@ -28,6 +28,7 @@ class ExtractionJob(Base):
     failed_files = Column(Integer, default=0)
     progress_percent = Column(Float, default=0.0)
     error_message = Column(Text, nullable=True)
+    job_metadata = Column(Text, nullable=True)  # JSON string for pipeline results
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

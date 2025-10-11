@@ -45,6 +45,7 @@ def init_db():
     """
     # Import models to register them
     from app.models.extraction import ExtractionJob, ExtractedData, Transaction
+    from app.models.data_points import DataPoint, DataPointConflict, DataPointValidationRule
 
     # Create all tables
     Base.metadata.create_all(bind=engine)

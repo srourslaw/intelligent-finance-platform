@@ -17,6 +17,36 @@ from openpyxl.utils import get_column_letter
 logger = logging.getLogger(__name__)
 
 
+def sanitize_sheet_name(name: str) -> str:
+    """
+    Sanitize worksheet name to comply with Excel requirements.
+    - Max 31 characters
+    - Cannot contain: [ ] : * ? / \
+    - Cannot start or end with apostrophe
+    """
+    if not name:
+        return "Sheet"
+
+    # Remove invalid characters
+    invalid_chars = ['[', ']', ':', '*', '?', '/', '\\']
+    sanitized = name
+    for char in invalid_chars:
+        sanitized = sanitized.replace(char, '_')
+
+    # Remove leading/trailing apostrophes
+    sanitized = sanitized.strip("'")
+
+    # Truncate to 31 characters
+    if len(sanitized) > 31:
+        sanitized = sanitized[:31]
+
+    # Ensure it's not empty after sanitization
+    if not sanitized or sanitized.isspace():
+        sanitized = "Sheet"
+
+    return sanitized
+
+
 class TemplatePopulator:
     """
     Populates Excel financial templates with aggregated data.
@@ -305,11 +335,12 @@ class TemplatePopulator:
             aggregated_data: Aggregated financial data
         """
         # Create or get lineage sheet
-        if "Data Lineage" in self.workbook.sheetnames:
-            sheet = self.workbook["Data Lineage"]
+        sheet_name = sanitize_sheet_name("Data Lineage")
+        if sheet_name in self.workbook.sheetnames:
+            sheet = self.workbook[sheet_name]
             sheet.delete_rows(1, sheet.max_row)  # Clear existing
         else:
-            sheet = self.workbook.create_sheet("Data Lineage")
+            sheet = self.workbook.create_sheet(sheet_name)
 
         # Header
         headers = ["Cell Reference", "Sheet", "Value", "Source File(s)", "Confidence", "Last Updated"]

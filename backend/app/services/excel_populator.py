@@ -16,6 +16,70 @@ from openpyxl.utils import get_column_letter
 logger = logging.getLogger(__name__)
 
 
+def sanitize_sheet_name(name: str) -> str:
+    """
+    Sanitize worksheet name to comply with Excel requirements:
+    - Max 31 characters
+    - Cannot contain: [ ] : * ? / \
+    - Cannot start or end with apostrophe
+
+    Args:
+        name: Original sheet name
+
+    Returns:
+        Sanitized sheet name
+    """
+    if not name:
+        return "Sheet"
+
+    # Remove invalid characters
+    invalid_chars = ['[', ']', ':', '*', '?', '/', '\\']
+    sanitized = name
+    for char in invalid_chars:
+        sanitized = sanitized.replace(char, '_')
+
+    # Remove leading/trailing apostrophes
+    sanitized = sanitized.strip("'")
+
+    # Truncate to 31 characters
+    if len(sanitized) > 31:
+        sanitized = sanitized[:31]
+
+    # Ensure it's not empty after sanitization
+    if not sanitized or sanitized.isspace():
+        sanitized = "Sheet"
+
+    return sanitized
+
+
+def sanitize_cell_value(value):
+    """
+    Sanitize cell value to remove illegal characters that openpyxl cannot write.
+
+    Excel cells cannot contain control characters (ASCII 0-31 except tab, newline, carriage return).
+    openpyxl will raise IllegalCharacterError if these are present.
+
+    Args:
+        value: Cell value (str, int, float, etc.)
+
+    Returns:
+        Sanitized value safe for Excel
+    """
+    if not isinstance(value, str):
+        return value
+
+    # Remove illegal control characters (0-31) except tab (9), newline (10), carriage return (13)
+    sanitized = ''
+    for char in value:
+        char_code = ord(char)
+        if char_code < 32 and char_code not in (9, 10, 13):
+            # Skip illegal control character
+            continue
+        sanitized += char
+
+    return sanitized
+
+
 class ExcelPopulator:
     """Service for populating Excel financial models."""
 
@@ -77,7 +141,7 @@ class ExcelPopulator:
         project_name: str
     ):
         """Create summary sheet with key metrics."""
-        ws = wb.create_sheet("Summary", 0)
+        ws = wb.create_sheet(sanitize_sheet_name("Summary"), 0)
 
         # Header styling
         header_font = Font(name='Arial', size=14, bold=True, color='FFFFFF')
@@ -166,17 +230,17 @@ class ExcelPopulator:
 
     def _create_revenue_sheet(self, wb: openpyxl.Workbook, data: Dict[str, Any]):
         """Create revenue breakdown sheet."""
-        ws = wb.create_sheet("Revenue")
+        ws = wb.create_sheet(sanitize_sheet_name("Revenue"))
         self._populate_category_sheet(ws, data, "Revenue", "Revenue Categories")
 
     def _create_direct_costs_sheet(self, wb: openpyxl.Workbook, data: Dict[str, Any]):
         """Create direct costs breakdown sheet."""
-        ws = wb.create_sheet("Direct Costs")
+        ws = wb.create_sheet(sanitize_sheet_name("Direct Costs"))
         self._populate_category_sheet(ws, data, "Direct Costs", "Direct Cost Categories")
 
     def _create_indirect_costs_sheet(self, wb: openpyxl.Workbook, data: Dict[str, Any]):
         """Create indirect costs breakdown sheet."""
-        ws = wb.create_sheet("Indirect Costs")
+        ws = wb.create_sheet(sanitize_sheet_name("Indirect Costs"))
         self._populate_category_sheet(ws, data, "Indirect Costs", "Indirect Cost Categories")
 
     def _populate_category_sheet(
@@ -217,7 +281,7 @@ class ExcelPopulator:
         # Populate data
         row = 4
         for cat_name, cat_data in sorted(relevant_categories.items(), key=lambda x: x[1]['total_amount'], reverse=True):
-            ws.cell(row=row, column=1).value = cat_name
+            ws.cell(row=row, column=1).value = sanitize_cell_value(cat_name)
             ws.cell(row=row, column=2).value = cat_data['count']
             ws.cell(row=row, column=3).value = cat_data['total_amount']
             ws.cell(row=row, column=3).number_format = '$#,##0.00'
@@ -247,7 +311,7 @@ class ExcelPopulator:
 
     def _create_transactions_sheet(self, wb: openpyxl.Workbook, data: Dict[str, Any]):
         """Create detailed transactions sheet."""
-        ws = wb.create_sheet("Transactions")
+        ws = wb.create_sheet(sanitize_sheet_name("Transactions"))
 
         # Header
         header_font = Font(name='Arial', size=14, bold=True, color='FFFFFF')
@@ -270,15 +334,15 @@ class ExcelPopulator:
         transactions = data.get('categorized_transactions', [])
         row = 4
         for txn in transactions:
-            ws.cell(row=row, column=1).value = txn.get('date', '')
-            ws.cell(row=row, column=2).value = txn.get('description', '')
-            ws.cell(row=row, column=3).value = txn.get('vendor', '')
+            ws.cell(row=row, column=1).value = sanitize_cell_value(txn.get('date', ''))
+            ws.cell(row=row, column=2).value = sanitize_cell_value(txn.get('description', ''))
+            ws.cell(row=row, column=3).value = sanitize_cell_value(txn.get('vendor', ''))
             ws.cell(row=row, column=4).value = txn.get('amount', 0)
             ws.cell(row=row, column=4).number_format = '$#,##0.00'
-            ws.cell(row=row, column=5).value = txn.get('category', 'Uncategorized')
+            ws.cell(row=row, column=5).value = sanitize_cell_value(txn.get('category', 'Uncategorized'))
             ws.cell(row=row, column=6).value = txn.get('confidence', 0)
             ws.cell(row=row, column=6).number_format = '0.00%'
-            ws.cell(row=row, column=7).value = txn.get('source_file', '')
+            ws.cell(row=row, column=7).value = sanitize_cell_value(txn.get('source_file', ''))
 
             # Color code by confidence
             confidence = txn.get('confidence', 0)

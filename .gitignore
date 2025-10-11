@@ -105,3 +105,4 @@ Icon
 *.bak
 *.backup
 *~.nib
+backend/data/projects/*/output/*.xlsx
