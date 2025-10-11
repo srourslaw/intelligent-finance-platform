@@ -537,28 +537,28 @@ export function AIDataMappingAnimation({
 
           <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-              <div id="layer1" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginLeft: '-40px', marginRight: '55px' }}>
+              <div id="layer1" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginLeft: '-40px', marginRight: '90px' }}>
                 <div style={{ position: 'absolute', top: '-38px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
                   Input Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.9em', marginTop: '1px' }}>12 nodes</span>
                 </div>
                 {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-1-${i}`} className="neural-node layer1" style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#3b82f6', transition: 'all 0.3s' }} />)}
               </div>
 
-              <div id="layer2" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginRight: '55px' }}>
+              <div id="layer2" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginRight: '90px' }}>
                 <div style={{ position: 'absolute', top: '-38px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
                   Processing Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.9em', marginTop: '1px' }}>12 nodes</span>
                 </div>
                 {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-2-${i}`} className="neural-node layer2" style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#ef4444', transition: 'all 0.3s' }} />)}
               </div>
 
-              <div style={{ position: 'relative', marginRight: '55px' }}>
+              <div style={{ position: 'relative', marginRight: '90px' }}>
                 <div style={{ position: 'absolute', top: '-30px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>Mapping Layer</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 18px)', gap: '3px' }}>
                   {[...Array(matrixSize * matrixSize)].map((_, i) => <div key={i} id={`cell-${i}`} className="matrix-cell" style={{ width: '18px', height: '18px', background: '#f3f4f6', borderRadius: '3px', transition: 'all 0.3s' }} />)}
                 </div>
               </div>
 
-              <div id="layer3" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginRight: '75px' }}>
+              <div id="layer3" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginRight: '90px' }}>
                 <div style={{ position: 'absolute', top: '-38px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
                   Processing Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.9em', marginTop: '1px' }}>12 nodes</span>
                 </div>
