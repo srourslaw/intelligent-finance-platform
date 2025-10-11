@@ -480,7 +480,7 @@ export function AIDataMappingAnimation({
           <p style={{ color: '#6b7280', fontSize: '0.85em' }}>Neural Network Processing • Real-time Data Flow Visualization</p>
         </div>
 
-        <div className="viz-container" style={{ display: 'grid', gridTemplateColumns: '240px 1fr 240px', gap: '60px', position: 'relative', minHeight: '800px', padding: '20px 0' }}>
+        <div className="viz-container" style={{ display: 'grid', gridTemplateColumns: '240px 1fr 240px', gap: '100px', position: 'relative', minHeight: '800px', padding: '20px 0' }}>
           <canvas ref={canvasRef} id="mainCanvas" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }} />
 
           <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '3px', maxHeight: '750px', overflowY: 'auto', paddingRight: '10px', perspective: '1000px' }}>
