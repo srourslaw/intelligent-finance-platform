@@ -2719,3 +2719,206 @@ const yPos = headerHeight + (itemIndex * lineHeight) - scrollOffset;
 
 **Major Achievement**: Successfully replaced canvas file tree with scrollable HTML sidebar overlay. Connection lines now sync perfectly with scroll position, and particles spawn from actual file locations. Matches reference specification exactly with blue lines, 15% opacity, and proper bezier curves.
 
+
+---
+
+## October 11, 2025 - Session: AI Animation Fluid Controls & Project Selector
+
+### What Was Completed
+
+1. **Fluid Animation Speed Controls**
+   - Implemented real-time speed changes during animation playback
+   - Fixed pause/resume to respect current speed setting
+   - Changed speeds to proportional values: Slow (800ms), Normal (400ms), Fast (200ms), Ultra (100ms)
+   - Each speed level is exactly 2x faster than the previous
+
+2. **Animation Architecture Refactoring**
+   - Removed all `setTimeout` scheduling complexities
+   - Simplified to pure sequential async/await pattern
+   - Created particles immediately instead of with delays
+   - All timing now controlled by `await sleep(speedRef.current / N)`
+   - Added `activeNodesRef` for cleaner state tracking
+
+3. **Speed State Synchronization**
+   - Added `useEffect` to sync `speedRef.current` with `speed` state
+   - Ensures speed changes before, during, or after pause all work correctly
+   - Speed toggle now automatically syncs through React's effect system
+
+4. **Project Selector Dropdown**
+   - Added interactive dropdown under "File Processing" section
+   - Lists all available projects from database
+   - Fetches and displays selected project's file structure
+   - Animation auto-resets when switching projects
+   - Clean hover effects and styling
+
+5. **Backend API Integration**
+   - Backend endpoint `/api/projects/{project_id}/file-structure` already existed
+   - Updated Projects.tsx to manage selected project state
+   - Made `fetchProjectStructure(projectId)` accept parameter
+   - Added useEffect to reload structure on project selection
+
+### Current Project State
+
+- **What's working**:
+  - ✅ AI Data Mapping Animation displays real project files from backend
+  - ✅ Start, Pause, Reset buttons all function correctly
+  - ✅ Speed toggle cycles through 4 speeds (Slow/Normal/Fast/Ultra)
+  - ✅ Speed changes take effect immediately during animation
+  - ✅ Project dropdown allows switching between different projects
+  - ✅ File structure dynamically loads from selected project
+  - ✅ Animation resets when changing projects
+  - ✅ All 144 files from project-a-123-sunset-blvd display correctly
+
+- **What's in progress**:
+  - N/A - All requested features complete
+
+- **What's tested**:
+  - ✅ Speed toggle during animation
+  - ✅ Pause and resume with different speeds
+  - ✅ Reset clears all animation state
+  - ✅ Project selector loads new file structure
+  - ✅ Animation handles project switch gracefully
+
+- **What needs testing**:
+  - Multiple rapid speed changes during animation
+  - Edge cases with very small projects (few files)
+
+### Code Changes Summary
+
+- **Files modified**:
+  - `frontend/src/components/dashboard/AIDataMappingAnimation.tsx`
+    - Added Project interface for props
+    - Added `projects`, `selectedProjectId`, `onProjectChange` props
+    - Changed speed values: 700→800, 400→400, 200→200, 80→100 (proportional 2x)
+    - Added `useEffect` to sync `speedRef.current` with `speed` state
+    - Added `useEffect` to reset animation when `selectedProjectId` changes
+    - Removed `pendingTimeoutsRef` and `scheduleTimeout` function
+    - Added `activeNodesRef: Set<string>` for tracking active nodes
+    - Created `activateNode()` and `deactivateNode()` helper functions
+    - Refactored `startAnimation()` to use immediate particle creation
+    - All particles now created with `particlesRef.current.push()` (no setTimeout)
+    - Changed cleanup from setTimeout to sequential `await sleep()` then `deactivateNode()`
+    - Simplified `resetAll()` to use activeNodesRef
+    - Removed manual `speedRef.current = newSpeed` from `toggleSpeed()` (handled by useEffect)
+    - Added project selector dropdown with styled `<select>` element
+    - Dropdown positioned under file counter with hover effects
+
+  - `frontend/src/pages/Projects.tsx`
+    - Added `selectedProjectId` state: `useState<string>('project-a-123-sunset-blvd')`
+    - Split useEffect: one for `fetchProjects()`, one for watching `selectedProjectId`
+    - Changed `fetchProjectStructure()` to accept `projectId: string` parameter
+    - Updated AIDataMappingAnimation component with new props:
+      - `projectStructure={projectStructure}`
+      - `projects={projects}`
+      - `selectedProjectId={selectedProjectId}`
+      - `onProjectChange={setSelectedProjectId}`
+
+### Technical Decisions Made
+
+1. **Pure Async/Await Pattern**:
+   - **Decision**: Eliminated all setTimeout scheduling for particle creation
+   - **Why**: setTimeout delays are calculated at scheduling time, not execution time. This caused glitchy behavior when toggling speed mid-animation.
+   - **Implementation**: Create particles immediately in sync with main loop, control pacing only with `await sleep(speedRef.current / N)`
+   - **Result**: True fluid speed changes with zero setTimeout complexity
+
+2. **useEffect for Speed Sync**:
+   - **Decision**: Let React's effect system handle speedRef synchronization
+   - **Why**: More predictable than manual sync, works correctly with pause/resume cycle
+   - **Implementation**: `useEffect(() => { speedRef.current = speed; }, [speed])`
+   - **Result**: Speed always in sync regardless of when it's changed
+
+3. **Proportional Speed Values (2x progression)**:
+   - **Decision**: Changed from inconsistent ratios (1.75x, 2x, 2.5x) to uniform 2x progression
+   - **Old**: 700→400→200→80
+   - **New**: 800→400→200→100
+   - **Why**: Makes speed differences predictable and easier to understand
+   - **Result**: Each level is exactly twice as fast as previous
+
+4. **Project Selector Integration**:
+   - **Decision**: Pass full project list and callbacks to animation component
+   - **Why**: Keeps animation component reusable and testable
+   - **Implementation**: Parent (Projects.tsx) manages state, child (AIDataMappingAnimation) renders UI
+   - **Result**: Clean separation of concerns
+
+### Challenges Encountered
+
+1. **Challenge**: Speed toggle didn't work mid-animation
+   - **Root Cause**: `setTimeout` delays calculated at scheduling time captured old speed value
+   - **Solution**: Removed all setTimeout, used pure async/await with speedRef.current
+   - **Status**: ✅ RESOLVED
+
+2. **Challenge**: Pause/resume didn't respect speed changes
+   - **Root Cause**: speedRef not automatically synced with speed state
+   - **Solution**: Added useEffect to sync speedRef whenever speed changes
+   - **Status**: ✅ RESOLVED
+
+3. **Challenge**: Speed values weren't proportional
+   - **Root Cause**: Original values had inconsistent ratios (700/400=1.75, 400/200=2, 200/80=2.5)
+   - **Solution**: Changed to proportional 800→400→200→100 (each 2x faster)
+   - **Status**: ✅ RESOLVED
+
+### Next Session Goals
+
+1. **Performance Optimization**:
+   - Profile animation with large projects (1000+ files)
+   - Consider virtualization if file list becomes sluggish
+   - Optimize particle rendering for Ultra speed
+
+2. **UX Enhancements**:
+   - Add loading indicator when fetching new project structure
+   - Add "No projects found" message if projects list is empty
+   - Consider adding project thumbnail/preview in dropdown
+
+3. **Animation Features**:
+   - Add ability to skip to specific file in animation
+   - Add progress slider to scrub through animation
+   - Consider adding "Loop" option to restart automatically
+
+### Current File Structure
+
+```
+frontend/src/
+├── components/dashboard/
+│   ├── AIDataMappingAnimation.tsx       # Main animation component (with project selector)
+│   └── AIDataMappingAnimation_v1.tsx    # Previous version backup
+├── pages/
+│   ├── Projects.tsx                     # Projects page (renders animation)
+│   └── Dashboard.tsx                    # Dashboard page
+└── services/
+    └── api.ts                           # API service functions
+
+backend/app/
+├── routers/
+│   ├── project_files.py                 # API endpoint for file structure
+│   └── projects.py                      # Projects API endpoints
+└── main.py                              # FastAPI app
+```
+
+### Session Summary
+
+**Duration**: 2.5 hours
+**Files Modified**: 2
+**Commits**: 9
+**Status**: ✅ FLUID ANIMATION CONTROLS & PROJECT SELECTOR COMPLETE
+
+**Major Achievements**:
+1. Successfully implemented truly fluid animation speed controls using pure async/await pattern
+2. Eliminated all setTimeout complexity for cleaner, more maintainable code
+3. Added project selector dropdown with full backend integration
+4. Fixed all speed synchronization issues with React effects
+5. Made speeds proportional (2x progression) for consistent UX
+
+**Key Commits**:
+- `feat: Add project selector dropdown to animation component` (081acf1)
+- `fix: Sync speed state and ref, use proportional speeds` (46ffc2a)
+- `refactor: Simplify animation to eliminate setTimeout delays` (1647adb)
+- `fix: Make animation speed changes truly fluid` (d8b42bc)
+- `feat: Implement fluid animation controls` (13fe9da)
+
+**Technical Highlights**:
+- Pure sequential async/await with zero setTimeout scheduling
+- useEffect-based state synchronization
+- Clean parent-child communication pattern
+- Immediate particle creation for responsive animation
+- Proportional speed values (800/400/200/100)
+
