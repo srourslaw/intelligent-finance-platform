@@ -536,7 +536,7 @@ export function AIDataMappingAnimation({
           </div>
 
           <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '80px', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <div style={{ display: 'flex', gap: '55px', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
               <div id="layer1" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginLeft: '-40px' }}>
                 <div style={{ position: 'absolute', top: '-45px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.7em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
                   Input Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.95em', marginTop: '2px' }}>12 nodes</span>
