@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   DollarSign, TrendingDown, TrendingUp, AlertTriangle, LogOut, ArrowLeft,
   Activity, Target, Clock, Briefcase, PieChart as PieChartIcon, BarChart3, FileText,
-  Home, Wallet, FolderOpen, Zap, Settings, Database
+  Home, Wallet, FolderOpen, Zap, Settings, Database, Loader2, CheckCircle2
 } from 'lucide-react';
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
@@ -33,6 +33,13 @@ export function Dashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'overview' | 'financials' | 'documents' | 'automation' | 'system' | 'builder'>('overview');
+
+  // Financial Builder state
+  const [pipelineRunning, setPipelineRunning] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [pipelineStatus, setPipelineStatus] = useState<any>(null);
+  const [excelPath, setExcelPath] = useState<string | null>(null);
+  const [pipelineError, setPipelineError] = useState<string | null>(null);
 
   useEffect(() => {
     const projectId = localStorage.getItem('selectedProjectId');
@@ -71,6 +78,87 @@ export function Dashboard() {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  // Financial Builder functions
+  const startPipeline = async () => {
+    if (!token || !selectedProjectId) return;
+
+    setPipelineRunning(true);
+    setPipelineError(null);
+    setExcelPath(null);
+    setPipelineStatus(null);
+
+    try {
+      const response = await fetch(`http://localhost:8000/api/financial-builder/${selectedProjectId}/run-full-pipeline`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Failed to start pipeline');
+      }
+
+      setJobId(data.job_id);
+      // Start polling for status
+      pollPipelineStatus(data.job_id);
+    } catch (err: any) {
+      setPipelineError(err.message);
+      setPipelineRunning(false);
+    }
+  };
+
+  const pollPipelineStatus = async (jobIdParam: string) => {
+    if (!token) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/financial-builder/jobs/${jobIdParam}/status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'Failed to fetch job status');
+        }
+
+        setPipelineStatus(data);
+
+        // Check if completed or failed
+        if (data.status === 'completed') {
+          clearInterval(pollInterval);
+          setPipelineRunning(false);
+          // Check if Excel was generated
+          if (data.metadata) {
+            try {
+              const metadata = JSON.parse(data.metadata);
+              if (metadata.excel_path) {
+                setExcelPath(metadata.excel_path);
+              }
+            } catch (e) {
+              console.error('Failed to parse metadata:', e);
+            }
+          }
+        } else if (data.status === 'failed') {
+          clearInterval(pollInterval);
+          setPipelineRunning(false);
+          setPipelineError(data.error_message || 'Pipeline failed');
+        }
+      } catch (err: any) {
+        console.error('Error polling status:', err);
+        clearInterval(pollInterval);
+        setPipelineRunning(false);
+        setPipelineError(err.message);
+      }
+    }, 2000); // Poll every 2 seconds
   };
 
   if (loading) {
@@ -672,7 +760,7 @@ export function Dashboard() {
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-5 h-5 text-purple-600" />
                       <span className="text-sm font-semibold text-purple-900">
-                        Project: {selectedProjectId} • 144 files ready for processing
+                        Project: {selectedProjectId}
                       </span>
                     </div>
                   </div>
@@ -680,27 +768,159 @@ export function Dashboard() {
               </div>
             </div>
 
-            {/* Start Button - TODO: Implement pipeline logic */}
-            <div className="text-center">
-              <button
-                onClick={() => alert('Full pipeline not yet implemented - backend endpoints needed!')}
-                className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-4 px-8 rounded-xl hover:from-purple-700 hover:to-indigo-800 transition-all duration-200 font-bold text-lg shadow-lg flex items-center gap-3 mx-auto"
-              >
-                <Zap className="w-6 h-6" />
-                Start Full Pipeline Processing
-              </button>
-            </div>
+            {/* Start Button */}
+            {!pipelineRunning && !pipelineStatus && !excelPath && (
+              <div className="text-center">
+                <button
+                  onClick={startPipeline}
+                  className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-4 px-8 rounded-xl hover:from-purple-700 hover:to-indigo-800 transition-all duration-200 font-bold text-lg shadow-lg flex items-center gap-3 mx-auto"
+                >
+                  <Zap className="w-6 h-6" />
+                  Start Full Pipeline Processing
+                </button>
+              </div>
+            )}
 
-            {/* Pipeline Stages Placeholder */}
-            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                Pipeline Ready
-              </h3>
-              <p className="text-sm text-gray-600">
-                Click "Start Full Pipeline Processing" to begin extracting and processing your project files
-              </p>
-            </div>
+            {/* Pipeline Progress */}
+            {(pipelineRunning || pipelineStatus) && !excelPath && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-900">Pipeline Progress</h2>
+
+                {/* Progress Card */}
+                <div className="bg-white rounded-xl border-2 border-purple-200 p-6 shadow-lg">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      {pipelineStatus?.status === 'completed' ? (
+                        <CheckCircle2 className="w-6 h-6 text-green-600" />
+                      ) : pipelineStatus?.status === 'failed' ? (
+                        <AlertTriangle className="w-6 h-6 text-red-600" />
+                      ) : (
+                        <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                      )}
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900">
+                          {pipelineStatus?.status === 'running' ? 'Processing Files...' :
+                           pipelineStatus?.status === 'completed' ? 'Processing Complete' :
+                           pipelineStatus?.status === 'failed' ? 'Processing Failed' :
+                           'Initializing Pipeline...'}
+                        </h3>
+                        <p className="text-sm text-gray-600">Job ID: {jobId}</p>
+                      </div>
+                    </div>
+                    {pipelineStatus && (
+                      <div className="text-right">
+                        <div className="text-sm font-semibold text-gray-900">
+                          {pipelineStatus.processed_files} / {pipelineStatus.total_files} files
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {pipelineStatus.progress_percent.toFixed(1)}%
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Progress Bar */}
+                  {pipelineStatus && (
+                    <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                      <div
+                        className={`h-3 rounded-full transition-all duration-500 ${
+                          pipelineStatus.status === 'completed' ? 'bg-green-600' :
+                          pipelineStatus.status === 'failed' ? 'bg-red-600' :
+                          'bg-blue-600'
+                        }`}
+                        style={{ width: `${pipelineStatus.progress_percent}%` }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Status Details */}
+                  {pipelineStatus && (
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900">{pipelineStatus.total_files}</div>
+                        <div className="text-xs text-gray-600">Total Files</div>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">{pipelineStatus.processed_files}</div>
+                        <div className="text-xs text-gray-600">Processed</div>
+                      </div>
+                      <div className="p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">{pipelineStatus.failed_files}</div>
+                        <div className="text-xs text-gray-600">Failed</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Error Display */}
+            {pipelineError && (
+              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-red-900 mb-1">Pipeline Error</h3>
+                    <p className="text-sm text-red-700">{pipelineError}</p>
+                    <button
+                      onClick={() => {
+                        setPipelineError(null);
+                        setPipelineStatus(null);
+                        setJobId(null);
+                      }}
+                      className="mt-3 text-sm text-red-600 hover:text-red-800 font-semibold"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Success & Download */}
+            {excelPath && !pipelineRunning && (
+              <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h3 className="font-bold text-green-900 mb-2">✨ Financial Model Successfully Generated!</h3>
+                    <p className="text-sm text-green-700 mb-4">
+                      All files have been processed and your financial statements are ready.
+                    </p>
+                    <div className="bg-white border border-green-300 rounded-lg p-3 mb-4">
+                      <div className="text-xs font-medium text-gray-600 mb-1">Generated File:</div>
+                      <div className="text-sm font-mono text-gray-900">{excelPath}</div>
+                    </div>
+                    {pipelineStatus && (
+                      <div className="text-sm text-green-800 space-y-1 mb-4">
+                        <div>• Total Transactions: {pipelineStatus.processed_files}</div>
+                        <div>• Successfully Processed: {pipelineStatus.processed_files - pipelineStatus.failed_files}</div>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => window.open(excelPath, '_blank')}
+                      className="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold flex items-center gap-2"
+                    >
+                      <FileText className="w-5 h-5" />
+                      View Financial Model
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Pipeline Ready State */}
+            {!pipelineRunning && !pipelineStatus && !excelPath && !pipelineError && (
+              <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
+                <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  Pipeline Ready
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Click "Start Full Pipeline Processing" to begin extracting and processing your project files
+                </p>
+              </div>
+            )}
           </>
         )}
       </main>

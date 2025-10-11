@@ -6,11 +6,20 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
+from datetime import datetime
 
 from app.database import get_db
 from app.services.template_parser import parse_template, TemplateParser
 from app.services.file_extractor import start_extraction, get_extraction_status, FileExtractor
-from app.models.extraction import ExtractionJob, JobStatus
+from app.services.ai_categorizer import create_categorizer
+from app.services.excel_populator import create_excel_populator
+from app.models.extraction import ExtractionJob, JobStatus, ExtractedData
+import json
+import os
+from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/financial-builder", tags=["financial-builder"])
 
@@ -180,9 +189,14 @@ async def run_full_pipeline(
 
         job_id = extractor.create_extraction_job()
 
-        # TODO: Add background task that runs all phases
-        # For now, just run extraction
-        background_tasks.add_task(extractor.run_extraction, job_id)
+        # Run full pipeline in background
+        background_tasks.add_task(
+            run_pipeline_phases,
+            project_id,
+            job_id,
+            template_dict,
+            db
+        )
 
         return {
             "success": True,
@@ -190,7 +204,7 @@ async def run_full_pipeline(
             "project_id": project_id,
             "total_files": len(files),
             "total_categories": template_dict['metadata']['total_categories'],
-            "message": "Full pipeline started. Phases: 1) Parse Template ✓ 2) Extract Files (in progress) 3) Categorize (pending) 4) Aggregate (pending) 5) Populate Excel (pending)"
+            "message": "Full pipeline started. Phases: 1) Parse Template ✓ 2) Extract Files (starting) 3) Categorize (pending) 4) Populate Excel (pending)"
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Pipeline failed: {str(e)}")
@@ -230,3 +244,146 @@ async def get_extracted_data(project_id: str, db: Session = Depends(get_db)):
             for d in data
         ]
     }
+
+
+def run_pipeline_phases(
+    project_id: str,
+    job_id: str,
+    template_dict: Dict[str, Any],
+    db: Session
+):
+    """
+    Background task to run all pipeline phases sequentially.
+
+    Phases:
+    1. Extract all files (PDFs, Excel, CSV)
+    2. Categorize transactions using AI
+    3. Aggregate and calculate totals
+    4. Populate Excel financial model
+
+    Args:
+        project_id: Project identifier
+        job_id: Extraction job ID
+        template_dict: Parsed template dictionary
+        db: Database session
+    """
+    try:
+        logger.info(f"[{project_id}] Pipeline started - Job ID: {job_id}")
+
+        # Phase 1: Extract files
+        logger.info(f"[{project_id}] Phase 1: Extracting files...")
+        extractor = FileExtractor(project_id, db)
+        extractor.run_extraction(job_id)
+
+        # Wait for extraction to complete
+        job = db.query(ExtractionJob).filter(ExtractionJob.job_id == job_id).first()
+        if not job or job.status != JobStatus.COMPLETED:
+            logger.error(f"[{project_id}] Extraction phase failed or incomplete")
+            return
+
+        logger.info(f"[{project_id}] Phase 1 complete: {job.processed_files} files extracted")
+
+        # Phase 2: Retrieve extracted data
+        logger.info(f"[{project_id}] Phase 2: Retrieving extracted data...")
+        extracted_data = db.query(ExtractedData).filter(
+            ExtractedData.project_id == project_id,
+            ExtractedData.extraction_status == "success"
+        ).all()
+
+        # Convert extracted data to transactions list
+        transactions = []
+        for data_record in extracted_data:
+            # Parse structured_data JSON
+            if data_record.structured_data:
+                try:
+                    structured = json.loads(data_record.structured_data)
+                    # Handle different extraction formats
+                    if 'transactions' in structured:
+                        for txn in structured['transactions']:
+                            transactions.append({
+                                'description': txn.get('description', ''),
+                                'amount': float(txn.get('amount', 0)),
+                                'vendor': txn.get('vendor', ''),
+                                'date': txn.get('date', ''),
+                                'source_file': data_record.file_name
+                            })
+                    elif 'rows' in structured:
+                        # Excel/CSV format
+                        for row in structured['rows']:
+                            transactions.append({
+                                'description': str(row.get('description', row.get('item', ''))),
+                                'amount': float(row.get('amount', row.get('cost', 0))),
+                                'vendor': str(row.get('vendor', '')),
+                                'date': str(row.get('date', '')),
+                                'source_file': data_record.file_name
+                            })
+                except Exception as e:
+                    logger.warning(f"Failed to parse structured data for {data_record.file_name}: {e}")
+
+        logger.info(f"[{project_id}] Phase 2 complete: {len(transactions)} transactions collected")
+
+        if not transactions:
+            logger.warning(f"[{project_id}] No transactions found, creating empty report")
+            transactions = []
+
+        # Phase 3: Categorize transactions
+        logger.info(f"[{project_id}] Phase 3: Categorizing {len(transactions)} transactions...")
+        categorizer = create_categorizer(template_dict)
+        categorized_transactions = categorizer.categorize_batch(transactions, use_llm=False)
+
+        # Get summary statistics
+        summary = categorizer.get_category_summary(categorized_transactions)
+        logger.info(f"[{project_id}] Phase 3 complete: {summary['total_transactions']} categorized, "
+                   f"{summary['uncategorized_count']} uncategorized, "
+                   f"avg confidence {summary['average_confidence']:.2%}")
+
+        # Phase 4: Populate Excel
+        logger.info(f"[{project_id}] Phase 4: Populating Excel financial model...")
+
+        # Prepare data for Excel
+        excel_data = {
+            'categorized_transactions': categorized_transactions,
+            'summary': summary
+        }
+
+        # Generate output path
+        output_dir = Path("data") / "projects" / project_id / "output"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = output_dir / f"Financial_Model_{timestamp}.xlsx"
+
+        # Create Excel file
+        populator = create_excel_populator()
+        excel_path = populator.create_financial_model(
+            excel_data,
+            str(output_path),
+            project_name=project_id
+        )
+
+        logger.info(f"[{project_id}] Phase 4 complete: Excel generated at {excel_path}")
+
+        # Update job with final results
+        job.status = JobStatus.COMPLETED
+        job.metadata = json.dumps({
+            'total_transactions': len(transactions),
+            'categorized': len(categorized_transactions),
+            'uncategorized_count': summary['uncategorized_count'],
+            'average_confidence': summary['average_confidence'],
+            'excel_path': excel_path,
+            'pipeline_complete': True
+        })
+        db.commit()
+
+        logger.info(f"[{project_id}] Full pipeline COMPLETE!")
+
+    except Exception as e:
+        logger.error(f"[{project_id}] Pipeline failed: {str(e)}", exc_info=True)
+        # Update job status to failed
+        try:
+            job = db.query(ExtractionJob).filter(ExtractionJob.job_id == job_id).first()
+            if job:
+                job.status = JobStatus.FAILED
+                job.error_message = f"Pipeline failed: {str(e)}"
+                db.commit()
+        except:
+            pass
