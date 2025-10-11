@@ -2922,3 +2922,287 @@ backend/app/
 - Immediate particle creation for responsive animation
 - Proportional speed values (800/400/200/100)
 
+
+---
+
+## October 11, 2025 - Financial Builder Dashboard & Download Fix Session
+
+### What Was Completed
+
+1. **Dashboard Results Display Fixed**:
+   - Added `job_metadata` column to `extraction_jobs` table for storing pipeline results
+   - Updated `JobStatusResponse` Pydantic model to include `metadata` field
+   - Modified `file_extractor.py` to return `metadata` in status dictionary
+   - Frontend now displays 4 colorful metric cards when pipeline completes
+   - Shows: Total Transactions, Successfully Categorized, Needs Review, Avg Confidence
+
+2. **Excel Cell Sanitization**:
+   - Root cause: Illegal ASCII control characters (0-31) in PDF-extracted text
+   - Added `sanitize_cell_value()` function to remove illegal characters except tab, newline, CR
+   - Applied sanitization to all cell writes in `excel_populator.py`
+   - Fixed "Electrical Compliance Certificate (EC- cannot be used in worksheets" error
+   - Error was misleading - not about worksheet names, but cell content
+
+3. **Download Endpoint Implementation**:
+   - Created `/api/financial-builder/{project_id}/download` GET endpoint
+   - Implements path resolution for relative file paths from database
+   - Returns FileResponse with Excel file for download
+   - Verified working via curl with Bearer token authentication
+
+4. **Frontend Download Button**:
+   - Updated from `window.open()` to authenticated `fetch()` with Bearer token
+   - Implements blob download with temporary `<a>` element
+   - Adds Authorization header from localStorage token
+   - Status: Works in curl tests, still failing in browser
+
+5. **Data Normalization Layer** (from previous session carryover):
+   - Created `DataPoint` model for normalized financial data
+   - Implemented `TransactionParser` for extracting transactions from raw text/Excel
+   - Built `DataPointMapper` for deduplication and conflict detection
+   - Pipeline now has 6 phases: Extract → Parse → Deduplicate → Categorize → Generate
+
+### Current Project State
+
+**What's Working**:
+- ✅ Financial Builder 6-phase pipeline executes successfully
+- ✅ Dashboard displays 4 metric cards with pipeline results
+- ✅ Excel generation creates 5-sheet workbook (Summary, Revenue, Direct/Indirect Costs, Transactions)
+- ✅ Cell value sanitization prevents openpyxl errors
+- ✅ Download endpoint responds correctly via curl
+- ✅ 123 files processed (5 failures due to corrupted PDFs)
+- ✅ 2849 transactions extracted and categorized
+
+**What's In Progress**:
+- 🔄 Browser download functionality (works via curl, fails in browser)
+
+**What Needs Testing**:
+- Download button in Chrome, Safari, Firefox
+- Complete end-to-end workflow with different projects
+- Manual conflict resolution interface
+
+### Code Changes Summary
+
+**Files Modified**:
+1. `backend/app/database.py` - Added `job_metadata` column migration
+2. `backend/app/models/extraction.py` - Added `job_metadata` field to ExtractionJob model
+3. `backend/app/routers/financial_builder.py` - Added download endpoint, updated metadata handling
+4. `backend/app/services/excel_populator.py` - Added cell value sanitization
+5. `backend/app/services/file_extractor.py` - Updated to return metadata in status
+6. `backend/app/services/template_populator.py` - Added worksheet name sanitization
+7. `frontend/src/pages/FinancialBuilder.tsx` - Updated download button with authenticated fetch
+
+**Files Created**:
+1. `backend/app/models/data_points.py` - DataPoint model for normalized data
+2. `backend/app/services/transaction_parser.py` - Parses extracted data into transactions
+3. `backend/app/services/data_point_mapper.py` - Deduplication and conflict detection
+4. `wiki/CHECKPOINT_20251011.md` - Session checkpoint documentation
+5. `/tmp/electrical-error-fix-summary.md` - Detailed error analysis document
+
+**Files Updated (Configuration)**:
+- `.gitignore` - Excluded generated Excel files (`backend/data/projects/*/output/*.xlsx`)
+
+### Dependencies Added/Updated
+- No new dependencies added this session
+- Existing: openpyxl, pandas, fastapi, sqlalchemy, magic-pdf (MinerU)
+
+### Technical Decisions Made
+
+1. **Database Schema Update**:
+   - **Decision**: Add `job_metadata` TEXT column to `extraction_jobs` table
+   - **Why**: Store pipeline results (transaction counts, confidence scores, Excel path) for frontend display
+   - **Alternative**: Could have used separate results table, but simpler to keep in job record
+   - **Result**: Single source of truth for pipeline output
+
+2. **Cell Value Sanitization Approach**:
+   - **Decision**: Character-by-character filtering of ASCII 0-31 (except 9, 10, 13)
+   - **Why**: More precise than regex, preserves readable text while removing control chars
+   - **Alternative**: Could use regex `re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', value)`
+   - **Result**: Clean Excel cells without data loss
+
+3. **Download Authentication Method**:
+   - **Decision**: Use fetch() with Authorization header instead of window.open()
+   - **Why**: window.open() doesn't pass auth headers, creates new session without token
+   - **Alternative**: Could use pre-signed URLs or session-based auth
+   - **Result**: Backend receives token correctly, but browser download still fails
+
+4. **Path Resolution Strategy**:
+   - **Decision**: Check if path is absolute, if not resolve relative to backend directory
+   - **Why**: Database stores relative paths, but FileResponse needs absolute paths
+   - **Implementation**: `Path(__file__).parent.parent.parent / excel_path`
+   - **Result**: Successfully finds Excel files for download
+
+### Challenges Encountered
+
+1. **Challenge**: "Electrical Compliance Certificate" openpyxl error
+   - **Root Cause**: Illegal ASCII control characters in PDF-extracted cell content (not worksheet names!)
+   - **Misleading Error**: Error message referenced worksheet validation, actual issue was cell value validation
+   - **Solution**: Added `sanitize_cell_value()` function to strip control chars before writing
+   - **Debugging Process**:
+     - Initially thought worksheet names were invalid
+     - Added worksheet name sanitization - didn't fix it
+     - Used Python REPL to test openpyxl directly with sample text
+     - Discovered cell content validation was failing, not worksheet validation
+     - Inspected PDF-extracted text with `repr()` to see invisible characters
+     - Implemented character-by-character filtering
+   - **Status**: ✅ RESOLVED
+
+2. **Challenge**: Dashboard not displaying results after pipeline completion
+   - **Root Cause**: API response missing `metadata` field, frontend couldn't read results
+   - **Investigation Steps**:
+     - Checked database - metadata was being saved correctly
+     - Tested API with curl - metadata field wasn't in response
+     - Found Pydantic model didn't declare metadata field
+     - Also found database model was missing job_metadata column
+   - **Solution**: 
+     - Added `job_metadata` TEXT column to database
+     - Updated Pydantic model with `metadata: Optional[str]` field
+     - Modified `file_extractor.py` to return metadata in status dict
+   - **Status**: ✅ RESOLVED
+
+3. **Challenge**: Download button redirects to login page
+   - **Root Cause**: Still under investigation - curl works, browser fails
+   - **Current Hypothesis**: 
+     - Possible CORS preflight issue
+     - Token may not be included correctly from browser
+     - Fetch might not be handling blob response properly
+   - **Debugging Done**:
+     - Verified endpoint works with curl + Bearer token
+     - Confirmed file exists and path resolution is correct
+     - Added authenticated fetch with localStorage token
+     - Created blob download mechanism with temporary <a> element
+   - **Status**: 🔄 IN PROGRESS - Next steps: check browser console, verify token format, test with Postman
+
+### Next Session Goals
+
+1. **Fix Browser Download** (HIGH PRIORITY):
+   - Open browser DevTools and check Network tab for download request
+   - Verify Authorization header is being sent
+   - Check for CORS errors or 401 responses
+   - Test with Postman to isolate frontend vs backend issue
+   - Consider alternative: generate pre-signed download URLs
+
+2. **Add Error Handling UI**:
+   - Display specific error messages when download fails
+   - Show user-friendly message with troubleshooting steps
+   - Add retry button
+
+3. **Test Complete Workflow**:
+   - Run full pipeline with different projects
+   - Verify all phases complete successfully
+   - Check Excel output quality across different data types
+   - Performance test with larger file sets
+
+4. **Manual Review Interface**:
+   - UI for viewing conflicts in normalized data
+   - Ability to merge duplicate transactions
+   - Manual categorization override for low-confidence items
+
+### Current File Structure
+
+```
+backend/
+├── app/
+│   ├── models/
+│   │   ├── extraction.py          # ExtractionJob, ExtractedData, Transaction (with job_metadata)
+│   │   └── data_points.py         # DataPoint model (NEW)
+│   ├── routers/
+│   │   └── financial_builder.py   # Pipeline endpoints + download endpoint
+│   ├── services/
+│   │   ├── excel_populator.py     # Excel generation (with sanitization)
+│   │   ├── file_extractor.py      # File extraction service
+│   │   ├── transaction_parser.py  # Parse extracted data (NEW)
+│   │   └── data_point_mapper.py   # Dedup & conflict detection (NEW)
+│   └── database.py                # Database connection + migrations
+└── data/
+    ├── financial_builder.db        # SQLite database
+    └── projects/
+        └── project-a-123-sunset-blvd/
+            ├── data/                # Input files (123 files)
+            └── output/              # Generated Excel files (*.xlsx)
+
+frontend/
+└── src/
+    └── pages/
+        └── FinancialBuilder.tsx    # Financial Builder page (with dashboard display)
+```
+
+### Environment Setup Notes
+- **Python**: 3.9+
+- **Node**: v16+
+- **Backend Port**: 8000 (started with `python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`)
+- **Frontend Port**: 5173 (started with `npm run dev`)
+- **Database**: SQLite at `backend/data/financial_builder.db`
+- **Migration Needed**: `ALTER TABLE extraction_jobs ADD COLUMN job_metadata TEXT;` (already applied)
+
+### Debug Notes
+
+**Electrical Compliance Error Analysis**:
+- Error message was misleading - claimed worksheet name was invalid
+- Actual cause: Cell content contained invisible ASCII control characters
+- Characters likely came from PDF conversion process (MinerU/magic-pdf)
+- Solution: Filter characters with `ord(char) < 32 and char_code not in (9, 10, 13)`
+- Preserves tabs, newlines, carriage returns (which are valid in Excel cells)
+
+**Download Endpoint Verification**:
+```bash
+# Test command that WORKS:
+curl -s http://localhost:8000/api/financial-builder/project-a-123-sunset-blvd/download \
+  -H "Authorization: Bearer <token>" \
+  -o test_download.xlsx
+
+# Result: Valid Excel file (Microsoft Excel 2007+)
+```
+
+**Frontend Download Code**:
+```typescript
+// Current implementation:
+const token = localStorage.getItem('token');
+const response = await fetch(`/api/financial-builder/${currentProject}/download`, {
+  headers: { 'Authorization': `Bearer ${token}` }
+});
+const blob = await response.blob();
+const url = window.URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `Financial_Model_${currentProject}.xlsx`;
+document.body.appendChild(a);
+a.click();
+window.URL.revokeObjectURL(url);
+document.body.removeChild(a);
+```
+
+### Performance Notes
+- **Pipeline Duration**: 15-20 minutes for 123 files
+- **PDF Extraction**: 5-10 seconds per file (MinerU bottleneck)
+- **Categorization**: ~0.5 seconds for 2849 transactions (rule-based, no LLM)
+- **Excel Generation**: ~2 seconds for 5-sheet workbook
+- **Memory Usage**: ~500MB peak during batch processing
+
+### Session Summary
+
+**Duration**: 4 hours
+**Files Modified**: 7
+**Files Created**: 5
+**Commits**: 1
+**Status**: ✅ DASHBOARD DISPLAY FIXED, ⚠️ DOWNLOAD STILL NEEDS WORK
+
+**Major Achievements**:
+1. Fixed dashboard results display with metadata storage and API updates
+2. Resolved openpyxl "Electrical Compliance" error through systematic debugging
+3. Implemented authenticated download endpoint (backend working)
+4. Added comprehensive cell value sanitization for Excel generation
+5. Created detailed checkpoint documentation
+
+**Key Commit**:
+- `fix: Financial Builder dashboard display and Excel download functionality` (cd44765)
+
+**Technical Highlights**:
+- Character-level cell sanitization for openpyxl compatibility
+- Database schema evolution with job_metadata column
+- Path resolution for relative file paths
+- Blob download mechanism with authenticated fetch
+- Systematic error investigation process (misleading error messages)
+
+**Outstanding Issues**:
+- Download button works via curl but fails in browser (authentication flow needs investigation)
+
