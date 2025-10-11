@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getProjectsList } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { AIDataMappingAnimation } from '../components/dashboard/AIDataMappingAnimation';
-import { ArrowRight, BarChart3, FolderOpen, Zap } from 'lucide-react';
+import { BarChart3, FolderOpen, Zap } from 'lucide-react';
 import axios from 'axios';
 
 interface Project {

@@ -12,7 +12,7 @@ interface PipelineStage {
 
 export default function FinancialBuilder() {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [stages, setStages] = useState<PipelineStage[]>([
+  const [stages] = useState<PipelineStage[]>([
     { name: 'File Extraction', status: 'pending', progress: 0, details: 'Extract data from 144 files (PDFs, Excel)', filesProcessed: 0, totalFiles: 144 },
     { name: 'AI Categorization', status: 'pending', progress: 0, details: 'Map transactions to MASTER template categories' },
     { name: 'Data Aggregation', status: 'pending', progress: 0, details: 'Aggregate and validate all extracted data' },
