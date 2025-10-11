@@ -261,3 +261,39 @@ def get_mineru_service(enable_ocr: bool = True) -> Optional[MinerUService]:
     """
     service = MinerUService(enable_ocr=enable_ocr)
     return service if service.is_available() else None
+
+
+def extract_with_mineru(pdf_path: str) -> Dict[str, Any]:
+    """
+    Extract PDF content using MinerU.
+
+    Args:
+        pdf_path: Path to PDF file
+
+    Returns:
+        Dictionary with extraction results including 'success', 'text', 'error' keys
+    """
+    try:
+        service = MinerUService(enable_ocr=True)
+        if not service.is_available():
+            return {
+                'success': False,
+                'error': 'MinerU not available',
+                'text': ''
+            }
+
+        result = service.extract_pdf(pdf_path)
+        return {
+            'success': True,
+            'text': result.get('text', ''),
+            'tables': result.get('tables', []),
+            'confidence': result.get('confidence', 0.0),
+            'extraction_method': result.get('extraction_method', 'mineru')
+        }
+    except Exception as e:
+        logger.error(f"Error extracting PDF with MinerU: {str(e)}")
+        return {
+            'success': False,
+            'error': str(e),
+            'text': ''
+        }
