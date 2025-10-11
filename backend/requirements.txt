@@ -9,6 +9,7 @@ python-dateutil==2.8.2
 python-jose[cryptography]==3.3.0
 passlib==1.7.4
 bcrypt==4.0.1
+sqlalchemy==2.0.23
 
 # File extraction dependencies
 pdfplumber==0.11.0
@@ -20,6 +21,7 @@ magic-pdf>=0.6.1  # MinerU for advanced PDF extraction
 
 # AI/ML for classification
 anthropic==0.34.2
+google-generativeai==0.3.2
 
 # Utilities
 aiofiles==23.2.1
