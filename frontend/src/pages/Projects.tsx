@@ -4,6 +4,7 @@ import { getProjectsList } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { AIDataMappingAnimation } from '../components/dashboard/AIDataMappingAnimation';
 import { ArrowRight, BarChart3, FolderOpen, Zap } from 'lucide-react';
+import axios from 'axios';
 
 interface Project {
   project_id: string;
@@ -21,69 +22,16 @@ interface Project {
   description?: string;
 }
 
-// Mock project structure for AI animation (nested FileNode structure)
-const mockProjectStructure = {
-  name: 'Project Files',
-  type: 'folder' as const,
-  path: '/',
-  isExpanded: true,
-  children: [
-    {
-      name: '01_CONTRACTS',
-      type: 'folder' as const,
-      path: '/01_CONTRACTS',
-      isExpanded: true,
-      children: [
-        { name: 'Land_Purchase_Contract.pdf', type: 'pdf' as const, path: '/01_CONTRACTS/Land_Purchase_Contract.pdf' },
-        { name: 'Building_Contract.pdf', type: 'pdf' as const, path: '/01_CONTRACTS/Building_Contract.pdf' },
-        { name: 'Subcontractor_Agreements.pdf', type: 'pdf' as const, path: '/01_CONTRACTS/Subcontractor_Agreements.pdf' },
-      ]
-    },
-    {
-      name: '02_BUDGET',
-      type: 'folder' as const,
-      path: '/02_BUDGET',
-      isExpanded: true,
-      children: [
-        { name: 'Master_Budget.xlsx', type: 'excel' as const, path: '/02_BUDGET/Master_Budget.xlsx' },
-        { name: 'Cost_Estimates.xlsx', type: 'excel' as const, path: '/02_BUDGET/Cost_Estimates.xlsx' },
-        { name: 'Budget_Tracking.xlsx', type: 'excel' as const, path: '/02_BUDGET/Budget_Tracking.xlsx' },
-      ]
-    },
-    {
-      name: '03_INVOICES',
-      type: 'folder' as const,
-      path: '/03_INVOICES',
-      isExpanded: true,
-      children: [
-        { name: 'Materials_Invoice_Q1.pdf', type: 'pdf' as const, path: '/03_INVOICES/Materials_Invoice_Q1.pdf' },
-        { name: 'Labor_Invoice_Q1.pdf', type: 'pdf' as const, path: '/03_INVOICES/Labor_Invoice_Q1.pdf' },
-        { name: 'Equipment_Rental.pdf', type: 'pdf' as const, path: '/03_INVOICES/Equipment_Rental.pdf' },
-        { name: 'Subcontractor_Invoices.pdf', type: 'pdf' as const, path: '/03_INVOICES/Subcontractor_Invoices.pdf' },
-      ]
-    },
-    {
-      name: '04_PAYMENTS',
-      type: 'folder' as const,
-      path: '/04_PAYMENTS',
-      isExpanded: true,
-      children: [
-        { name: 'Payment_Schedule.xlsx', type: 'excel' as const, path: '/04_PAYMENTS/Payment_Schedule.xlsx' },
-        { name: 'Receipts_Log.xlsx', type: 'excel' as const, path: '/04_PAYMENTS/Receipts_Log.xlsx' },
-        { name: 'Bank_Statements.pdf', type: 'pdf' as const, path: '/04_PAYMENTS/Bank_Statements.pdf' },
-      ]
-    },
-  ]
-};
-
 const Projects: React.FC = () => {
   const { token } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [projectStructure, setProjectStructure] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProjects();
+    fetchProjectStructure();
   }, []);
 
   const fetchProjects = async () => {
@@ -98,6 +46,27 @@ const Projects: React.FC = () => {
       console.error('Error fetching projects:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProjectStructure = async () => {
+    try {
+      // Fetch file structure for first project (or default project)
+      const projectId = 'project-a-123-sunset-blvd';
+      const response = await axios.get(`http://localhost:8000/api/projects/${projectId}/file-structure`);
+      if (response.data && response.data.file_structure) {
+        setProjectStructure(response.data.file_structure);
+      }
+    } catch (error) {
+      console.error('Error fetching project structure:', error);
+      // Fallback to a simple structure
+      setProjectStructure({
+        name: 'Project Files',
+        type: 'folder',
+        path: '/',
+        isExpanded: true,
+        children: []
+      });
     }
   };
 
@@ -147,7 +116,9 @@ const Projects: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
         {/* AI Data Mapping Animation */}
-        <AIDataMappingAnimation projectStructure={mockProjectStructure} />
+        {projectStructure && (
+          <AIDataMappingAnimation projectStructure={projectStructure} />
+        )}
 
         {/* How It Works Section */}
         <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
