@@ -23,6 +23,7 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   const particlesRef = useRef<any[]>([]);
   const isPausedRef = useRef(false);
   const shouldStopRef = useRef(false);
+  const speedRef = useRef(400); // Use ref so speed changes take effect immediately during animation
   const speedLabels: Record<number, string> = { 700: 'Slow', 400: 'Normal', 200: 'Fast', 80: 'Ultra' };
 
   const outputs = ['Balance Sheet', 'Income Statement', 'Cash Flow Statement', 'Equity Statement', 'Ratios Dashboard', 'Assumptions', 'Instructions'];
@@ -317,12 +318,12 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
 
         for (let p = 0; p < 3; p++) setTimeout(() => particlesRef.current.push(createParticle(`file-${globalFileIdx}`, `node-1-${nodeIdx}`, '#3b82f6')), p * 50);
         document.getElementById(`node-1-${nodeIdx}`)?.classList.add('active');
-        await sleep(speed / 6);
+        await sleep(speedRef.current / 6);
 
         const node2Idx = (nodeIdx + 2) % nodesPerLayer;
         for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`node-1-${nodeIdx}`, `node-2-${node2Idx}`, '#ef4444')), p * 60);
         document.getElementById(`node-2-${node2Idx}`)?.classList.add('active');
-        await sleep(speed / 6);
+        await sleep(speedRef.current / 6);
 
         for (let j = 0; j < 5; j++) {
           const cellIdx = Math.floor(Math.random() * (matrixSize * matrixSize));
@@ -332,25 +333,25 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
             particlesRef.current.push(createParticle(`node-2-${node2Idx}`, `cell-${cellIdx}`, '#a78bfa'));
           }, j * 30);
         }
-        await sleep(speed / 6);
+        await sleep(speedRef.current / 6);
 
         const node3Idx = (nodeIdx + 1) % nodesPerLayer;
         for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`cell-${nodeIdx * matrixSize}`, `node-3-${node3Idx}`, '#8b5cf6')), p * 60);
         document.getElementById(`node-3-${node3Idx}`)?.classList.add('active');
-        await sleep(speed / 6);
+        await sleep(speedRef.current / 6);
 
         for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`node-3-${node3Idx}`, `node-4-${nodeIdx}`, '#10b981')), p * 60);
         document.getElementById(`node-4-${nodeIdx}`)?.classList.add('active');
-        await sleep(speed / 6);
+        await sleep(speedRef.current / 6);
 
         for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`node-4-${nodeIdx}`, 'outputHub', '#10b981')), p * 60);
         document.getElementById('outputHub')?.classList.add('active');
-        await sleep(speed / 6);
+        await sleep(speedRef.current / 6);
 
         const outputIdx = Math.floor(processedFiles / (totalFiles / outputs.length));
         if (outputIdx < outputs.length) {
           for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle('outputHub', `output-${outputIdx}`, '#10b981')), p * 60);
-          setTimeout(() => document.getElementById(`output-${outputIdx}`)?.classList.add('active'), speed / 3);
+          setTimeout(() => document.getElementById(`output-${outputIdx}`)?.classList.add('active'), speedRef.current / 3);
         }
 
         setTimeout(() => {
@@ -361,12 +362,12 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
           document.getElementById(`node-4-${nodeIdx}`)?.classList.remove('active');
           document.getElementById('outputHub')?.classList.remove('active');
           document.querySelectorAll('.matrix-cell.active').forEach(el => el.classList.remove('active'));
-        }, speed);
+        }, speedRef.current);
 
         processedFiles++;
         setFileCounter(`${processedFiles}/${totalFiles}`);
         setProgress(processedFiles / totalFiles * 100);
-        await sleep(speed / 8);
+        await sleep(speedRef.current / 8);
       }
       document.getElementById(`folder-${folderIdx}`)?.classList.remove('active');
     }
@@ -403,7 +404,9 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   const toggleSpeed = () => {
     const speeds = [700, 400, 200, 80];
     const idx = speeds.indexOf(speed);
-    setSpeed(speeds[(idx + 1) % speeds.length]);
+    const newSpeed = speeds[(idx + 1) % speeds.length];
+    setSpeed(newSpeed);
+    speedRef.current = newSpeed; // Update ref immediately for running animation
   };
 
   return (
