@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   DollarSign, TrendingDown, TrendingUp, AlertTriangle, LogOut, ArrowLeft,
   Activity, Target, Clock, Briefcase, PieChart as PieChartIcon, BarChart3, FileText,
-  Home, Wallet, FolderOpen, Zap, Settings
+  Home, Wallet, FolderOpen, Zap, Settings, Database
 } from 'lucide-react';
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
@@ -32,7 +32,7 @@ export function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'financials' | 'documents' | 'automation' | 'system'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'financials' | 'documents' | 'automation' | 'system' | 'builder'>('overview');
 
   useEffect(() => {
     const projectId = localStorage.getItem('selectedProjectId');
@@ -305,6 +305,17 @@ export function Dashboard() {
               <Settings className="w-4 h-4" />
               System
             </button>
+            <button
+              onClick={() => setActiveTab('builder')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
+                activeTab === 'builder'
+                  ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              Financial Builder
+            </button>
           </nav>
         </div>
       </div>
@@ -345,30 +356,6 @@ export function Dashboard() {
                 </div>
               </div>
             )}
-
-            {/* Financial Builder - Quick Access */}
-            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 rounded-xl p-6 shadow-xl border border-purple-400">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="bg-white bg-opacity-20 p-4 rounded-lg">
-                    <FileText className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="text-white">
-                    <h3 className="text-xl font-bold mb-1">Financial Statement Builder</h3>
-                    <p className="text-purple-100 text-sm">
-                      Process all 144 files → AI categorization → Automated Excel financial model
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigate('/financial-builder')}
-                  className="bg-white text-purple-700 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2"
-                >
-                  <Zap className="w-5 h-5" />
-                  Launch Builder
-                </button>
-              </div>
-            </div>
 
             {/* Enhanced KPI Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -655,6 +642,65 @@ export function Dashboard() {
           <>
             {/* System Health & Monitoring */}
             <SystemHealth />
+          </>
+        )}
+
+        {/* FINANCIAL BUILDER TAB */}
+        {activeTab === 'builder' && (
+          <>
+            {/* Info Card */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-lg">
+              <div className="flex items-start gap-4">
+                <Database className="w-8 h-8 text-purple-600 flex-shrink-0" />
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">Financial Statement Builder</h2>
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <p>
+                      <strong>1. Extract:</strong> Process all PDFs and Excel files in your project folder using MinerU AI
+                    </p>
+                    <p>
+                      <strong>2. Categorize:</strong> AI maps each transaction to the MASTER Financial Statement Template
+                    </p>
+                    <p>
+                      <strong>3. Aggregate:</strong> Combine and validate all data with confidence scores
+                    </p>
+                    <p>
+                      <strong>4. Populate:</strong> Automatically fill your Financial Model Excel with verified data
+                    </p>
+                  </div>
+                  <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-purple-600" />
+                      <span className="text-sm font-semibold text-purple-900">
+                        Project: {selectedProjectId} • 144 files ready for processing
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Start Button - TODO: Implement pipeline logic */}
+            <div className="text-center">
+              <button
+                onClick={() => alert('Full pipeline not yet implemented - backend endpoints needed!')}
+                className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-4 px-8 rounded-xl hover:from-purple-700 hover:to-indigo-800 transition-all duration-200 font-bold text-lg shadow-lg flex items-center gap-3 mx-auto"
+              >
+                <Zap className="w-6 h-6" />
+                Start Full Pipeline Processing
+              </button>
+            </div>
+
+            {/* Pipeline Stages Placeholder */}
+            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
+              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                Pipeline Ready
+              </h3>
+              <p className="text-sm text-gray-600">
+                Click "Start Full Pipeline Processing" to begin extracting and processing your project files
+              </p>
+            </div>
           </>
         )}
       </main>
