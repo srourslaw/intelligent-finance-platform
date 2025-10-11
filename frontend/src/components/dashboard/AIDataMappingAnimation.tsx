@@ -8,11 +8,24 @@ interface FileNode {
   isExpanded?: boolean;
 }
 
-interface AIDataMappingAnimationProps {
-  projectStructure: FileNode;
+interface Project {
+  project_id: string;
+  project_name: string;
 }
 
-export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimationProps) {
+interface AIDataMappingAnimationProps {
+  projectStructure: FileNode;
+  projects: Project[];
+  selectedProjectId: string;
+  onProjectChange: (projectId: string) => void;
+}
+
+export function AIDataMappingAnimation({
+  projectStructure,
+  projects,
+  selectedProjectId,
+  onProjectChange
+}: AIDataMappingAnimationProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -69,6 +82,13 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   useEffect(() => {
     speedRef.current = speed;
   }, [speed]);
+
+  // Reset animation when project changes
+  useEffect(() => {
+    if (isRunning) {
+      resetAll();
+    }
+  }, [selectedProjectId]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -467,6 +487,34 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
             <div style={{ fontSize: '0.75em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '16px', paddingBottom: '10px', borderBottom: '2px solid #e5e7eb', textAlign: 'center' }}>
               File Processing
               <span style={{ display: 'block', fontSize: '1.1em', color: '#3b82f6', fontWeight: 700, marginTop: '6px' }}>{fileCounter}</span>
+
+              {/* Project Selector */}
+              <select
+                value={selectedProjectId}
+                onChange={(e) => onProjectChange(e.target.value)}
+                style={{
+                  marginTop: '12px',
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '0.9em',
+                  fontWeight: 600,
+                  color: '#374151',
+                  background: 'white',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+              >
+                {projects.map((project) => (
+                  <option key={project.project_id} value={project.project_id}>
+                    {project.project_name}
+                  </option>
+                ))}
+              </select>
             </div>
             {fileStructure.map((group, groupIdx) => {
               const startIndex = fileStructure.slice(0, groupIdx).reduce((acc, f) => acc + f.files.length, 0);

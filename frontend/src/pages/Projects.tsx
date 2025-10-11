@@ -27,12 +27,18 @@ const Projects: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [projectStructure, setProjectStructure] = useState<any>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('project-a-123-sunset-blvd');
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProjects();
-    fetchProjectStructure();
   }, []);
+
+  useEffect(() => {
+    if (selectedProjectId) {
+      fetchProjectStructure(selectedProjectId);
+    }
+  }, [selectedProjectId]);
 
   const fetchProjects = async () => {
     if (!token) return;
@@ -49,10 +55,8 @@ const Projects: React.FC = () => {
     }
   };
 
-  const fetchProjectStructure = async () => {
+  const fetchProjectStructure = async (projectId: string) => {
     try {
-      // Fetch file structure for first project (or default project)
-      const projectId = 'project-a-123-sunset-blvd';
       const response = await axios.get(`http://localhost:8000/api/projects/${projectId}/file-structure`);
       if (response.data && response.data.file_structure) {
         setProjectStructure(response.data.file_structure);
@@ -117,7 +121,12 @@ const Projects: React.FC = () => {
       <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
         {/* AI Data Mapping Animation */}
         {projectStructure && (
-          <AIDataMappingAnimation projectStructure={projectStructure} />
+          <AIDataMappingAnimation
+            projectStructure={projectStructure}
+            projects={projects}
+            selectedProjectId={selectedProjectId}
+            onProjectChange={setSelectedProjectId}
+          />
         )}
 
         {/* How It Works Section */}
