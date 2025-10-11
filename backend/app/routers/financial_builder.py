@@ -347,7 +347,9 @@ def run_pipeline_phases(
         }
 
         # Generate output path
-        output_dir = Path("data") / "projects" / project_id / "output"
+        # Use /tmp for cloud deployments (Render, etc.) where file system is ephemeral
+        base_dir = Path("/tmp") if os.getenv("RENDER") else Path("data")
+        output_dir = base_dir / "projects" / project_id / "output"
         output_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_path = output_dir / f"Financial_Model_{timestamp}.xlsx"
