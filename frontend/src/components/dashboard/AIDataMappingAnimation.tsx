@@ -56,6 +56,11 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   const fileStructure = buildFileStructure(projectStructure);
   const totalFiles = fileStructure.reduce((acc, f) => acc + f.files.length, 0);
 
+  // Initialize counter with total files
+  useEffect(() => {
+    setFileCounter(`0/${totalFiles}`);
+  }, [totalFiles]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
