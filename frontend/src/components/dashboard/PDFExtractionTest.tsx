@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, FileText, CheckCircle2, XCircle, Loader2, Database } from 'lucide-react';
+import { Upload, FileText, CheckCircle2, XCircle, Loader2, Database, ArrowRight, TrendingUp, DollarSign, FileSpreadsheet } from 'lucide-react';
 
 interface ExtractionResult {
   method: 'mineru' | 'pdfplumber';
@@ -332,6 +332,161 @@ export function PDFExtractionTest() {
                   <div className="text-sm text-gray-600">
                     Improvement: +{((results.mineru.confidence - results.pdfplumber.confidence) * 100).toFixed(1)}% confidence,
                     +{results.mineru.transactions_found - results.pdfplumber.transactions_found} transactions
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Automated Pipeline Visualization */}
+          {results.mineru && results.mineru.transactions_found > 0 && (
+            <div className="mt-8 border-t-2 border-gray-300 pt-8">
+              <div className="flex items-center gap-3 mb-6">
+                <TrendingUp className="w-6 h-6 text-purple-600" />
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Automated Financial Statement Pipeline</h2>
+                  <p className="text-sm text-gray-600">
+                    Watch as AI categorizes transactions and populates your financial statements
+                  </p>
+                </div>
+              </div>
+
+              {/* Pipeline Flow */}
+              <div className="relative">
+                {/* Progress Line */}
+                <div className="absolute top-12 left-0 right-0 h-1 bg-gradient-to-r from-blue-200 via-purple-200 to-green-200 rounded-full" />
+                <div className="absolute top-12 left-0 h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 rounded-full transition-all duration-1000"
+                     style={{ width: '100%' }} />
+
+                {/* Pipeline Stages */}
+                <div className="grid grid-cols-3 gap-4 relative z-10">
+                  {/* Stage 1: Extracted Data */}
+                  <div className="bg-white border-2 border-blue-500 rounded-lg p-4 shadow-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">✓</div>
+                      <div className="font-bold text-gray-900">1. Extracted Data</div>
+                    </div>
+                    <div className="text-xs text-gray-600 mb-2">
+                      {results.mineru.transactions_found} transactions extracted
+                    </div>
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {results.mineru.transactions.slice(0, 6).map((txn, idx) => (
+                        <div key={idx} className="bg-blue-50 p-2 rounded text-xs">
+                          <div className="flex justify-between">
+                            <span className="font-medium truncate">{txn.description}</span>
+                            <span className="font-bold text-blue-600">${txn.amount.toFixed(2)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Arrow 1 */}
+                  <div className="absolute top-14 left-1/3 transform -translate-x-1/2 z-20">
+                    <ArrowRight className="w-6 h-6 text-purple-600 animate-pulse" />
+                  </div>
+
+                  {/* Stage 2: AI Categorization */}
+                  <div className="bg-white border-2 border-purple-500 rounded-lg p-4 shadow-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold">✓</div>
+                      <div className="font-bold text-gray-900">2. AI Categorization</div>
+                    </div>
+                    <div className="text-xs text-gray-600 mb-2">
+                      Intelligent categorization with confidence scores
+                    </div>
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {results.mineru.transactions.slice(0, 6).map((txn, idx) => (
+                        <div key={idx} className="bg-purple-50 p-2 rounded text-xs">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-medium truncate">{txn.description}</div>
+                              <div className="text-purple-700 font-semibold mt-0.5">
+                                {txn.category || (txn.amount > 0 ? 'Revenue' : 'Expense')}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold">${txn.amount.toFixed(2)}</div>
+                              <div className="text-purple-600 text-xs">
+                                {(txn.confidence * 100).toFixed(0)}%
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Arrow 2 */}
+                  <div className="absolute top-14 left-2/3 transform -translate-x-1/2 z-20">
+                    <ArrowRight className="w-6 h-6 text-green-600 animate-pulse" />
+                  </div>
+
+                  {/* Stage 3: Financial Statement */}
+                  <div className="bg-white border-2 border-green-500 rounded-lg p-4 shadow-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold">✓</div>
+                      <div className="font-bold text-gray-900">3. Income Statement</div>
+                    </div>
+                    <div className="text-xs text-gray-600 mb-2">
+                      Auto-populated financial statement
+                    </div>
+                    <div className="bg-green-50 p-3 rounded text-xs font-mono space-y-1">
+                      <div className="font-bold text-green-900 border-b border-green-300 pb-1 mb-2">
+                        Income Statement Preview
+                      </div>
+                      {(() => {
+                        const revenue = results.mineru.transactions
+                          .filter(t => t.amount > 0)
+                          .reduce((sum, t) => sum + t.amount, 0);
+                        const expenses = Math.abs(results.mineru.transactions
+                          .filter(t => t.amount < 0)
+                          .reduce((sum, t) => sum + t.amount, 0));
+                        const netIncome = revenue - expenses;
+
+                        return (
+                          <>
+                            <div className="flex justify-between">
+                              <span>Revenue</span>
+                              <span className="font-bold text-green-600">${revenue.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Expenses</span>
+                              <span className="font-bold text-red-600">(${expenses.toFixed(2)})</span>
+                            </div>
+                            <div className="border-t border-green-300 mt-2 pt-2 flex justify-between font-bold">
+                              <span>Net Income</span>
+                              <span className={netIncome >= 0 ? 'text-green-700' : 'text-red-700'}>
+                                ${netIncome.toFixed(2)}
+                              </span>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Export Button */}
+                    <button
+                      className="mt-3 w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2 px-4 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold text-sm flex items-center justify-center gap-2"
+                    >
+                      <FileSpreadsheet className="w-4 h-4" />
+                      Export to Excel
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Info Badge */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-green-50 border border-purple-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <DollarSign className="w-6 h-6 text-purple-600" />
+                  <div>
+                    <div className="font-bold text-gray-900">
+                      ✨ Fully Automated Process
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      From PDF upload to financial statements in seconds - powered by AI
+                    </div>
                   </div>
                 </div>
               </div>
