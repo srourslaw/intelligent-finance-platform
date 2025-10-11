@@ -21,20 +21,59 @@ interface Project {
   description?: string;
 }
 
-// Mock project structure for AI animation
+// Mock project structure for AI animation (nested FileNode structure)
 const mockProjectStructure = {
-  files: [
-    { name: 'Budget_Master.xlsx', type: 'budget', size: '2.4 MB' },
-    { name: 'Invoices_Q1.pdf', type: 'invoice', size: '1.8 MB' },
-    { name: 'Payments_Log.xlsx', type: 'payment', size: '890 KB' },
-    { name: 'Contract_Docs.pdf', type: 'contract', size: '3.2 MB' },
-  ],
-  folders: [
-    '01_CONTRACTS',
-    '02_BUDGET',
-    '03_INVOICES',
-    '04_PAYMENTS',
-  ],
+  name: 'Project Files',
+  type: 'folder' as const,
+  path: '/',
+  isExpanded: true,
+  children: [
+    {
+      name: '01_CONTRACTS',
+      type: 'folder' as const,
+      path: '/01_CONTRACTS',
+      isExpanded: true,
+      children: [
+        { name: 'Land_Purchase_Contract.pdf', type: 'pdf' as const, path: '/01_CONTRACTS/Land_Purchase_Contract.pdf' },
+        { name: 'Building_Contract.pdf', type: 'pdf' as const, path: '/01_CONTRACTS/Building_Contract.pdf' },
+        { name: 'Subcontractor_Agreements.pdf', type: 'pdf' as const, path: '/01_CONTRACTS/Subcontractor_Agreements.pdf' },
+      ]
+    },
+    {
+      name: '02_BUDGET',
+      type: 'folder' as const,
+      path: '/02_BUDGET',
+      isExpanded: true,
+      children: [
+        { name: 'Master_Budget.xlsx', type: 'excel' as const, path: '/02_BUDGET/Master_Budget.xlsx' },
+        { name: 'Cost_Estimates.xlsx', type: 'excel' as const, path: '/02_BUDGET/Cost_Estimates.xlsx' },
+        { name: 'Budget_Tracking.xlsx', type: 'excel' as const, path: '/02_BUDGET/Budget_Tracking.xlsx' },
+      ]
+    },
+    {
+      name: '03_INVOICES',
+      type: 'folder' as const,
+      path: '/03_INVOICES',
+      isExpanded: true,
+      children: [
+        { name: 'Materials_Invoice_Q1.pdf', type: 'pdf' as const, path: '/03_INVOICES/Materials_Invoice_Q1.pdf' },
+        { name: 'Labor_Invoice_Q1.pdf', type: 'pdf' as const, path: '/03_INVOICES/Labor_Invoice_Q1.pdf' },
+        { name: 'Equipment_Rental.pdf', type: 'pdf' as const, path: '/03_INVOICES/Equipment_Rental.pdf' },
+        { name: 'Subcontractor_Invoices.pdf', type: 'pdf' as const, path: '/03_INVOICES/Subcontractor_Invoices.pdf' },
+      ]
+    },
+    {
+      name: '04_PAYMENTS',
+      type: 'folder' as const,
+      path: '/04_PAYMENTS',
+      isExpanded: true,
+      children: [
+        { name: 'Payment_Schedule.xlsx', type: 'excel' as const, path: '/04_PAYMENTS/Payment_Schedule.xlsx' },
+        { name: 'Receipts_Log.xlsx', type: 'excel' as const, path: '/04_PAYMENTS/Receipts_Log.xlsx' },
+        { name: 'Bank_Statements.pdf', type: 'pdf' as const, path: '/04_PAYMENTS/Bank_Statements.pdf' },
+      ]
+    },
+  ]
 };
 
 const Projects: React.FC = () => {
