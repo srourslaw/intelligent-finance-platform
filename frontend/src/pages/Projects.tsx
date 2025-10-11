@@ -118,7 +118,7 @@ const Projects: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-8 pt-4 pb-8 space-y-8">
         {/* AI Data Mapping Animation */}
         {projectStructure && (
           <AIDataMappingAnimation
