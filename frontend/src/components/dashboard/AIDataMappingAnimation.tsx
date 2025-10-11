@@ -24,6 +24,7 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   const isPausedRef = useRef(false);
   const shouldStopRef = useRef(false);
   const speedRef = useRef(400); // Use ref so speed changes take effect immediately during animation
+  const pendingTimeoutsRef = useRef<number[]>([]); // Track all setTimeout IDs for cleanup
   const speedLabels: Record<number, string> = { 700: 'Slow', 400: 'Normal', 200: 'Fast', 80: 'Ultra' };
 
   const outputs = ['Balance Sheet', 'Income Statement', 'Cash Flow Statement', 'Equity Statement', 'Ratios Dashboard', 'Assumptions', 'Instructions'];
@@ -283,6 +284,13 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
     ctx.shadowBlur = 0;
   };
 
+  // Helper to create speed-aware setTimeout that uses current speed
+  const scheduleTimeout = (callback: () => void, delayFactor: number) => {
+    const id = window.setTimeout(callback, speedRef.current * delayFactor);
+    pendingTimeoutsRef.current.push(id);
+    return id;
+  };
+
   const sleep = (ms: number) => new Promise<void>(resolve => {
     const checkPause = () => {
       if (shouldStopRef.current) {
@@ -298,6 +306,11 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
 
   const startAnimation = async () => {
     if (isRunning) return;
+
+    // Clear any pending timeouts from previous run
+    pendingTimeoutsRef.current.forEach(id => clearTimeout(id));
+    pendingTimeoutsRef.current = [];
+
     setIsRunning(true);
     setIsPaused(false);
     isPausedRef.current = false;
@@ -316,45 +329,58 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
         fileEl?.classList.add('active');
         const nodeIdx = globalFileIdx % nodesPerLayer;
 
-        for (let p = 0; p < 3; p++) setTimeout(() => particlesRef.current.push(createParticle(`file-${globalFileIdx}`, `node-1-${nodeIdx}`, '#3b82f6')), p * 50);
+        // Create particles with speed-scaled delays
+        for (let p = 0; p < 3; p++) {
+          scheduleTimeout(() => particlesRef.current.push(createParticle(`file-${globalFileIdx}`, `node-1-${nodeIdx}`, '#3b82f6')), p * 0.05);
+        }
         document.getElementById(`node-1-${nodeIdx}`)?.classList.add('active');
         await sleep(speedRef.current / 6);
 
         const node2Idx = (nodeIdx + 2) % nodesPerLayer;
-        for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`node-1-${nodeIdx}`, `node-2-${node2Idx}`, '#ef4444')), p * 60);
+        for (let p = 0; p < 2; p++) {
+          scheduleTimeout(() => particlesRef.current.push(createParticle(`node-1-${nodeIdx}`, `node-2-${node2Idx}`, '#ef4444')), p * 0.06);
+        }
         document.getElementById(`node-2-${node2Idx}`)?.classList.add('active');
         await sleep(speedRef.current / 6);
 
         for (let j = 0; j < 5; j++) {
           const cellIdx = Math.floor(Math.random() * (matrixSize * matrixSize));
           document.getElementById(`cell-${cellIdx}`)?.classList.add('active');
-          setTimeout(() => {
+          scheduleTimeout(() => {
             particlesRef.current.push(createParticle(`node-2-${node2Idx}`, `cell-${cellIdx}`, '#a78bfa'));
             particlesRef.current.push(createParticle(`node-2-${node2Idx}`, `cell-${cellIdx}`, '#a78bfa'));
-          }, j * 30);
+          }, j * 0.03);
         }
         await sleep(speedRef.current / 6);
 
         const node3Idx = (nodeIdx + 1) % nodesPerLayer;
-        for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`cell-${nodeIdx * matrixSize}`, `node-3-${node3Idx}`, '#8b5cf6')), p * 60);
+        for (let p = 0; p < 2; p++) {
+          scheduleTimeout(() => particlesRef.current.push(createParticle(`cell-${nodeIdx * matrixSize}`, `node-3-${node3Idx}`, '#8b5cf6')), p * 0.06);
+        }
         document.getElementById(`node-3-${node3Idx}`)?.classList.add('active');
         await sleep(speedRef.current / 6);
 
-        for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`node-3-${node3Idx}`, `node-4-${nodeIdx}`, '#10b981')), p * 60);
+        for (let p = 0; p < 2; p++) {
+          scheduleTimeout(() => particlesRef.current.push(createParticle(`node-3-${node3Idx}`, `node-4-${nodeIdx}`, '#10b981')), p * 0.06);
+        }
         document.getElementById(`node-4-${nodeIdx}`)?.classList.add('active');
         await sleep(speedRef.current / 6);
 
-        for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle(`node-4-${nodeIdx}`, 'outputHub', '#10b981')), p * 60);
+        for (let p = 0; p < 2; p++) {
+          scheduleTimeout(() => particlesRef.current.push(createParticle(`node-4-${nodeIdx}`, 'outputHub', '#10b981')), p * 0.06);
+        }
         document.getElementById('outputHub')?.classList.add('active');
         await sleep(speedRef.current / 6);
 
         const outputIdx = Math.floor(processedFiles / (totalFiles / outputs.length));
         if (outputIdx < outputs.length) {
-          for (let p = 0; p < 2; p++) setTimeout(() => particlesRef.current.push(createParticle('outputHub', `output-${outputIdx}`, '#10b981')), p * 60);
-          setTimeout(() => document.getElementById(`output-${outputIdx}`)?.classList.add('active'), speedRef.current / 3);
+          for (let p = 0; p < 2; p++) {
+            scheduleTimeout(() => particlesRef.current.push(createParticle('outputHub', `output-${outputIdx}`, '#10b981')), p * 0.06);
+          }
+          scheduleTimeout(() => document.getElementById(`output-${outputIdx}`)?.classList.add('active'), 0.33);
         }
 
-        setTimeout(() => {
+        scheduleTimeout(() => {
           fileEl?.classList.remove('active');
           document.getElementById(`node-1-${nodeIdx}`)?.classList.remove('active');
           document.getElementById(`node-2-${node2Idx}`)?.classList.remove('active');
@@ -362,7 +388,7 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
           document.getElementById(`node-4-${nodeIdx}`)?.classList.remove('active');
           document.getElementById('outputHub')?.classList.remove('active');
           document.querySelectorAll('.matrix-cell.active').forEach(el => el.classList.remove('active'));
-        }, speedRef.current);
+        }, 1.0);
 
         processedFiles++;
         setFileCounter(`${processedFiles}/${totalFiles}`);
@@ -392,6 +418,10 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
     isPausedRef.current = false;
     setIsPaused(false);
     setIsRunning(false);
+
+    // Clear all pending timeouts
+    pendingTimeoutsRef.current.forEach(id => clearTimeout(id));
+    pendingTimeoutsRef.current = [];
 
     // Clear all visual states
     document.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
