@@ -40,6 +40,7 @@ export function Dashboard() {
   const [pipelineStatus, setPipelineStatus] = useState<any>(null);
   const [excelPath, setExcelPath] = useState<string | null>(null);
   const [pipelineError, setPipelineError] = useState<string | null>(null);
+  const [pipelineResults, setPipelineResults] = useState<any>(null);
 
   useEffect(() => {
     const projectId = localStorage.getItem('selectedProjectId');
@@ -143,6 +144,14 @@ export function Dashboard() {
               if (metadata.excel_path) {
                 setExcelPath(metadata.excel_path);
               }
+              // Store results for display
+              setPipelineResults({
+                totalTransactions: metadata.total_transactions || 0,
+                categorized: metadata.categorized || 0,
+                uncategorizedCount: metadata.uncategorized_count || 0,
+                averageConfidence: metadata.average_confidence || 0,
+                excelPath: metadata.excel_path
+              });
             } catch (e) {
               console.error('Failed to parse metadata:', e);
             }
@@ -879,33 +888,106 @@ export function Dashboard() {
 
             {/* Success & Download */}
             {excelPath && !pipelineRunning && (
-              <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="font-bold text-green-900 mb-2">✨ Financial Model Successfully Generated!</h3>
-                    <p className="text-sm text-green-700 mb-4">
-                      All files have been processed and your financial statements are ready.
-                    </p>
-                    <div className="bg-white border border-green-300 rounded-lg p-3 mb-4">
-                      <div className="text-xs font-medium text-gray-600 mb-1">Generated File:</div>
-                      <div className="text-sm font-mono text-gray-900">{excelPath}</div>
-                    </div>
-                    {pipelineStatus && (
-                      <div className="text-sm text-green-800 space-y-1 mb-4">
-                        <div>• Total Transactions: {pipelineStatus.processed_files}</div>
-                        <div>• Successfully Processed: {pipelineStatus.processed_files - pipelineStatus.failed_files}</div>
+              <div className="space-y-6">
+                <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h3 className="font-bold text-green-900 mb-2">✨ Financial Model Successfully Generated!</h3>
+                      <p className="text-sm text-green-700 mb-4">
+                        All files have been processed and your financial statements are ready.
+                      </p>
+                      <div className="bg-white border border-green-300 rounded-lg p-3 mb-4">
+                        <div className="text-xs font-medium text-gray-600 mb-1">Generated File:</div>
+                        <div className="text-sm font-mono text-gray-900">{excelPath}</div>
                       </div>
-                    )}
-                    <button
-                      onClick={() => window.open(excelPath, '_blank')}
-                      className="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold flex items-center gap-2"
-                    >
-                      <FileText className="w-5 h-5" />
-                      View Financial Model
-                    </button>
+                      {pipelineStatus && (
+                        <div className="text-sm text-green-800 space-y-1 mb-4">
+                          <div>• Total Files Processed: {pipelineStatus.processed_files}</div>
+                          <div>• Successfully Processed: {pipelineStatus.processed_files - pipelineStatus.failed_files}</div>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => window.open(excelPath, '_blank')}
+                        className="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold flex items-center gap-2"
+                      >
+                        <FileText className="w-5 h-5" />
+                        Download Financial Model
+                      </button>
+                    </div>
                   </div>
                 </div>
+
+                {/* Results Summary */}
+                {pipelineResults && (
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-lg">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Financial Summary</h3>
+
+                    {/* Key Metrics Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="text-sm text-blue-600 font-medium mb-1">Total Transactions</div>
+                        <div className="text-3xl font-bold text-blue-900">{pipelineResults.totalTransactions}</div>
+                      </div>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="text-sm text-green-600 font-medium mb-1">Categorized</div>
+                        <div className="text-3xl font-bold text-green-900">{pipelineResults.categorized}</div>
+                      </div>
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div className="text-sm text-yellow-600 font-medium mb-1">Uncategorized</div>
+                        <div className="text-3xl font-bold text-yellow-900">{pipelineResults.uncategorizedCount}</div>
+                      </div>
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <div className="text-sm text-purple-600 font-medium mb-1">Avg Confidence</div>
+                        <div className="text-3xl font-bold text-purple-900">
+                          {(pipelineResults.averageConfidence * 100).toFixed(0)}%
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Excel Sheets Info */}
+                    <div className="border-t border-gray-200 pt-4">
+                      <h4 className="font-semibold text-gray-900 mb-3">Generated Excel Contains:</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="flex items-start gap-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
+                          <div>
+                            <div className="font-medium text-gray-900">Summary Sheet</div>
+                            <div className="text-sm text-gray-600">Key financial metrics and data quality</div>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
+                          <div>
+                            <div className="font-medium text-gray-900">Revenue Sheet</div>
+                            <div className="text-sm text-gray-600">Revenue category breakdown</div>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5"></div>
+                          <div>
+                            <div className="font-medium text-gray-900">Direct Costs Sheet</div>
+                            <div className="text-sm text-gray-600">Materials, labor, equipment costs</div>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5"></div>
+                          <div>
+                            <div className="font-medium text-gray-900">Indirect Costs Sheet</div>
+                            <div className="text-sm text-gray-600">Overhead and administrative costs</div>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <div className="w-2 h-2 bg-gray-500 rounded-full mt-1.5"></div>
+                          <div>
+                            <div className="font-medium text-gray-900">Transactions Sheet</div>
+                            <div className="text-sm text-gray-600">Complete transaction details</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
