@@ -168,7 +168,7 @@ export function PDFExtractionTest() {
                   {/* Text Preview */}
                   <div>
                     <div className="text-xs font-medium text-gray-600 mb-1">Text Preview:</div>
-                    <div className="bg-gray-50 p-3 rounded border border-gray-200 text-xs font-mono max-h-32 overflow-y-auto">
+                    <div className="bg-gray-50 p-3 rounded border border-gray-200 text-xs font-mono whitespace-pre-wrap">
                       {results.mineru.text_preview}
                     </div>
                   </div>
@@ -267,7 +267,7 @@ export function PDFExtractionTest() {
                   {/* Text Preview */}
                   <div>
                     <div className="text-xs font-medium text-gray-600 mb-1">Text Preview:</div>
-                    <div className="bg-gray-50 p-3 rounded border border-gray-200 text-xs font-mono max-h-32 overflow-y-auto">
+                    <div className="bg-gray-50 p-3 rounded border border-gray-200 text-xs font-mono whitespace-pre-wrap">
                       {results.pdfplumber.text_preview || 'No text extracted'}
                     </div>
                   </div>
