@@ -101,18 +101,18 @@ const Projects: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12 px-8 shadow-xl">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-6 px-8 shadow-xl">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-5xl font-bold mb-3">Project Intelligence Hub</h1>
-              <p className="text-blue-100 text-lg">
+              <h1 className="text-3xl font-bold mb-1">Project Intelligence Hub</h1>
+              <p className="text-blue-100 text-sm">
                 AI-Powered Financial Analytics • Real-time Dashboard Integration
               </p>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold">{projects.length}</div>
-              <div className="text-blue-100 text-sm">Active Projects</div>
+              <div className="text-2xl font-bold">{projects.length}</div>
+              <div className="text-blue-100 text-xs">Active Projects</div>
             </div>
           </div>
         </div>

@@ -475,9 +475,9 @@ export function AIDataMappingAnimation({
       <div style={{ position: 'fixed', top: 0, left: 0, height: '3px', background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)', width: `${progress}%`, transition: 'width 0.3s', zIndex: 1000 }} />
 
       <div style={{ width: '100%' }}>
-        <div style={{ textAlign: 'center', padding: '10px 0 20px' }}>
-          <h1 style={{ fontSize: '2.2em', color: '#1f2937', marginBottom: '8px', fontWeight: 700 }}>AI Data Mapping & Transformation</h1>
-          <p style={{ color: '#6b7280', fontSize: '1em' }}>Neural Network Processing • Real-time Data Flow Visualization</p>
+        <div style={{ textAlign: 'center', padding: '5px 0 15px' }}>
+          <h1 style={{ fontSize: '1.6em', color: '#1f2937', marginBottom: '4px', fontWeight: 700 }}>AI Data Mapping & Transformation</h1>
+          <p style={{ color: '#6b7280', fontSize: '0.85em' }}>Neural Network Processing • Real-time Data Flow Visualization</p>
         </div>
 
         <div className="viz-container" style={{ display: 'grid', gridTemplateColumns: '240px 1fr 240px', gap: '60px', position: 'relative', minHeight: '800px', padding: '20px 0' }}>
