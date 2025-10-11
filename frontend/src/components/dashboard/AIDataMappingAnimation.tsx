@@ -25,7 +25,9 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   const shouldStopRef = useRef(false);
   const speedRef = useRef(400); // Use ref so speed changes take effect immediately during animation
   const activeNodesRef = useRef<Set<string>>(new Set()); // Track active nodes for cleanup
-  const speedLabels: Record<number, string> = { 700: 'Slow', 400: 'Normal', 200: 'Fast', 80: 'Ultra' };
+
+  // Proportional speeds: each level is 2x faster than previous
+  const speedLabels: Record<number, string> = { 800: 'Slow', 400: 'Normal', 200: 'Fast', 100: 'Ultra' };
 
   const outputs = ['Balance Sheet', 'Income Statement', 'Cash Flow Statement', 'Equity Statement', 'Ratios Dashboard', 'Assumptions', 'Instructions'];
   const nodesPerLayer = 12;
@@ -62,6 +64,11 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   useEffect(() => {
     setFileCounter(`0/${totalFiles}`);
   }, [totalFiles]);
+
+  // Sync speedRef with speed state whenever speed changes
+  useEffect(() => {
+    speedRef.current = speed;
+  }, [speed]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -435,11 +442,12 @@ export function AIDataMappingAnimation({ projectStructure }: AIDataMappingAnimat
   };
 
   const toggleSpeed = () => {
-    const speeds = [700, 400, 200, 80];
+    // Proportional speeds: each level is 2x faster (half the delay)
+    const speeds = [800, 400, 200, 100];
     const idx = speeds.indexOf(speed);
     const newSpeed = speeds[(idx + 1) % speeds.length];
     setSpeed(newSpeed);
-    speedRef.current = newSpeed; // Update ref immediately for running animation
+    // speedRef.current is updated automatically by useEffect
   };
 
   return (
