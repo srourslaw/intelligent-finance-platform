@@ -1,0 +1,60 @@
+{
+  "file_name": "Tax_Invoice_PP-9012.pdf",
+  "extraction_methods": {
+    "mineru": {
+      "confidence": 1.0,
+      "transactions_found": 4,
+      "total_amount": 18650.0,
+      "extraction_date": "2025-10-11T03:54:41.385321"
+    },
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-11T03:54:41.449047"
+    }
+  },
+  "recommended_for_statements": "mineru",
+  "best_transactions": [
+    {
+      "description": "Plumbing Rough-In Complete",
+      "amount": 12000.0,
+      "date": "2024-08-25",
+      "category": "services",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 12000.0
+    },
+    {
+      "description": "Hot Water System (315L)",
+      "amount": 2800.0,
+      "date": "2024-08-25",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 2800.0
+    },
+    {
+      "description": "Bathroom Fixtures Set (2 bathrooms)",
+      "amount": 3000.0,
+      "date": "2024-08-25",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 2,
+      "unit_price": 1500.0
+    },
+    {
+      "description": "Kitchen Sink & Tapware",
+      "amount": 850.0,
+      "date": "2024-08-25",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 850.0
+    }
+  ]
+}

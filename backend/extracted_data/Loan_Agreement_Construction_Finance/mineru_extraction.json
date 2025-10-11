@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "file_name": "Loan_Agreement_Construction_Finance.pdf",
+    "extraction_method": "mineru",
+    "extraction_date": "2025-10-11T08:28:09.427879",
+    "confidence_score": 0.7728571428571429
+  },
+  "text_content": {
+    "full_text": "COMMONWEALTH BANK\nBusiness & Commercial Banking\nCONSTRUCTION LOAN FACILITY AGREEMENT\nLOAN FACILITY DETAILS\nBorrower:\nSunset Construction Pty Ltd (ABN: 12 345 678 901)\nFacility Type:\nConstruction Loan - Commercial Development\nFacility Limit:\n$650,000.00 AUD\nInterest Rate:\n6.50% p.a. (variable)\nLoan Term:\n12 months construction + 24 months interest-only\nCommencement:\n1 June 2024\nFacility Fee:\n1.5% of facility limit ($9,750)\nDRAWDOWN SCHEDULE\nStage 1: Land Acquisition\n$265,000\nCompleted 15/01/2024\nStage 2: Site Works & Foundation\n$130,000\nCompleted 15/03/2024\nStage 3: Framing & Roof\n$100,000\nAvailable upon completion\nStage 4: Services & Fit-out\n$100,000\nAvailable upon completion\nStage 5: Final Completion\n$55,000\nAvailable upon final inspection\nSECURITY\n\u2022 First registered mortgage over land at 123 Sunset Boulevard, Sydney NSW 2000\n\u2022 Fixed and floating charge over all assets of Sunset Construction Pty Ltd\n\u2022 Personal guarantee from Michael Chen (Director) - $650,000\n\u2022 Assignment of construct",
+    "text_length": 1877
+  },
+  "transactions": [
+    {
+      "description": "Construction Loan - Commercial Development",
+      "amount": 650000.0,
+      "date": "2024-06-01",
+      "category": "other",
+      "confidence": 0.95,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 650000.0
+    },
+    {
+      "description": "Facility Fee",
+      "amount": 9750.0,
+      "date": null,
+      "category": "services",
+      "confidence": 0.9,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 9750.0
+    },
+    {
+      "description": "Stage 1: Land Acquisition",
+      "amount": 265000.0,
+      "date": "2024-01-15",
+      "category": "other",
+      "confidence": 0.9,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 265000.0
+    },
+    {
+      "description": "Stage 2: Site Works & Foundation",
+      "amount": 130000.0,
+      "date": "2024-03-15",
+      "category": "other",
+      "confidence": 0.9,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 130000.0
+    },
+    {
+      "description": "Stage 3: Framing & Roof",
+      "amount": 100000.0,
+      "date": null,
+      "category": "other",
+      "confidence": 0.8,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 100000.0
+    },
+    {
+      "description": "Stage 4: Services & Fit-out",
+      "amount": 100000.0,
+      "date": null,
+      "category": "other",
+      "confidence": 0.8,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 100000.0
+    },
+    {
+      "description": "Stage 5: Final Completion",
+      "amount": 55000.0,
+      "date": null,
+      "category": "other",
+      "confidence": 0.8,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 55000.0
+    }
+  ],
+  "financial_summary": {
+    "total_transactions": 7,
+    "total_amount": 1309750.0,
+    "expense_count": 7,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.7728571428571429,
+    "completeness": 0.42857142857142855
+  }
+}

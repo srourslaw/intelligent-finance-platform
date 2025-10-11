@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Contract_Electrician_SparkElectric.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-11T04:16:05.650119",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "SUBCONTRACTOR AGREEMENT\nThis Agreement made on: 1 July 2024\nBETWEEN:\nABC Construction Pty Ltd (ABN: 12 345 678 901)\n123 Builder Street, Sydney NSW 2000\n(hereinafter 'the Principal')\nAND:\nBright Spark Electrical Pty Ltd (ABN: 44 223 445 667)\n321 Sparky Lane, Auburn NSW 2144\nElectrical Contractor License: EL-123456\n(hereinafter 'the Subcontractor')\n1. SCOPE OF WORKS\nThe Subcontractor agrees to supply, install and complete all electrical works for:\nProject: New Two-Storey Dwelling - 123 Sunset Boulevard, Sydney NSW 2000\nIncluding but not limited to:\n(cid:127) Complete electrical installation as per approved plans dated 15/01/2024\n(cid:127) Main switchboard, distribution boards, circuit protection\n(cid:127) Power and lighting circuits, power points, switches, light fittings\n(cid:127) Hardwired smoke alarms (interconnected)\n(cid:127) Hot water, oven/cooktop circuits\n(cid:127) Testing and certification as per AS/NZS 3000\n2. CONTRACT PRICE\nTotal Contract Sum: $28,540.00 (including GST)\nPaymen",
+    "text_length": 3519
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

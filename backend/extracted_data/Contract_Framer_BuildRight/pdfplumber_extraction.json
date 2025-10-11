@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Contract_Framer_BuildRight.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-11T04:16:38.873621",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "FRAME AND TRUSS SUBCONTRACT AGREEMENT\n==========================================================================================\nDate: 10 July 2024\nProject: 123 Sunset Boulevard, Sydney NSW 2000\nContract No: BRF-2024-089\nPARTIES:\nBuilder: ABC Construction Pty Ltd (ABN: 12 345 678 901)\nFramer: BuildRight Framers (ABN: 66 778 889 991 | Lic: 234567C)\nSCOPE:\nSupply and install all wall frames (external & internal), roof trusses,\nsarking, bracing as per approved plans dated 15/01/2024\nPRICE: $46,500.00 + GST = $51,150.00\nPROGRAM:\nStart: 1 August 2024 | Complete: 31 August 2024\nPAYMENT:\nProgress claims monthly. 30-day payment terms. 5% retention.\nINSURANCE:\nPublic Liability $20M, Workers Comp, Contract Works as required\nBuilder Signature: __M. Johnson__________ Date: 10/07/2024\nFramer Signature: __T. Williams_________ Date: 10/07/2024",
+    "text_length": 840
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

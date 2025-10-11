@@ -1,0 +1,40 @@
+{
+  "file_name": "Contract_Framer_BuildRight.pdf",
+  "extraction_methods": {
+    "mineru": {
+      "confidence": 0.99,
+      "transactions_found": 2,
+      "total_amount": 51150.0,
+      "extraction_date": "2025-10-11T04:16:38.812865"
+    },
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-11T04:16:38.874016"
+    }
+  },
+  "recommended_for_statements": "mineru",
+  "best_transactions": [
+    {
+      "description": "Supply and install all wall frames (external & internal), roof trusses, sarking, bracing as per approved plans dated 15/01/2024",
+      "amount": 46500.0,
+      "date": "2024-01-15",
+      "category": "labor",
+      "confidence": 0.9,
+      "transaction_type": "expense",
+      "quantity": 1.0,
+      "unit_price": 46500.0
+    },
+    {
+      "description": "GST",
+      "amount": 4650.0,
+      "date": "2024-07-10",
+      "category": "tax",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": null,
+      "unit_price": null
+    }
+  ]
+}

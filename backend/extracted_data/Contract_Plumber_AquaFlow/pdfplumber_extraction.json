@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Contract_Plumber_AquaFlow.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-11T04:24:06.096659",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "SUBCONTRACT AGREEMENT\nPlumbing Works\nAgreement Date: 5 July 2024\nProject: New Dwelling - 123 Sunset Boulevard, Sydney NSW\nPrincipal Contractor:\nABC Construction Pty Ltd | ABN: 12 345 678 901 | License: 123456C\nSubcontractor:\nJohn's Plumbing Services Pty Ltd | ABN: 55 667 889 001 | License: PL-234567\nWORKS TO BE PERFORMED:\nComplete plumbing installation including:\n(cid:127) Cold and hot water supply systems (copper and PEX pipe)\n(cid:127) Sanitary drainage (PVC 100mm and 150mm)\n(cid:127) Stormwater drainage and connection to Council system\n(cid:127) Installation of fixtures: toilets, basins, showers, bath, kitchen sink\n(cid:127) Hot water system connection (315L electric storage)\n(cid:127) Backflow prevention devices\n(cid:127) Pressure testing and certification to AS/NZS 3500\nCONTRACT SUM: $19,150.00 (inc GST)\nPAYMENT SCHEDULE:\n(cid:127) Monthly progress claims based on work completed\n(cid:127) Payment within 30 days of approved claim\n(cid:127) 5% retention until final completion + 90 d",
+    "text_length": 1195
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

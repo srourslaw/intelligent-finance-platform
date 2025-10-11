@@ -1,0 +1,90 @@
+{
+  "file_name": "Loan_Agreement_Construction_Finance.pdf",
+  "extraction_methods": {
+    "mineru": {
+      "confidence": 0.7728571428571429,
+      "transactions_found": 7,
+      "total_amount": 1309750.0,
+      "extraction_date": "2025-10-11T08:28:09.428970"
+    },
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-11T08:28:09.510423"
+    }
+  },
+  "recommended_for_statements": "mineru",
+  "best_transactions": [
+    {
+      "description": "Construction Loan - Commercial Development",
+      "amount": 650000.0,
+      "date": "2024-06-01",
+      "category": "other",
+      "confidence": 0.95,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 650000.0
+    },
+    {
+      "description": "Facility Fee",
+      "amount": 9750.0,
+      "date": null,
+      "category": "services",
+      "confidence": 0.9,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 9750.0
+    },
+    {
+      "description": "Stage 1: Land Acquisition",
+      "amount": 265000.0,
+      "date": "2024-01-15",
+      "category": "other",
+      "confidence": 0.9,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 265000.0
+    },
+    {
+      "description": "Stage 2: Site Works & Foundation",
+      "amount": 130000.0,
+      "date": "2024-03-15",
+      "category": "other",
+      "confidence": 0.9,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 130000.0
+    },
+    {
+      "description": "Stage 3: Framing & Roof",
+      "amount": 100000.0,
+      "date": null,
+      "category": "other",
+      "confidence": 0.8,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 100000.0
+    },
+    {
+      "description": "Stage 4: Services & Fit-out",
+      "amount": 100000.0,
+      "date": null,
+      "category": "other",
+      "confidence": 0.8,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 100000.0
+    },
+    {
+      "description": "Stage 5: Final Completion",
+      "amount": 55000.0,
+      "date": null,
+      "category": "other",
+      "confidence": 0.8,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 55000.0
+    }
+  ]
+}

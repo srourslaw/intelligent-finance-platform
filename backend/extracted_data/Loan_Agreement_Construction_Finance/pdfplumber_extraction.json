@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Loan_Agreement_Construction_Finance.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-11T08:28:09.510148",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "COMMONWEALTH BANK\nBusiness & Commercial Banking\nCONSTRUCTION LOAN FACILITY AGREEMENT\nLOAN FACILITY DETAILS\nBorrower: Sunset Construction Pty Ltd (ABN: 12 345 678 901)\nFacility Type: Construction Loan - Commercial Development\nFacility Limit: $650,000.00 AUD\nInterest Rate: 6.50% p.a. (variable)\nLoan Term: 12 months construction + 24 months interest-only\nCommencement: 1 June 2024\nFacility Fee: 1.5% of facility limit ($9,750)\nDRAWDOWN SCHEDULE\nStage 1: Land Acquisition $265,000 Completed 15/01/2024\nStage 2: Site Works & Foundation $130,000 Completed 15/03/2024\nStage 3: Framing & Roof $100,000 Available upon completion\nStage 4: Services & Fit-out $100,000 Available upon completion\nStage 5: Final Completion $55,000 Available upon final inspection\nSECURITY\n(cid:127) First registered mortgage over land at 123 Sunset Boulevard, Sydney NSW 2000\n(cid:127) Fixed and floating charge over all assets of Sunset Construction Pty Ltd\n(cid:127) Personal guarantee from Michael Chen (Director) - $650,000\n(",
+    "text_length": 1980
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

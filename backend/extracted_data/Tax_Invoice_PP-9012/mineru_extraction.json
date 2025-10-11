@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "file_name": "Tax_Invoice_PP-9012.pdf",
+    "extraction_method": "mineru",
+    "extraction_date": "2025-10-11T03:54:41.384315",
+    "confidence_score": 1.0
+  },
+  "text_content": {
+    "full_text": "PREMIUM PLUMBING SOLUTIONS PTY LTD\nABN: 23 456 789 012\n12 Pipe Lane, Sydney NSW 2000\nPhone: (02) 9555 6789\nTAX INVOICE\nBILL TO:\nSunset Construction Pty Ltd\nABN: 12 345 678 901\n123 Builder Street, Sydney NSW 2000\nInvoice Number:\nPP-9012\nInvoice Date:\n25/08/2024\nPurchase Order:\nPO-2024-1008\nPayment Terms:\nNet 30 Days\nDescription\nQty\nUnit Price\nAmount\nPlumbing Rough-In Complete\n1\n$12,000.00\n$12,000.00\nHot Water System (315L)\n1\n$2,800.00\n$2,800.00\nBathroom Fixtures Set (2 bathrooms)\n2\n$1,500.00\n$3,000.00\nKitchen Sink & Tapware\n1\n$850.00\n$850.00\nSubtotal:\n$18,650.00\nGST (10%):\n$1,865.00\nTOTAL:\n$20,515.00\nPAYMENT DETAILS\nBank: Commonwealth Bank\nBSB: 062-001\nAccount Number: 6 789 012\nAccount Name: Premium Plumbing Solutions Pty Ltd\nReference: PP-9012\nThis is a tax invoice for GST purposes. Please retain for your records.\nPayment due: 25/08/2024 + 30 days | All prices in AUD | E&OE\n",
+    "text_length": 887
+  },
+  "transactions": [
+    {
+      "description": "Plumbing Rough-In Complete",
+      "amount": 12000.0,
+      "date": "2024-08-25",
+      "category": "services",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 12000.0
+    },
+    {
+      "description": "Hot Water System (315L)",
+      "amount": 2800.0,
+      "date": "2024-08-25",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 2800.0
+    },
+    {
+      "description": "Bathroom Fixtures Set (2 bathrooms)",
+      "amount": 3000.0,
+      "date": "2024-08-25",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 2,
+      "unit_price": 1500.0
+    },
+    {
+      "description": "Kitchen Sink & Tapware",
+      "amount": 850.0,
+      "date": "2024-08-25",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 850.0
+    }
+  ],
+  "financial_summary": {
+    "total_transactions": 4,
+    "total_amount": 18650.0,
+    "expense_count": 4,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 1.0,
+    "completeness": 1.0
+  }
+}

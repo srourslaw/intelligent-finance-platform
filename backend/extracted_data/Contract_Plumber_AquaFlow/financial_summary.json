@@ -1,0 +1,30 @@
+{
+  "file_name": "Contract_Plumber_AquaFlow.pdf",
+  "extraction_methods": {
+    "mineru": {
+      "confidence": 0.79,
+      "transactions_found": 1,
+      "total_amount": 19150.0,
+      "extraction_date": "2025-10-11T04:24:06.026348"
+    },
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-11T04:24:06.097009"
+    }
+  },
+  "recommended_for_statements": "mineru",
+  "best_transactions": [
+    {
+      "description": "Complete plumbing installation including:\n\u2022 Cold and hot water supply systems (copper and PEX pipe)\n\u2022 Sanitary drainage (PVC 100mm and 150mm)\n\u2022 Stormwater drainage and connection to Council system\n\u2022 Installation of fixtures: toilets, basins, showers, bath, kitchen sink\n\u2022 Hot water system connection (315L electric storage)\n\u2022 Backflow prevention devices\n\u2022 Pressure testing and certification to AS/NZS 3500",
+      "amount": 19150.0,
+      "date": "2024-07-05",
+      "category": "services",
+      "confidence": 0.95,
+      "transaction_type": "expense",
+      "quantity": 1.0,
+      "unit_price": 19150.0
+    }
+  ]
+}

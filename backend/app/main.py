@@ -5,7 +5,7 @@ Processes Excel files and provides REST API for React dashboard
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation, batch, email, webhooks, system, automation, templates, folder_watch, extraction_test, project_files
+from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation, batch, email, webhooks, system, automation, templates, folder_watch, extraction_test, project_files, financial_builder
 from app.middleware import setup_error_handling
 
 
@@ -16,6 +16,10 @@ async def lifespan(app: FastAPI):
     """
     # Startup
     print("🚀 Starting Intelligent Finance Platform...")
+
+    # Initialize database
+    from app.database import init_db
+    init_db()
 
     # Validate configuration
     from app.config import validate_config
@@ -86,6 +90,7 @@ app.include_router(templates.router)  # Excel template population
 app.include_router(folder_watch.router)  # Local folder monitoring
 app.include_router(extraction_test.router)  # MinerU extraction testing and comparison
 app.include_router(project_files.router)  # Project file structure for AI animation
+app.include_router(financial_builder.router)  # Financial Builder - full pipeline processing
 
 
 @app.get("/")

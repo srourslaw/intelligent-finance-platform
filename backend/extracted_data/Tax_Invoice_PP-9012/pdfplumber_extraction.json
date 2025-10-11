@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Tax_Invoice_PP-9012.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-11T03:54:41.448688",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "PREMIUM PLUMBING SOLUTIONS PTY LTD\nTAX INVOICE\nABN: 23 456 789 012\n12 Pipe Lane, Sydney NSW 2000\nPhone: (02) 9555 6789\nBILL TO: Invoice Number: PP-9012\nSunset Construction Pty Ltd Invoice Date: 25/08/2024\nABN: 12 345 678 901\nPurchase Order: PO-2024-1008\n123 Builder Street, Sydney NSW 2000\nPayment Terms: Net 30 Days\nDescription Qty Unit Price Amount\nPlumbing Rough-In Complete 1 $12,000.00 $12,000.00\nHot Water System (315L) 1 $2,800.00 $2,800.00\nBathroom Fixtures Set (2 bathrooms) 2 $1,500.00 $3,000.00\nKitchen Sink & Tapware 1 $850.00 $850.00\nSubtotal: $18,650.00\nGST (10%): $1,865.00\nTOTAL: $20,515.00\nPAYMENT DETAILS\nBank: Commonwealth Bank\nBSB: 062-001\nAccount Number: 6 789 012\nAccount Name: Premium Plumbing Solutions Pty Ltd\nReference: PP-9012\nThis is a tax invoice for GST purposes. Please retain for your records.\nPayment due: 25/08/2024 + 30 days | All prices in AUD | E&OE",
+    "text_length": 886
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

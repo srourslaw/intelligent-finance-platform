@@ -1,0 +1,13 @@
+{
+  "file_name": "Contract_Electrician_SparkElectric.pdf",
+  "extraction_methods": {
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-11T04:16:05.650327"
+    }
+  },
+  "recommended_for_statements": "pdfplumber",
+  "best_transactions": []
+}
