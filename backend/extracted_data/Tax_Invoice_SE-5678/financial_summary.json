@@ -1,0 +1,70 @@
+{
+  "file_name": "Tax_Invoice_SE-5678.pdf",
+  "extraction_methods": {
+    "mineru": {
+      "confidence": 1.0,
+      "transactions_found": 5,
+      "total_amount": 20080.0,
+      "extraction_date": "2025-10-10T06:33:21.481310"
+    },
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-10T06:33:21.549432"
+    }
+  },
+  "recommended_for_statements": "mineru",
+  "best_transactions": [
+    {
+      "description": "Electrical Rough-In - First Fix",
+      "amount": 8500.0,
+      "date": "2024-09-15",
+      "category": "labor",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 8500.0
+    },
+    {
+      "description": "Power Points & Switches (50 units)",
+      "amount": 4250.0,
+      "date": "2024-09-15",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 50,
+      "unit_price": 85.0
+    },
+    {
+      "description": "LED Downlights (30 units)",
+      "amount": 1950.0,
+      "date": "2024-09-15",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 30,
+      "unit_price": 65.0
+    },
+    {
+      "description": "Switchboard & Circuit Breakers",
+      "amount": 3200.0,
+      "date": "2024-09-15",
+      "category": "equipment",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 3200.0
+    },
+    {
+      "description": "Cable & Conduit Materials",
+      "amount": 2180.0,
+      "date": "2024-09-15",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 2180.0
+    }
+  ]
+}

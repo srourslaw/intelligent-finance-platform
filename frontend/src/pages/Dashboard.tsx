@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   DollarSign, TrendingDown, TrendingUp, AlertTriangle, LogOut, ArrowLeft,
-  Activity, Target, Clock, Briefcase, PieChart as PieChartIcon, BarChart3, FileText
+  Activity, Target, Clock, Briefcase, PieChart as PieChartIcon, BarChart3, FileText,
+  Home, Wallet, FolderOpen, Zap, Settings
 } from 'lucide-react';
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
@@ -14,7 +15,6 @@ import { CloudWebhooks } from '../components/dashboard/CloudWebhooks';
 import { SystemHealth } from '../components/dashboard/SystemHealth';
 import { TemplateGenerator } from '../components/dashboard/TemplateGenerator';
 import { FolderMonitoring } from '../components/dashboard/FolderMonitoring';
-import { AIDataMappingAnimation } from '../components/dashboard/AIDataMappingAnimation';
 import { PDFExtractionTest } from '../components/dashboard/PDFExtractionTest';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
@@ -32,6 +32,7 @@ export function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'overview' | 'financials' | 'documents' | 'automation' | 'system'>('overview');
 
   useEffect(() => {
     const projectId = localStorage.getItem('selectedProjectId');
@@ -172,33 +173,6 @@ export function Dashboard() {
     }).format(value);
   };
 
-  // Mock project structure for animation (can be replaced with real data from API)
-  const mockProjectStructure = {
-    name: projectData.name,
-    type: 'folder' as const,
-    path: '/',
-    isExpanded: true,
-    children: [
-      {
-        name: 'data',
-        type: 'folder' as const,
-        path: '/data',
-        isExpanded: true,
-        children: budgetSummary.categories.slice(0, 10).map((cat: any) => ({
-          name: cat.category.replace(/ /g, '_'),
-          type: 'folder' as const,
-          path: `/data/${cat.category.replace(/ /g, '_')}`,
-          isExpanded: true,
-          children: [
-            { name: `${cat.category}_Budget.xlsx`, type: 'excel' as const, path: `/data/${cat.category.replace(/ /g, '_')}/${cat.category}_Budget.xlsx` },
-            { name: `${cat.category}_Actual.xlsx`, type: 'excel' as const, path: `/data/${cat.category.replace(/ /g, '_')}/${cat.category}_Actual.xlsx` },
-            { name: `${cat.category}_Invoice.pdf`, type: 'pdf' as const, path: `/data/${cat.category.replace(/ /g, '_')}/${cat.category}_Invoice.pdf` },
-          ]
-        }))
-      }
-    ]
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100">
       {/* Enhanced Header */}
@@ -272,308 +246,393 @@ export function Dashboard() {
         </div>
       </header>
 
+      {/* Tab Navigation */}
+      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-8">
+          <nav className="flex gap-1" aria-label="Dashboard sections">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
+                activeTab === 'overview'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <Home className="w-4 h-4" />
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveTab('financials')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
+                activeTab === 'financials'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <Wallet className="w-4 h-4" />
+              Financials
+            </button>
+            <button
+              onClick={() => setActiveTab('documents')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
+                activeTab === 'documents'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <FolderOpen className="w-4 h-4" />
+              Documents
+            </button>
+            <button
+              onClick={() => setActiveTab('automation')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
+                activeTab === 'automation'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <Zap className="w-4 h-4" />
+              Automation
+            </button>
+            <button
+              onClick={() => setActiveTab('system')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
+                activeTab === 'system'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              System
+            </button>
+          </nav>
+        </div>
+      </div>
+
       {/* Main Content */}
       <main className="max-w-[1600px] mx-auto px-6 lg:px-8 py-8 space-y-8">
-        {/* AI Data Mapping Animation */}
-        <AIDataMappingAnimation projectStructure={mockProjectStructure} />
-
-        {/* Critical Alerts */}
-        {(!isProfitable || projectData.daysBehind > 0 || projectData.revenueLeakage > 0) && (
-          <div className="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-lg">
-            <div className="flex items-start">
-              <AlertTriangle className="w-6 h-6 text-red-600 mr-4 mt-1" />
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-red-900 mb-2">⚠️ Critical Project Alerts</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                  {!isProfitable && (
-                    <div className="bg-white p-3 rounded-lg border border-red-200">
-                      <p className="font-semibold text-red-800">Budget Overrun</p>
-                      <p className="text-red-700">Forecast loss: {formatCurrency(Math.abs(projectedProfit))}</p>
-                    </div>
-                  )}
-                  {projectData.daysBehind > 0 && (
-                    <div className="bg-white p-3 rounded-lg border border-orange-200">
-                      <p className="font-semibold text-orange-800">Schedule Delay</p>
-                      <p className="text-orange-700">{projectData.daysBehind} days behind schedule</p>
-                    </div>
-                  )}
-                  {projectData.revenueLeakage > 0 && (
-                    <div className="bg-white p-3 rounded-lg border border-yellow-200">
-                      <p className="font-semibold text-yellow-800">Revenue Leakage</p>
-                      <p className="text-yellow-700">{formatCurrency(projectData.revenueLeakage)} at risk</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Enhanced KPI Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Contract Value */}
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
-                <DollarSign className="w-6 h-6" />
-              </div>
-              <div className="text-right">
-                <div className="text-sm opacity-90">Contract Value</div>
-                <div className="text-2xl font-bold">{formatCurrency(projectData.contractValue)}</div>
-              </div>
-            </div>
-            <div className="text-xs opacity-75">Total project scope</div>
-          </div>
-
-          {/* Costs to Date */}
-          <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
-                <TrendingDown className="w-6 h-6" />
-              </div>
-              <div className="text-right">
-                <div className="text-sm opacity-90">Costs to Date</div>
-                <div className="text-2xl font-bold">{formatCurrency(projectData.totalCosts)}</div>
-              </div>
-            </div>
-            <div className="text-xs opacity-75">{costToDate}% of contract value</div>
-          </div>
-
-          {/* Projected Profit/Loss */}
-          <div className={`bg-gradient-to-br ${isProfitable ? 'from-green-500 to-emerald-600' : 'from-red-500 to-red-600'} rounded-xl p-6 text-white shadow-xl hover:shadow-2xl transition-all`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
-                {isProfitable ? <TrendingUp className="w-6 h-6" /> : <AlertTriangle className="w-6 h-6" />}
-              </div>
-              <div className="text-right">
-                <div className="text-sm opacity-90">Projected {isProfitable ? 'Profit' : 'Loss'}</div>
-                <div className="text-2xl font-bold">{formatCurrency(Math.abs(projectedProfit))}</div>
-              </div>
-            </div>
-            <div className="text-xs opacity-75">{profitMargin}% margin</div>
-          </div>
-
-          {/* Project Progress */}
-          <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-white bg-opacity-20 p-3 rounded-lg">
-                <Activity className="w-6 h-6" />
-              </div>
-              <div className="text-right">
-                <div className="text-sm opacity-90">Completion</div>
-                <div className="text-2xl font-bold">{projectData.percentComplete}%</div>
-              </div>
-            </div>
-            <div className="w-full bg-white bg-opacity-20 rounded-full h-2">
-              <div
-                className="bg-white h-2 rounded-full transition-all"
-                style={{ width: `${projectData.percentComplete}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Secondary KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
-            <div className="text-sm text-gray-600 mb-1">Forecast Cost</div>
-            <div className="text-xl font-bold text-gray-900">{formatCurrency(projectData.forecastCost)}</div>
-            <div className={`text-xs mt-1 ${forecastVariance < 0 ? 'text-red-600' : 'text-green-600'}`}>
-              Variance: {formatCurrency(forecastVariance)}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
-            <div className="text-sm text-gray-600 mb-1">Remaining Budget</div>
-            <div className="text-xl font-bold text-gray-900">{formatCurrency(remainingBudget)}</div>
-            <div className="text-xs text-gray-500 mt-1">
-              {((remainingBudget / projectData.contractValue) * 100).toFixed(1)}% available
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
-            <div className="text-sm text-gray-600 mb-1">Burn Rate</div>
-            <div className="text-xl font-bold text-gray-900">{formatCurrency(burnRate)}</div>
-            <div className="text-xs text-gray-500 mt-1">Per 100% completion</div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
-            <div className="text-sm text-gray-600 mb-1">Schedule Status</div>
-            <div className={`text-xl font-bold ${projectData.daysBehind > 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {projectData.daysBehind > 0 ? `${projectData.daysBehind} days` : 'On Track'}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">
-              {projectData.daysBehind > 0 ? 'Behind schedule' : 'Meeting deadlines'}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
-            <div className="text-sm text-gray-600 mb-1">Revenue Leakage</div>
-            <div className={`text-xl font-bold ${projectData.revenueLeakage > 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {formatCurrency(projectData.revenueLeakage)}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">At risk revenue</div>
-          </div>
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Budget by Category Chart */}
-          <div className="bg-white rounded-xl p-6 shadow-xl border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-blue-600" />
-              Budget Performance by Category
-            </h3>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={categoryChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip
-                  formatter={(value) => formatCurrency(value as number)}
-                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                />
-                <Legend />
-                <Bar dataKey="Budget" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Actual" fill="#10B981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Forecast" fill="#F59E0B" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Budget Status Pie Chart */}
-          <div className="bg-white rounded-xl p-6 shadow-xl border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <PieChartIcon className="w-5 h-5 text-blue-600" />
-              Budget Allocation Status
-            </h3>
-            <ResponsiveContainer width="100%" height={400}>
-              <PieChart>
-                <Pie
-                  data={budgetStatusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={(entry) => `${entry.name}: ${formatCurrency(entry.value as number)}`}
-                  outerRadius={120}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {budgetStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="mt-4 grid grid-cols-3 gap-4">
-              {budgetStatusData.map((item, idx) => (
-                <div key={idx} className="text-center">
-                  <div className="text-xs text-gray-600">{item.name}</div>
-                  <div className="text-sm font-bold" style={{ color: item.color }}>
-                    {formatCurrency(item.value)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Project Health Radar & Variance Analysis */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Project Health Radar */}
-          <div className="bg-white rounded-xl p-6 shadow-xl border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Target className="w-5 h-5 text-blue-600" />
-              Project Health Score
-            </h3>
-            <ResponsiveContainer width="100%" height={350}>
-              <RadarChart data={healthMetrics}>
-                <PolarGrid stroke="#e5e7eb" />
-                <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12 }} />
-                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 11 }} />
-                <Radar
-                  name="Health Score"
-                  dataKey="value"
-                  stroke="#3B82F6"
-                  fill="#3B82F6"
-                  fillOpacity={0.6}
-                />
-                <Tooltip />
-              </RadarChart>
-            </ResponsiveContainer>
-            <div className="mt-4 grid grid-cols-5 gap-2">
-              {healthMetrics.map((metric, idx) => (
-                <div key={idx} className="text-center">
-                  <div className="text-2xl font-bold" style={{ color: metric.value >= 80 ? '#10B981' : metric.value >= 60 ? '#F59E0B' : '#EF4444' }}>
-                    {metric.value}
-                  </div>
-                  <div className="text-xs text-gray-600">{metric.metric}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Category Variance Analysis */}
-          <div className="bg-white rounded-xl p-6 shadow-xl border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600" />
-              Variance Analysis by Category
-            </h3>
-            <div className="space-y-3 max-h-[350px] overflow-y-auto">
-              {categoryChartData.map((cat: any, idx: number) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+        {/* OVERVIEW TAB */}
+        {activeTab === 'overview' && (
+          <>
+            {/* Critical Alerts */}
+            {(!isProfitable || projectData.daysBehind > 0 || projectData.revenueLeakage > 0) && (
+              <div className="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-6 rounded-r-xl shadow-lg">
+                <div className="flex items-start">
+                  <AlertTriangle className="w-6 h-6 text-red-600 mr-4 mt-1" />
                   <div className="flex-1">
-                    <div className="font-semibold text-sm text-gray-900">{cat.name}</div>
-                    <div className="text-xs text-gray-600">Budget: {formatCurrency(cat.Budget)}</div>
+                    <h3 className="text-lg font-bold text-red-900 mb-2">⚠️ Critical Project Alerts</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                      {!isProfitable && (
+                        <div className="bg-white p-3 rounded-lg border border-red-200">
+                          <p className="font-semibold text-red-800">Budget Overrun</p>
+                          <p className="text-red-700">Forecast loss: {formatCurrency(Math.abs(projectedProfit))}</p>
+                        </div>
+                      )}
+                      {projectData.daysBehind > 0 && (
+                        <div className="bg-white p-3 rounded-lg border border-orange-200">
+                          <p className="font-semibold text-orange-800">Schedule Delay</p>
+                          <p className="text-orange-700">{projectData.daysBehind} days behind schedule</p>
+                        </div>
+                      )}
+                      {projectData.revenueLeakage > 0 && (
+                        <div className="bg-white p-3 rounded-lg border border-yellow-200">
+                          <p className="font-semibold text-yellow-800">Revenue Leakage</p>
+                          <p className="text-yellow-700">{formatCurrency(projectData.revenueLeakage)} at risk</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Enhanced KPI Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Contract Value */}
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                    <DollarSign className="w-6 h-6" />
                   </div>
                   <div className="text-right">
-                    <div className={`text-sm font-bold ${cat.Variance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {cat.Variance >= 0 ? '+' : ''}{formatCurrency(cat.Variance)}
-                    </div>
-                    <div className="text-xs text-gray-500">{cat['Completion %']}% complete</div>
+                    <div className="text-sm opacity-90">Contract Value</div>
+                    <div className="text-2xl font-bold">{formatCurrency(projectData.contractValue)}</div>
                   </div>
                 </div>
-              ))}
+                <div className="text-xs opacity-75">Total project scope</div>
+              </div>
+
+              {/* Costs to Date */}
+              <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                    <TrendingDown className="w-6 h-6" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm opacity-90">Costs to Date</div>
+                    <div className="text-2xl font-bold">{formatCurrency(projectData.totalCosts)}</div>
+                  </div>
+                </div>
+                <div className="text-xs opacity-75">{costToDate}% of contract value</div>
+              </div>
+
+              {/* Projected Profit/Loss */}
+              <div className={`bg-gradient-to-br ${isProfitable ? 'from-green-500 to-emerald-600' : 'from-red-500 to-red-600'} rounded-xl p-6 text-white shadow-xl hover:shadow-2xl transition-all`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                    {isProfitable ? <TrendingUp className="w-6 h-6" /> : <AlertTriangle className="w-6 h-6" />}
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm opacity-90">Projected {isProfitable ? 'Profit' : 'Loss'}</div>
+                    <div className="text-2xl font-bold">{formatCurrency(Math.abs(projectedProfit))}</div>
+                  </div>
+                </div>
+                <div className="text-xs opacity-75">{profitMargin}% margin</div>
+              </div>
+
+              {/* Project Progress */}
+              <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl p-6 text-white shadow-xl hover:shadow-2xl transition-all">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                    <Activity className="w-6 h-6" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm opacity-90">Completion</div>
+                    <div className="text-2xl font-bold">{projectData.percentComplete}%</div>
+                  </div>
+                </div>
+                <div className="w-full bg-white bg-opacity-20 rounded-full h-2">
+                  <div
+                    className="bg-white h-2 rounded-full transition-all"
+                    style={{ width: `${projectData.percentComplete}%` }}
+                  ></div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Budget Treemap */}
-        <BudgetTreemap projectId={selectedProjectId} />
+            {/* Secondary KPIs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
+                <div className="text-sm text-gray-600 mb-1">Forecast Cost</div>
+                <div className="text-xl font-bold text-gray-900">{formatCurrency(projectData.forecastCost)}</div>
+                <div className={`text-xs mt-1 ${forecastVariance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  Variance: {formatCurrency(forecastVariance)}
+                </div>
+              </div>
 
-        {/* Document Viewer */}
-        <DocumentViewer projectId={selectedProjectId} />
+              <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
+                <div className="text-sm text-gray-600 mb-1">Remaining Budget</div>
+                <div className="text-xl font-bold text-gray-900">{formatCurrency(remainingBudget)}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {((remainingBudget / projectData.contractValue) * 100).toFixed(1)}% available
+                </div>
+              </div>
 
-        {/* AI-Consolidated Financial Statements */}
-        <FinancialStatements projectId={selectedProjectId} />
+              <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
+                <div className="text-sm text-gray-600 mb-1">Burn Rate</div>
+                <div className="text-xl font-bold text-gray-900">{formatCurrency(burnRate)}</div>
+                <div className="text-xs text-gray-500 mt-1">Per 100% completion</div>
+              </div>
 
-        {/* Demo Financial Workflow - Files, Transactions, Conflicts, Jobs */}
-        <DemoFinancialWorkflow />
+              <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
+                <div className="text-sm text-gray-600 mb-1">Schedule Status</div>
+                <div className={`text-xl font-bold ${projectData.daysBehind > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {projectData.daysBehind > 0 ? `${projectData.daysBehind} days` : 'On Track'}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {projectData.daysBehind > 0 ? 'Behind schedule' : 'Meeting deadlines'}
+                </div>
+              </div>
 
-        {/* Batch Jobs & Scheduling */}
-        <BatchJobs />
+              <div className="bg-white rounded-lg p-4 shadow-md border border-gray-200">
+                <div className="text-sm text-gray-600 mb-1">Revenue Leakage</div>
+                <div className={`text-xl font-bold ${projectData.revenueLeakage > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {formatCurrency(projectData.revenueLeakage)}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">At risk revenue</div>
+              </div>
+            </div>
 
-        {/* Email Integration */}
-        <EmailIntegration />
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Budget by Category Chart */}
+              <div className="bg-white rounded-xl p-6 shadow-xl border border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-blue-600" />
+                  Budget Performance by Category
+                </h3>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={categoryChartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      formatter={(value) => formatCurrency(value as number)}
+                      contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                    />
+                    <Legend />
+                    <Bar dataKey="Budget" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Actual" fill="#10B981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Forecast" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
 
-        {/* Cloud Storage Webhooks */}
-        <CloudWebhooks />
+              {/* Budget Status Pie Chart */}
+              <div className="bg-white rounded-xl p-6 shadow-xl border border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <PieChartIcon className="w-5 h-5 text-blue-600" />
+                  Budget Allocation Status
+                </h3>
+                <ResponsiveContainer width="100%" height={400}>
+                  <PieChart>
+                    <Pie
+                      data={budgetStatusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry) => `${entry.name}: ${formatCurrency(entry.value as number)}`}
+                      outerRadius={120}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {budgetStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                  {budgetStatusData.map((item, idx) => (
+                    <div key={idx} className="text-center">
+                      <div className="text-xs text-gray-600">{item.name}</div>
+                      <div className="text-sm font-bold" style={{ color: item.color }}>
+                        {formatCurrency(item.value)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-        {/* System Health & Monitoring */}
-        <SystemHealth />
+            {/* Project Health Radar & Variance Analysis */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Project Health Radar */}
+              <div className="bg-white rounded-xl p-6 shadow-xl border border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-blue-600" />
+                  Project Health Score
+                </h3>
+                <ResponsiveContainer width="100%" height={350}>
+                  <RadarChart data={healthMetrics}>
+                    <PolarGrid stroke="#e5e7eb" />
+                    <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12 }} />
+                    <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 11 }} />
+                    <Radar
+                      name="Health Score"
+                      dataKey="value"
+                      stroke="#3B82F6"
+                      fill="#3B82F6"
+                      fillOpacity={0.6}
+                    />
+                    <Tooltip />
+                  </RadarChart>
+                </ResponsiveContainer>
+                <div className="mt-4 grid grid-cols-5 gap-2">
+                  {healthMetrics.map((metric, idx) => (
+                    <div key={idx} className="text-center">
+                      <div className="text-2xl font-bold" style={{ color: metric.value >= 80 ? '#10B981' : metric.value >= 60 ? '#F59E0B' : '#EF4444' }}>
+                        {metric.value}
+                      </div>
+                      <div className="text-xs text-gray-600">{metric.metric}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-        {/* Excel Template Generator */}
-        <TemplateGenerator />
+              {/* Category Variance Analysis */}
+              <div className="bg-white rounded-xl p-6 shadow-xl border border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  Variance Analysis by Category
+                </h3>
+                <div className="space-y-3 max-h-[350px] overflow-y-auto">
+                  {categoryChartData.map((cat: any, idx: number) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex-1">
+                        <div className="font-semibold text-sm text-gray-900">{cat.name}</div>
+                        <div className="text-xs text-gray-600">Budget: {formatCurrency(cat.Budget)}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-sm font-bold ${cat.Variance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {cat.Variance >= 0 ? '+' : ''}{formatCurrency(cat.Variance)}
+                        </div>
+                        <div className="text-xs text-gray-500">{cat['Completion %']}% complete</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-        {/* Local Folder Monitoring */}
-        <FolderMonitoring />
+            {/* Budget Treemap */}
+            <BudgetTreemap projectId={selectedProjectId} />
+          </>
+        )}
 
-        {/* Aggregated Financial Data from Multiple Files */}
-        <AggregatedFinancials />
+        {/* FINANCIALS TAB */}
+        {activeTab === 'financials' && (
+          <>
+            {/* AI-Consolidated Financial Statements */}
+            <FinancialStatements projectId={selectedProjectId} />
 
-        {/* MinerU PDF Extraction Test */}
-        <PDFExtractionTest />
+            {/* Aggregated Financial Data from Multiple Files */}
+            <AggregatedFinancials />
+          </>
+        )}
+
+        {/* DOCUMENTS TAB */}
+        {activeTab === 'documents' && (
+          <>
+            {/* Document Viewer */}
+            <DocumentViewer projectId={selectedProjectId} />
+
+            {/* MinerU PDF Extraction Test */}
+            <PDFExtractionTest />
+
+            {/* Excel Template Generator */}
+            <TemplateGenerator />
+          </>
+        )}
+
+        {/* AUTOMATION TAB */}
+        {activeTab === 'automation' && (
+          <>
+            {/* Demo Financial Workflow - Files, Transactions, Conflicts, Jobs */}
+            <DemoFinancialWorkflow />
+
+            {/* Email Integration */}
+            <EmailIntegration />
+
+            {/* Cloud Storage Webhooks */}
+            <CloudWebhooks />
+
+            {/* Local Folder Monitoring */}
+            <FolderMonitoring />
+
+            {/* Batch Jobs & Scheduling */}
+            <BatchJobs />
+          </>
+        )}
+
+        {/* SYSTEM TAB */}
+        {activeTab === 'system' && (
+          <>
+            {/* System Health & Monitoring */}
+            <SystemHealth />
+          </>
+        )}
       </main>
     </div>
   );

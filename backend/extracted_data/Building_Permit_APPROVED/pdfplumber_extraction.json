@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Building_Permit_APPROVED.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-10T05:55:41.461965",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "SYDNEY COUNCIL\nBuilding Certification Services\n123 Council Street, Sydney NSW 2000 | Phone: 02 9999 8888\nBUILDING PERMIT - APPROVED\nPermit Number: BP-2024-08756 Development Type: New Dwelling\nIssue Date: 15 January 2024 Estimated Value: $650,000\nExpiry Date: 15 January 2026 Class of Building: Class 1a\nPROPERTY DETAILS\nAddress: 123 Sunset Boulevard, Sydney NSW 2000\nLot/DP: Lot 45 DP 123456\nOwner: John & Mary Smith\nBuilder: ABC Construction Pty Ltd (Lic: 123456C)\nAPPROVED WORKS\nConstruction of new two-storey residential dwelling including:\n(cid:127) Total floor area: 245m\u00b2\n(cid:127) 4 bedrooms, 2.5 bathrooms, double garage\n(cid:127) Concrete slab on ground foundation\n(cid:127) Timber frame construction with brick veneer\n(cid:127) Terracotta tile roof\nMANDATORY INSPECTIONS REQUIRED\n1. Excavation and footings before concrete pour\n2. Foundation and slab reinforcement before pour\n3. Frame inspection before cladding\n4. Wet area waterproofing before tiling\n5. Stormwater drainage before backfil",
+    "text_length": 1350
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProjectsList } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { AIDataMappingAnimation } from '../components/dashboard/AIDataMappingAnimation';
+import { ArrowRight, BarChart3, FolderOpen, Zap } from 'lucide-react';
 
 interface Project {
   project_id: string;
@@ -18,6 +20,22 @@ interface Project {
   architect?: string;
   description?: string;
 }
+
+// Mock project structure for AI animation
+const mockProjectStructure = {
+  files: [
+    { name: 'Budget_Master.xlsx', type: 'budget', size: '2.4 MB' },
+    { name: 'Invoices_Q1.pdf', type: 'invoice', size: '1.8 MB' },
+    { name: 'Payments_Log.xlsx', type: 'payment', size: '890 KB' },
+    { name: 'Contract_Docs.pdf', type: 'contract', size: '3.2 MB' },
+  ],
+  folders: [
+    '01_CONTRACTS',
+    '02_BUDGET',
+    '03_INVOICES',
+    '04_PAYMENTS',
+  ],
+};
 
 const Projects: React.FC = () => {
   const { token } = useAuth();
@@ -69,11 +87,70 @@ const Projects: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Projects</h1>
-          <p className="text-gray-600">Select a project to view its dashboard</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12 px-8 shadow-xl">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-5xl font-bold mb-3">Project Intelligence Hub</h1>
+              <p className="text-blue-100 text-lg">
+                AI-Powered Financial Analytics • Real-time Dashboard Integration
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold">{projects.length}</div>
+              <div className="text-blue-100 text-sm">Active Projects</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
+        {/* AI Data Mapping Animation */}
+        <AIDataMappingAnimation projectStructure={mockProjectStructure} />
+
+        {/* How It Works Section */}
+        <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <Zap className="w-7 h-7 text-yellow-500" />
+            How Your Projects Transform into Intelligent Dashboards
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="bg-blue-100 p-4 rounded-full mb-4">
+                <FolderOpen className="w-10 h-10 text-blue-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">1. Upload Project Files</h3>
+              <p className="text-sm text-gray-600">
+                Add Excel budgets, PDF invoices, contracts, and financial documents to your project folders
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="bg-purple-100 p-4 rounded-full mb-4">
+                <Zap className="w-10 h-10 text-purple-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">2. AI Processes & Maps Data</h3>
+              <p className="text-sm text-gray-600">
+                Neural network extracts transactions, categorizes expenses, and builds financial relationships
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="bg-green-100 p-4 rounded-full mb-4">
+                <BarChart3 className="w-10 h-10 text-green-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">3. Interactive Dashboards</h3>
+              <p className="text-sm text-gray-600">
+                Real-time financial analytics, budget tracking, and profit forecasting at your fingertips
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Projects Grid Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-gray-900">Your Projects</h2>
+          <p className="text-gray-600">Click any project to access its intelligent dashboard</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

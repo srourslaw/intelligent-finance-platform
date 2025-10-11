@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Land_Contract_FINAL_v3.pdf",
+    "extraction_method": "mineru",
+    "extraction_date": "2025-10-10T05:29:31.381286",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "LAND PURCHASE CONTRACT\nContract of Sale - Residential Land\nProperty: 123 Sunset Boulevard, Sydney NSW 2000\nVENDOR: Previous Owner Pty Ltd\nPURCHASER: John Smith\nPurchase Price: $250,000.00\nDeposit Paid: $25,000.00 (10%)\nBalance Due: $225,000.00\nSettlement Date: 15 June 2024\nSpecial Conditions:\n1. Subject to finance approval\n2. Building & pest inspection satisfactory\n3. Clear title transfer\nSigned: 1 June 2024\nVendor Signature: [signed]\nPurchaser Signature: [signed]\n",
+    "text_length": 469
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

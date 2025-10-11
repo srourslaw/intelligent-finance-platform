@@ -40,8 +40,9 @@ class AIExtractionService:
         if GENAI_AVAILABLE and gemini_api_key:
             try:
                 genai.configure(api_key=gemini_api_key)
-                self.model = genai.GenerativeModel('gemini-1.5-flash')
-                print("✅ Gemini AI initialized successfully")
+                # Use gemini-2.0-flash (fast and efficient for structured extraction)
+                self.model = genai.GenerativeModel('gemini-2.0-flash')
+                print("✅ Gemini AI initialized successfully (gemini-2.0-flash)")
             except Exception as e:
                 print(f"Failed to initialize Gemini client: {e}")
 
@@ -90,7 +91,7 @@ class AIExtractionService:
             # Add metadata
             extracted_data["extraction_metadata"] = {
                 "extracted_at": datetime.utcnow().isoformat(),
-                "model": "gemini-1.5-flash",
+                "model": "gemini-2.0-flash",
                 "document_type": document_type,
                 "confidence": self._calculate_confidence(extracted_data)
             }

@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "file_name": "Tax_Invoice_SE-5678.pdf",
+    "extraction_method": "mineru",
+    "extraction_date": "2025-10-10T06:33:21.479632",
+    "confidence_score": 1.0
+  },
+  "text_content": {
+    "full_text": "SPARK ELECTRICAL SERVICES PTY LTD\nABN: 45 678 901 234\n78 Voltage Street, Sydney NSW 2000\nPhone: (02) 9555 3456\nTAX INVOICE\nBILL TO:\nSunset Construction Pty Ltd\nABN: 12 345 678 901\n123 Builder Street, Sydney NSW 2000\nInvoice Number:\nSE-5678\nInvoice Date:\n15/09/2024\nPurchase Order:\nPO-2024-1000\nPayment Terms:\nNet 30 Days\nDescription\nQty\nUnit Price\nAmount\nElectrical Rough-In - First Fix\n1\n$8,500.00\n$8,500.00\nPower Points & Switches (50 units)\n50\n$85.00\n$4,250.00\nLED Downlights (30 units)\n30\n$65.00\n$1,950.00\nSwitchboard & Circuit Breakers\n1\n$3,200.00\n$3,200.00\nCable & Conduit Materials\n1\n$2,180.00\n$2,180.00\nSubtotal:\n$20,080.00\nGST (10%):\n$2,008.00\nTOTAL:\n$22,088.00\nPAYMENT DETAILS\nBank: Commonwealth Bank\nBSB: 062-001\nAccount Number: 8 901 234\nAccount Name: Spark Electrical Services Pty Ltd\nReference: SE-5678\nThis is a tax invoice for GST purposes. Please retain for your records.\nPayment due: 15/09/2024 + 30 days | All prices in AUD | E&OE\n",
+    "text_length": 950
+  },
+  "transactions": [
+    {
+      "description": "Electrical Rough-In - First Fix",
+      "amount": 8500.0,
+      "date": "2024-09-15",
+      "category": "labor",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 8500.0
+    },
+    {
+      "description": "Power Points & Switches (50 units)",
+      "amount": 4250.0,
+      "date": "2024-09-15",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 50,
+      "unit_price": 85.0
+    },
+    {
+      "description": "LED Downlights (30 units)",
+      "amount": 1950.0,
+      "date": "2024-09-15",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 30,
+      "unit_price": 65.0
+    },
+    {
+      "description": "Switchboard & Circuit Breakers",
+      "amount": 3200.0,
+      "date": "2024-09-15",
+      "category": "equipment",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 3200.0
+    },
+    {
+      "description": "Cable & Conduit Materials",
+      "amount": 2180.0,
+      "date": "2024-09-15",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 2180.0
+    }
+  ],
+  "financial_summary": {
+    "total_transactions": 5,
+    "total_amount": 20080.0,
+    "expense_count": 5,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 1.0,
+    "completeness": 1.0
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Tax_Invoice_SE-5678.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-10T06:33:21.549160",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "SPARK ELECTRICAL SERVICES PTY LTD\nTAX INVOICE\nABN: 45 678 901 234\n78 Voltage Street, Sydney NSW 2000\nPhone: (02) 9555 3456\nBILL TO: Invoice Number: SE-5678\nSunset Construction Pty Ltd Invoice Date: 15/09/2024\nABN: 12 345 678 901\nPurchase Order: PO-2024-1000\n123 Builder Street, Sydney NSW 2000\nPayment Terms: Net 30 Days\nDescription Qty Unit Price Amount\nElectrical Rough-In - First Fix 1 $8,500.00 $8,500.00\nPower Points & Switches (50 units) 50 $85.00 $4,250.00\nLED Downlights (30 units) 30 $65.00 $1,950.00\nSwitchboard & Circuit Breakers 1 $3,200.00 $3,200.00\nCable & Conduit Materials 1 $2,180.00 $2,180.00\nSubtotal: $20,080.00\nGST (10%): $2,008.00\nTOTAL: $22,088.00\nPAYMENT DETAILS\nBank: Commonwealth Bank\nBSB: 062-001\nAccount Number: 8 901 234\nAccount Name: Spark Electrical Services Pty Ltd\nReference: SE-5678\nThis is a tax invoice for GST purposes. Please retain for your records.\nPayment due: 15/09/2024 + 30 days | All prices in AUD | E&OE",
+    "text_length": 949
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

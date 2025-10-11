@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "file_name": "APS-2024-8912.pdf",
+    "extraction_method": "mineru",
+    "extraction_date": "2025-10-10T06:27:58.421359",
+    "confidence_score": 1.0
+  },
+  "text_content": {
+    "full_text": "CONSTRUCTION SUPPLIES CO.\nABN: 64 890 123 456\n99 Supply Street\nSydney NSW 2000\nPhone: (02) 9000 7777\nEmail: sales@constructionsupplies.com.au\nTAX INVOICE\nInvoice Number: APS-2024-8912\nInvoice Date: 03/10/2025\nPO Number: N/A\nBILL TO:\nSUNSET CONSTRUCTION PTY LTD\n123 Sunset Boulevard\nSydney NSW 2000\nABN: 51 824 753 556\nItem\nDescription\nQuantity\nUnit Price\nAmount\n1\nConstruction Materials\n1\n$8,363.64\n$8,363.64\nSubtotal:\n$8,363.64\nGST (10%):\n$836.36\nTOTAL:\n$9,200.00\nPayment Terms:\nNet 30 days\nBank Details:\nAccount Name: CONSTRUCTION SUPPLIES CO.\nBSB: 062-006\nAccount Number: 78901234\nPage 1\nGenerated: 03/10/2025\n",
+    "text_length": 613
+  },
+  "transactions": [
+    {
+      "description": "Construction Materials",
+      "amount": 8363.64,
+      "date": "2025-10-03",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 8363.64
+    }
+  ],
+  "financial_summary": {
+    "total_transactions": 1,
+    "total_amount": 8363.64,
+    "expense_count": 1,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 1.0,
+    "completeness": 1.0
+  }
+}

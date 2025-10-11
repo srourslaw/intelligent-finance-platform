@@ -1,0 +1,19 @@
+{
+  "file_name": "Building_Permit_APPROVED.pdf",
+  "extraction_methods": {
+    "mineru": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-10T05:55:41.422952"
+    },
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-10T05:55:41.462233"
+    }
+  },
+  "recommended_for_statements": "mineru",
+  "best_transactions": []
+}

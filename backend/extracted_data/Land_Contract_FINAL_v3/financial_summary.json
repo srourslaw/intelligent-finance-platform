@@ -1,0 +1,19 @@
+{
+  "file_name": "Land_Contract_FINAL_v3.pdf",
+  "extraction_methods": {
+    "mineru": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-10T05:29:31.381539"
+    },
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-10T05:29:31.397656"
+    }
+  },
+  "recommended_for_statements": "mineru",
+  "best_transactions": []
+}

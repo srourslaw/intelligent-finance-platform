@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Land_Purchase_Contract_Signed.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-10T05:29:39.292464",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "SUNSET CONSTRUCTION PTY LTD\nABN: 12 345 678 901\n123 Builder Street, Sydney NSW 2000\nPhone: (02) 9555 1234 | Email: info@sunsetconstruction.com.au\nCONTRACT FOR SALE OF LAND\nPARTIES\nVENDOR: Smith Family Trust\nC/- Sarah Smith (Trustee)\n456 Vendor Avenue, Sydney NSW 2000\nPURCHASER: Sunset Construction Pty Ltd\nABN: 12 345 678 901\n123 Builder Street, Sydney NSW 2000\nPROPERTY DETAILS\nAddress: 123 Sunset Boulevard, Sydney NSW 2000\nLot/Plan: Lot 42 in DP 1234567\nLand Area: 850 square metres\nZoning: R2 Low Density Residential\nPURCHASE PRICE & PAYMENT TERMS\nPurchase Price: $250,000.00 (GST-Free)\nDeposit (10%): $25,000.00 (Paid on signing)\nBalance: $225,000.00 (Payable on settlement)\nSettlement Date: 15 January 2024\nSPECIAL CONDITIONS\n1. This contract is subject to purchaser obtaining Development Approval within 90 days.\n2. Purchaser to conduct soil testing and environmental assessment at their cost.\n3. Property sold with existing easements and encumbrances as per title search.\n4. Settlement to oc",
+    "text_length": 1318
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

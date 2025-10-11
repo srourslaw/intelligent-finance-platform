@@ -1,0 +1,30 @@
+{
+  "file_name": "APS-2024-8912.pdf",
+  "extraction_methods": {
+    "mineru": {
+      "confidence": 1.0,
+      "transactions_found": 1,
+      "total_amount": 8363.64,
+      "extraction_date": "2025-10-10T06:27:58.422576"
+    },
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-10T06:27:58.485780"
+    }
+  },
+  "recommended_for_statements": "mineru",
+  "best_transactions": [
+    {
+      "description": "Construction Materials",
+      "amount": 8363.64,
+      "date": "2025-10-03",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 8363.64
+    }
+  ]
+}

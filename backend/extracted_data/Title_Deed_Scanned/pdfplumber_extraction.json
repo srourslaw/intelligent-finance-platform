@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Title_Deed_Scanned.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-10T05:29:50.547437",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "CERTIFICATE OF TITLE\nSTATE OF NEW SOUTH WALES\nLAND AND PROPERTY INFORMATION\nLOT 15 DP 123456\n123 Sunset Boulevard, Sydney NSW 2000\nFOLIO IDENTIFIER: 15/123456\nRegistered Proprietor: JOHN SMITH\nDate Registered: 20 June 2024\nEstate: Fee Simple\nEncumbrances: Mortgage to ANZ Bank\nLand Dimensions:\nFrontage: 15.24 metres\nDepth: 30.48 metres\nArea: 465 square metres\n[STAMP: NSW Land Registry Services]\n[SEAL]",
+    "text_length": 403
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}
