@@ -346,6 +346,30 @@ export function Dashboard() {
               </div>
             )}
 
+            {/* Financial Builder - Quick Access */}
+            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 rounded-xl p-6 shadow-xl border border-purple-400">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="bg-white bg-opacity-20 p-4 rounded-lg">
+                    <FileText className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-white">
+                    <h3 className="text-xl font-bold mb-1">Financial Statement Builder</h3>
+                    <p className="text-purple-100 text-sm">
+                      Process all 144 files → AI categorization → Automated Excel financial model
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/financial-builder')}
+                  className="bg-white text-purple-700 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2"
+                >
+                  <Zap className="w-5 h-5" />
+                  Launch Builder
+                </button>
+              </div>
+            </div>
+
             {/* Enhanced KPI Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Contract Value */}
