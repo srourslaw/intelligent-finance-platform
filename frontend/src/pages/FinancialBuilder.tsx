@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FileSpreadsheet, Zap, CheckCircle2, Loader2, AlertCircle, TrendingUp, Database, DollarSign, PieChart, BarChart3, Download } from 'lucide-react';
+import { FileSpreadsheet, Zap, CheckCircle2, Loader2, AlertCircle, TrendingUp, Database, BarChart3, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
 
 interface PipelineStage {
   name: string;
@@ -28,7 +27,8 @@ interface FinancialResults {
 }
 
 export default function FinancialBuilder() {
-  const { currentProject } = useAuth();
+  const { } = useAuth();
+  const currentProject = 'project-a-123-sunset-blvd'; // TODO: Make project-aware
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [stages, setStages] = useState<PipelineStage[]>([
@@ -58,8 +58,20 @@ export default function FinancialBuilder() {
     setStages(stages.map(s => ({ ...s, status: 'pending', progress: 0 })));
 
     try {
-      const response = await api.post(`/financial-builder/${currentProject}/run-full-pipeline`);
-      const data = response.data;
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8000/api/financial-builder/${currentProject}/run-full-pipeline`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
 
       setJobId(data.job_id);
 
@@ -81,8 +93,18 @@ export default function FinancialBuilder() {
 
     const pollInterval = setInterval(async () => {
       try {
-        const response = await api.get(`/financial-builder/jobs/${jobId}/status`);
-        const status = response.data;
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:8000/api/financial-builder/jobs/${jobId}/status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const status = await response.json();
 
         // Update stages based on progress
         const progressPercent = status.progress_percent;
@@ -182,7 +204,7 @@ export default function FinancialBuilder() {
           ));
         }
 
-      } catch (err: any) {
+      } catch (err) {
         console.error('Status poll failed:', err);
         clearInterval(pollInterval);
         setIsProcessing(false);
@@ -219,14 +241,6 @@ export default function FinancialBuilder() {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100">
@@ -540,7 +554,7 @@ export default function FinancialBuilder() {
                     console.log('Download complete!');
                   } catch (error) {
                     console.error('Download error:', error);
-                    alert(`Failed to download file: ${error.message}`);
+                    alert(`Failed to download file: ${error instanceof Error ? error.message : 'Unknown error'}`);
                   }
                 }}
                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-3 px-6 rounded-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-200 font-semibold flex items-center justify-center gap-2"

@@ -1091,7 +1091,7 @@ export function Dashboard() {
                             document.body.removeChild(a);
                           } catch (error) {
                             console.error('Download error:', error);
-                            alert(`Failed to download file: ${error.message}`);
+                            alert(`Failed to download file: ${error instanceof Error ? error.message : 'Unknown error'}`);
                           }
                         }}
                         className="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold flex items-center gap-2"
