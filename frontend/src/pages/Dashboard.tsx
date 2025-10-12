@@ -16,6 +16,7 @@ import { SystemHealth } from '../components/dashboard/SystemHealth';
 import { TemplateGenerator } from '../components/dashboard/TemplateGenerator';
 import { FolderMonitoring } from '../components/dashboard/FolderMonitoring';
 import { PDFExtractionTest } from '../components/dashboard/PDFExtractionTest';
+import { DetailedPipelineArchitecture } from '../components/dashboard/DetailedPipelineArchitecture';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -45,6 +46,7 @@ export function Dashboard() {
   const [pipelineResults, setPipelineResults] = useState<any>(null);
   const [excelData, setExcelData] = useState<any>(null);
   const [activeSheet, setActiveSheet] = useState<string>('Summary');
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     const projectId = localStorage.getItem('selectedProjectId');
@@ -778,131 +780,19 @@ export function Dashboard() {
         {/* FINANCIAL BUILDER TAB */}
         {activeTab === 'builder' && (
           <>
-            {/* Data Transformation Animation */}
-            <div className="mb-8 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-8 border-2 border-indigo-200 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                🎯 AI-Powered Financial Data Transformation
+            {/* Detailed Pipeline Architecture Animation */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+                🎯 AI-Powered Financial Data Transformation Pipeline
               </h2>
-
-              {/* Animation Flow */}
-              <div className="relative">
-                {/* Step 1: Messy Files */}
-                <div className="flex items-center justify-between gap-4 mb-8">
-                  <div className="flex-1 bg-white rounded-xl p-6 shadow-md border-2 border-red-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-red-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900">Step 1: Raw Files</h3>
-                        <p className="text-xs text-gray-600">Unstructured Data</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="bg-red-50 px-3 py-2 rounded text-xs font-mono text-red-700 animate-pulse">
-                        📄 invoice_messy.pdf
-                      </div>
-                      <div className="bg-red-50 px-3 py-2 rounded text-xs font-mono text-red-700 animate-pulse" style={{ animationDelay: '0.2s' }}>
-                        📊 costs_unclear.xlsx
-                      </div>
-                      <div className="bg-red-50 px-3 py-2 rounded text-xs font-mono text-red-700 animate-pulse" style={{ animationDelay: '0.4s' }}>
-                        📝 random_data.csv
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Arrow 1 */}
-                  <div className="flex flex-col items-center">
-                    <div className="text-3xl animate-bounce">➡️</div>
-                    <span className="text-xs text-gray-600 mt-1 font-semibold">Extract</span>
-                  </div>
-
-                  {/* Step 2: AI Processing */}
-                  <div className="flex-1 bg-white rounded-xl p-6 shadow-md border-2 border-yellow-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center animate-spin" style={{ animationDuration: '3s' }}>
-                        <Zap className="w-6 h-6 text-yellow-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900">Step 2: AI Processing</h3>
-                        <p className="text-xs text-gray-600">Smart Analysis</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="bg-yellow-50 px-3 py-2 rounded text-xs text-yellow-700 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping"></div>
-                        Parsing data...
-                      </div>
-                      <div className="bg-yellow-50 px-3 py-2 rounded text-xs text-yellow-700 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
-                        Deduplicating...
-                      </div>
-                      <div className="bg-yellow-50 px-3 py-2 rounded text-xs text-yellow-700 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
-                        Categorizing...
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Arrow 2 */}
-                  <div className="flex flex-col items-center">
-                    <div className="text-3xl animate-bounce" style={{ animationDelay: '0.5s' }}>➡️</div>
-                    <span className="text-xs text-gray-600 mt-1 font-semibold">Transform</span>
-                  </div>
-
-                  {/* Step 3: Organized Output */}
-                  <div className="flex-1 bg-white rounded-xl p-6 shadow-md border-2 border-green-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <CheckCircle2 className="w-6 h-6 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900">Step 3: Financial Model</h3>
-                        <p className="text-xs text-gray-600">Clean & Organized</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="bg-green-50 px-3 py-2 rounded text-xs text-green-700 flex items-center justify-between">
-                        <span>📈 Summary</span>
-                        <span className="font-bold">✓</span>
-                      </div>
-                      <div className="bg-green-50 px-3 py-2 rounded text-xs text-green-700 flex items-center justify-between">
-                        <span>💰 Revenue</span>
-                        <span className="font-bold">✓</span>
-                      </div>
-                      <div className="bg-green-50 px-3 py-2 rounded text-xs text-green-700 flex items-center justify-between">
-                        <span>📊 Costs</span>
-                        <span className="font-bold">✓</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stats Banner */}
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg p-4 text-white">
-                  <div className="flex items-center justify-around text-center">
-                    <div>
-                      <div className="text-2xl font-bold">123+</div>
-                      <div className="text-xs opacity-90">Files Processed</div>
-                    </div>
-                    <div className="w-px h-10 bg-white opacity-30"></div>
-                    <div>
-                      <div className="text-2xl font-bold">2,849</div>
-                      <div className="text-xs opacity-90">Transactions</div>
-                    </div>
-                    <div className="w-px h-10 bg-white opacity-30"></div>
-                    <div>
-                      <div className="text-2xl font-bold">5</div>
-                      <div className="text-xs opacity-90">Excel Sheets</div>
-                    </div>
-                    <div className="w-px h-10 bg-white opacity-30"></div>
-                    <div>
-                      <div className="text-2xl font-bold">~15min</div>
-                      <div className="text-xs opacity-90">Processing Time</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <p className="text-center text-gray-600 mb-8 max-w-3xl mx-auto">
+                Explore how our intelligent system transforms messy financial documents into a comprehensive financial model
+                through multiple processing stages powered by AI and machine learning.
+              </p>
+              <DetailedPipelineArchitecture
+                isAnimating={isAnimating}
+                onToggleAnimation={() => setIsAnimating(!isAnimating)}
+              />
             </div>
 
             {/* Info Card */}

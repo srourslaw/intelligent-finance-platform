@@ -12,6 +12,7 @@
   "dependencies": {
     "@mescius/spread-sheets-io": "^18.2.3",
     "axios": "^1.12.2",
+    "d3": "^7.9.0",
     "date-fns": "^4.1.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.544.0",
