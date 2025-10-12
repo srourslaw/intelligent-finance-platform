@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Upload, FileText, CheckCircle2, XCircle, Loader2, Database, ArrowRight, TrendingUp, DollarSign, FileSpreadsheet } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 interface ExtractionResult {
   method: 'mineru' | 'pdfplumber';
   confidence: number;
@@ -47,7 +49,7 @@ export function PDFExtractionTest() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://localhost:8000/api/extraction/test-comparison', {
+      const response = await fetch(`${API_BASE_URL}/extraction/test-comparison`, {
         method: 'POST',
         body: formData,
       });

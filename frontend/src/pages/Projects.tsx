@@ -6,6 +6,8 @@ import { AIDataMappingAnimation } from '../components/dashboard/AIDataMappingAni
 import { BarChart3, FolderOpen, Zap } from 'lucide-react';
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 interface Project {
   project_id: string;
   project_name: string;
@@ -57,7 +59,7 @@ const Projects: React.FC = () => {
 
   const fetchProjectStructure = async (projectId: string) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/projects/${projectId}/file-structure`);
+      const response = await axios.get(`${API_BASE_URL}/projects/${projectId}/file-structure`);
       if (response.data && response.data.file_structure) {
         setProjectStructure(response.data.file_structure);
       }
