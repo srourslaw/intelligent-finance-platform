@@ -423,14 +423,216 @@ def run_pipeline_phases(
             pass
 
 
+@router.get("/{project_id}/excel-data")
+async def get_excel_data(project_id: str):
+    """
+    Get Excel data as JSON for dashboard display.
+
+    Args:
+        project_id: Project identifier
+
+    Returns:
+        JSON with Excel sheet data
+    """
+    try:
+        from app.database import SessionLocal
+        import openpyxl
+
+        db = SessionLocal()
+
+        job = db.query(ExtractionJob).filter(
+            ExtractionJob.project_id == project_id,
+            ExtractionJob.status == JobStatus.COMPLETED
+        ).order_by(ExtractionJob.created_at.desc()).first()
+
+        db.close()
+
+        if not job or not job.job_metadata:
+            raise HTTPException(status_code=404, detail="No completed pipeline found for this project")
+
+        # Parse metadata to get excel_path
+        metadata = json.loads(job.job_metadata)
+        excel_path = metadata.get('excel_path')
+
+        if not excel_path:
+            raise HTTPException(status_code=404, detail="Excel file path not found in job metadata")
+
+        # Construct full path
+        file_path = Path(excel_path)
+        if not file_path.is_absolute():
+            backend_dir = Path(__file__).parent.parent.parent
+            file_path = backend_dir / excel_path
+
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail=f"Excel file not found: {excel_path}")
+
+        # Read Excel file and convert to JSON with formatting
+        wb = openpyxl.load_workbook(str(file_path), data_only=True)
+        excel_data = {}
+
+        for sheet_name in wb.sheetnames:
+            sheet = wb[sheet_name]
+
+            # Auto-detect sheet format: Check if it's key-value format or table format
+            # Look at multiple rows to determine the format
+
+            # Check first 5 rows to find a header row pattern
+            has_header_row = False
+            for row_idx in range(1, min(6, sheet.max_row + 1)):
+                row = sheet[row_idx]
+                non_empty_count = sum(1 for cell in row if cell.value and str(cell.value).strip() and str(cell.value) != 'None')
+                bold_count = sum(1 for cell in row if cell.value and str(cell.value) != 'None' and cell.font and cell.font.bold)
+
+                # If we find a row with multiple bold cells and multiple values, it's a table header
+                if bold_count >= 2 and non_empty_count >= 3:
+                    has_header_row = True
+                    break
+
+            # If no header row found, it's key-value format
+            is_key_value_format = not has_header_row
+
+            if is_key_value_format:
+                summary_sections = []
+                current_section = None
+
+                for row_idx in range(1, sheet.max_row + 1):
+                    # Check first cell for section header or key
+                    cell_a = sheet.cell(row=row_idx, column=1)
+                    cell_b = sheet.cell(row=row_idx, column=2)
+
+                    # Skip empty rows
+                    if not cell_a.value or cell_a.value == 'None':
+                        continue
+
+                    # Section headers are in UPPERCASE and have no value in column B
+                    cell_a_value = str(cell_a.value).strip()
+                    is_section_header = (
+                        cell_a_value.isupper() and
+                        (not cell_b.value or cell_b.value == 'None') and
+                        cell_a_value not in ['NONE']
+                    )
+
+                    if is_section_header:
+                        # Start new section
+                        if current_section:
+                            summary_sections.append(current_section)
+                        current_section = {
+                            'title': cell_a_value,
+                            'items': []
+                        }
+                    elif current_section is not None and cell_b.value and cell_b.value != 'None':
+                        # Data row (key-value pair)
+                        value = cell_b.value
+                        if isinstance(value, (int, float)):
+                            value = round(value, 2) if isinstance(value, float) else value
+                        current_section['items'].append({
+                            'label': cell_a_value,
+                            'value': value
+                        })
+
+                if current_section:
+                    summary_sections.append(current_section)
+
+                excel_data[sheet_name] = {
+                    'type': 'summary',
+                    'sections': summary_sections,
+                    'total_rows': sheet.max_row
+                }
+            else:
+                # Standard table format for other sheets
+                # Find the header row (look for row with multiple non-empty bold cells)
+                header_row_idx = 1
+                for row_idx in range(1, min(10, sheet.max_row + 1)):
+                    row = sheet[row_idx]
+                    bold_count = sum(1 for cell in row if cell.value and cell.value != 'None' and cell.font and cell.font.bold)
+                    non_empty_count = sum(1 for cell in row if cell.value and cell.value != 'None')
+
+                    # Header row typically has multiple bold cells
+                    if bold_count >= 2 and non_empty_count >= 3:
+                        header_row_idx = row_idx
+                        break
+
+                sheet_data = []
+                header_styles = []
+
+                # Get headers from detected header row
+                headers = []
+                for cell in sheet[header_row_idx]:
+                    headers.append(str(cell.value) if cell.value is not None and cell.value != 'None' else "")
+                    # Capture header cell styling
+                    header_styles.append({
+                        'bg_color': cell.fill.start_color.index if cell.fill and cell.fill.start_color else None,
+                        'font_color': cell.font.color.index if cell.font and cell.font.color else None,
+                        'bold': cell.font.bold if cell.font else False
+                    })
+
+                # Get data rows starting after header (limit to first 100 rows for performance)
+                for row_idx in range(header_row_idx + 1, min(header_row_idx + 101, sheet.max_row + 1)):
+                    row_data = []
+                    row_dict = {}
+                    has_data = False
+
+                    for col_idx, header in enumerate(headers, start=1):
+                        cell = sheet.cell(row=row_idx, column=col_idx)
+                        value = cell.value
+
+                        # Convert value to string, handle None
+                        if value is not None:
+                            has_data = True
+                            if isinstance(value, (int, float)):
+                                # Format numbers properly
+                                if isinstance(value, float):
+                                    row_dict[header] = round(value, 2)
+                                else:
+                                    row_dict[header] = value
+                            else:
+                                row_dict[header] = str(value)
+                        else:
+                            row_dict[header] = ""
+
+                        # Capture cell styling
+                        row_data.append({
+                            'value': row_dict[header],
+                            'bg_color': cell.fill.start_color.index if cell.fill and cell.fill.start_color else None,
+                            'font_color': cell.font.color.index if cell.font and cell.font.color else None,
+                            'bold': cell.font.bold if cell.font else False
+                        })
+
+                    if has_data:
+                        sheet_data.append({
+                            'data': row_dict,
+                            'styles': row_data
+                        })
+
+                excel_data[sheet_name] = {
+                    'type': 'table',
+                    'headers': headers,
+                    'header_styles': header_styles,
+                    'data': sheet_data,
+                    'total_rows': sheet.max_row - 1  # Exclude header row
+                }
+
+        return {
+            'success': True,
+            'project_id': project_id,
+            'sheets': excel_data
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Excel data fetch error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch Excel data: {str(e)}")
+
+
 @router.get("/{project_id}/download")
 async def download_excel(project_id: str):
     """
     Download the generated Excel financial model.
-    
+
     Args:
         project_id: Project identifier
-        
+
     Returns:
         Excel file download
     """
@@ -438,17 +640,17 @@ async def download_excel(project_id: str):
         # Get the most recent completed job for this project
         from app.database import SessionLocal
         db = SessionLocal()
-        
+
         job = db.query(ExtractionJob).filter(
             ExtractionJob.project_id == project_id,
             ExtractionJob.status == JobStatus.COMPLETED
         ).order_by(ExtractionJob.created_at.desc()).first()
-        
+
         db.close()
-        
+
         if not job or not job.job_metadata:
             raise HTTPException(status_code=404, detail="No completed pipeline found for this project")
-        
+
         # Parse metadata to get excel_path
         metadata = json.loads(job.job_metadata)
         excel_path = metadata.get('excel_path')
@@ -466,14 +668,14 @@ async def download_excel(project_id: str):
         # Check if file exists
         if not file_path.exists():
             raise HTTPException(status_code=404, detail=f"Excel file not found: {excel_path}")
-        
+
         # Return file
         return FileResponse(
             path=str(file_path),
             filename=f"Financial_Model_{project_id}.xlsx",
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:

@@ -494,31 +494,53 @@ export default function FinancialBuilder() {
               </div>
 
               <button
-                onClick={async () => {
+                type="button"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Download button clicked');
+                  console.log('Current project:', currentProject);
+
                   try {
                     const token = localStorage.getItem('token');
-                    const response = await fetch(`/api/financial-builder/${currentProject}/download`, {
+                    console.log('Token exists:', !!token);
+
+                    const downloadUrl = `/api/financial-builder/${currentProject}/download`;
+                    console.log('Download URL:', downloadUrl);
+
+                    console.log('Starting fetch...');
+                    const response = await fetch(downloadUrl, {
                       headers: {
                         'Authorization': `Bearer ${token}`
                       }
                     });
 
+                    console.log('Response status:', response.status);
+                    console.log('Response ok:', response.ok);
+
                     if (!response.ok) {
-                      throw new Error('Download failed');
+                      const errorText = await response.text();
+                      console.error('Error response:', errorText);
+                      throw new Error(`Download failed: ${response.status} - ${errorText}`);
                     }
 
+                    console.log('Creating blob...');
                     const blob = await response.blob();
+                    console.log('Blob size:', blob.size, 'type:', blob.type);
+
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = `Financial_Model_${currentProject}.xlsx`;
                     document.body.appendChild(a);
+                    console.log('Triggering download...');
                     a.click();
                     window.URL.revokeObjectURL(url);
                     document.body.removeChild(a);
+                    console.log('Download complete!');
                   } catch (error) {
                     console.error('Download error:', error);
-                    alert('Failed to download file. Please try again.');
+                    alert(`Failed to download file: ${error.message}`);
                   }
                 }}
                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-3 px-6 rounded-lg hover:from-purple-700 hover:to-indigo-800 transition-all duration-200 font-semibold flex items-center justify-center gap-2"

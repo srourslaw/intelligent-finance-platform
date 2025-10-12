@@ -41,6 +41,8 @@ export function Dashboard() {
   const [excelPath, setExcelPath] = useState<string | null>(null);
   const [pipelineError, setPipelineError] = useState<string | null>(null);
   const [pipelineResults, setPipelineResults] = useState<any>(null);
+  const [excelData, setExcelData] = useState<any>(null);
+  const [activeSheet, setActiveSheet] = useState<string>('Summary');
 
   useEffect(() => {
     const projectId = localStorage.getItem('selectedProjectId');
@@ -82,6 +84,35 @@ export function Dashboard() {
   };
 
   // Financial Builder functions
+  // Fetch Excel data when path is available
+  useEffect(() => {
+    const fetchExcelData = async () => {
+      if (excelPath && selectedProjectId) {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await fetch(`http://localhost:8000/api/financial-builder/${selectedProjectId}/excel-data`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setExcelData(data.sheets);
+            // Set default active sheet
+            if (data.sheets && Object.keys(data.sheets).length > 0) {
+              setActiveSheet(Object.keys(data.sheets)[0]);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch Excel data:', error);
+        }
+      }
+    };
+
+    fetchExcelData();
+  }, [excelPath, selectedProjectId]);
+
   const startPipeline = async () => {
     if (!token || !selectedProjectId) return;
 
@@ -745,6 +776,133 @@ export function Dashboard() {
         {/* FINANCIAL BUILDER TAB */}
         {activeTab === 'builder' && (
           <>
+            {/* Data Transformation Animation */}
+            <div className="mb-8 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl p-8 border-2 border-indigo-200 shadow-lg">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                🎯 AI-Powered Financial Data Transformation
+              </h2>
+
+              {/* Animation Flow */}
+              <div className="relative">
+                {/* Step 1: Messy Files */}
+                <div className="flex items-center justify-between gap-4 mb-8">
+                  <div className="flex-1 bg-white rounded-xl p-6 shadow-md border-2 border-red-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-red-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900">Step 1: Raw Files</h3>
+                        <p className="text-xs text-gray-600">Unstructured Data</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="bg-red-50 px-3 py-2 rounded text-xs font-mono text-red-700 animate-pulse">
+                        📄 invoice_messy.pdf
+                      </div>
+                      <div className="bg-red-50 px-3 py-2 rounded text-xs font-mono text-red-700 animate-pulse" style={{ animationDelay: '0.2s' }}>
+                        📊 costs_unclear.xlsx
+                      </div>
+                      <div className="bg-red-50 px-3 py-2 rounded text-xs font-mono text-red-700 animate-pulse" style={{ animationDelay: '0.4s' }}>
+                        📝 random_data.csv
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Arrow 1 */}
+                  <div className="flex flex-col items-center">
+                    <div className="text-3xl animate-bounce">➡️</div>
+                    <span className="text-xs text-gray-600 mt-1 font-semibold">Extract</span>
+                  </div>
+
+                  {/* Step 2: AI Processing */}
+                  <div className="flex-1 bg-white rounded-xl p-6 shadow-md border-2 border-yellow-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center animate-spin" style={{ animationDuration: '3s' }}>
+                        <Zap className="w-6 h-6 text-yellow-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900">Step 2: AI Processing</h3>
+                        <p className="text-xs text-gray-600">Smart Analysis</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="bg-yellow-50 px-3 py-2 rounded text-xs text-yellow-700 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping"></div>
+                        Parsing data...
+                      </div>
+                      <div className="bg-yellow-50 px-3 py-2 rounded text-xs text-yellow-700 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
+                        Deduplicating...
+                      </div>
+                      <div className="bg-yellow-50 px-3 py-2 rounded text-xs text-yellow-700 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping" style={{ animationDelay: '0.6s' }}></div>
+                        Categorizing...
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Arrow 2 */}
+                  <div className="flex flex-col items-center">
+                    <div className="text-3xl animate-bounce" style={{ animationDelay: '0.5s' }}>➡️</div>
+                    <span className="text-xs text-gray-600 mt-1 font-semibold">Transform</span>
+                  </div>
+
+                  {/* Step 3: Organized Output */}
+                  <div className="flex-1 bg-white rounded-xl p-6 shadow-md border-2 border-green-200 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <CheckCircle2 className="w-6 h-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900">Step 3: Financial Model</h3>
+                        <p className="text-xs text-gray-600">Clean & Organized</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="bg-green-50 px-3 py-2 rounded text-xs text-green-700 flex items-center justify-between">
+                        <span>📈 Summary</span>
+                        <span className="font-bold">✓</span>
+                      </div>
+                      <div className="bg-green-50 px-3 py-2 rounded text-xs text-green-700 flex items-center justify-between">
+                        <span>💰 Revenue</span>
+                        <span className="font-bold">✓</span>
+                      </div>
+                      <div className="bg-green-50 px-3 py-2 rounded text-xs text-green-700 flex items-center justify-between">
+                        <span>📊 Costs</span>
+                        <span className="font-bold">✓</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stats Banner */}
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg p-4 text-white">
+                  <div className="flex items-center justify-around text-center">
+                    <div>
+                      <div className="text-2xl font-bold">123+</div>
+                      <div className="text-xs opacity-90">Files Processed</div>
+                    </div>
+                    <div className="w-px h-10 bg-white opacity-30"></div>
+                    <div>
+                      <div className="text-2xl font-bold">2,849</div>
+                      <div className="text-xs opacity-90">Transactions</div>
+                    </div>
+                    <div className="w-px h-10 bg-white opacity-30"></div>
+                    <div>
+                      <div className="text-2xl font-bold">5</div>
+                      <div className="text-xs opacity-90">Excel Sheets</div>
+                    </div>
+                    <div className="w-px h-10 bg-white opacity-30"></div>
+                    <div>
+                      <div className="text-2xl font-bold">~15min</div>
+                      <div className="text-xs opacity-90">Processing Time</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Info Card */}
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-lg">
               <div className="flex items-start gap-4">
@@ -908,7 +1066,34 @@ export function Dashboard() {
                         </div>
                       )}
                       <button
-                        onClick={() => window.open(excelPath, '_blank')}
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem('token');
+                            const response = await fetch(`http://localhost:8000/api/financial-builder/${selectedProjectId}/download`, {
+                              headers: {
+                                'Authorization': `Bearer ${token}`
+                              }
+                            });
+
+                            if (!response.ok) {
+                              throw new Error(`Download failed: ${response.status}`);
+                            }
+
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `Financial_Model_${selectedProjectId}.xlsx`;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                          } catch (error) {
+                            console.error('Download error:', error);
+                            alert(`Failed to download file: ${error.message}`);
+                          }
+                        }}
                         className="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold flex items-center gap-2"
                       >
                         <FileText className="w-5 h-5" />
@@ -986,6 +1171,139 @@ export function Dashboard() {
                         </div>
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {/* Excel Data Viewer */}
+                {excelData && (
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-lg">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">📊 Excel Data Preview</h3>
+
+                    {/* Sheet Tabs */}
+                    <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                      {Object.keys(excelData).map((sheetName) => (
+                        <button
+                          key={sheetName}
+                          type="button"
+                          onClick={() => setActiveSheet(sheetName)}
+                          className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
+                            activeSheet === sheetName
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {sheetName}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Sheet Data Display */}
+                    {excelData[activeSheet] && (
+                      <>
+                        {/* Summary Sheet - Special Card Layout */}
+                        {excelData[activeSheet].type === 'summary' && excelData[activeSheet].sections && (
+                          <div className="space-y-4">
+                            {excelData[activeSheet].sections.map((section: any, sectionIdx: number) => (
+                              <div key={sectionIdx} className="border border-gray-200 rounded-lg overflow-hidden">
+                                {/* Section Header */}
+                                <div className="bg-blue-700 px-4 py-3">
+                                  <h4 className="text-sm font-bold text-white uppercase">{section.title}</h4>
+                                </div>
+                                {/* Section Items */}
+                                <div className="bg-white">
+                                  {section.items.map((item: any, itemIdx: number) => (
+                                    <div
+                                      key={itemIdx}
+                                      className="flex justify-between items-center px-4 py-2 border-b border-gray-100 last:border-b-0"
+                                    >
+                                      <span className="text-sm text-gray-700">{item.label}</span>
+                                      <span className="text-sm font-medium text-gray-900">
+                                        {typeof item.value === 'number'
+                                          ? item.value.toLocaleString('en-US', {
+                                              minimumFractionDigits: 2,
+                                              maximumFractionDigits: 2
+                                            })
+                                          : item.value}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Regular Table Sheets */}
+                        {excelData[activeSheet].type === 'table' && (
+                          <div className="border border-gray-200 rounded-lg overflow-hidden">
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-indigo-600">
+                                  <tr>
+                                    {excelData[activeSheet].headers.map((header: string, idx: number) => (
+                                      <th
+                                        key={idx}
+                                        className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider border-r border-indigo-500 last:border-r-0"
+                                      >
+                                        {header || '\u00A0'}
+                                      </th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  {excelData[activeSheet].data.slice(0, 50).map((rowData: any, rowIdx: number) => (
+                                    <tr key={rowIdx} className="hover:bg-gray-50">
+                                      {excelData[activeSheet].headers.map((header: string, cellIdx: number) => {
+                                        const cellValue = rowData.data?.[header];
+                                        const displayValue = cellValue !== null && cellValue !== undefined && cellValue !== ''
+                                          ? String(cellValue)
+                                          : '';
+
+                                        // Format numbers with commas and decimals
+                                        let formattedValue = displayValue;
+                                        if (displayValue && !isNaN(Number(displayValue))) {
+                                          const num = Number(displayValue);
+                                          formattedValue = num.toLocaleString('en-US', {
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 2
+                                          });
+                                        }
+
+                                        return (
+                                          <td
+                                            key={cellIdx}
+                                            className={`px-4 py-3 text-sm border-r border-gray-200 last:border-r-0 ${
+                                              !isNaN(Number(displayValue)) && displayValue !== ''
+                                                ? 'text-right font-medium text-gray-900'
+                                                : 'text-left text-gray-700'
+                                            }`}
+                                          >
+                                            {formattedValue || '\u00A0'}
+                                          </td>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Row Count Info */}
+                            <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+                              <p className="text-sm text-gray-600">
+                                Showing {Math.min(50, excelData[activeSheet].data.length)} of{' '}
+                                {excelData[activeSheet].total_rows} rows
+                                {excelData[activeSheet].total_rows > 50 && (
+                                  <span className="ml-2 text-indigo-600 font-medium">
+                                    (Download Excel file to view all data)
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
