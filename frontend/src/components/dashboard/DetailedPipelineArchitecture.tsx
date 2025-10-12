@@ -485,11 +485,14 @@ export function DetailedPipelineArchitecture({
           position: relative;
         }
 
-        .connection-dot {
+        .source-icon-circle .connection-dot {
           position: absolute;
           right: -6px;
           top: 50%;
           transform: translateY(-50%);
+        }
+
+        .connection-dot {
           width: 8px;
           height: 8px;
           background: #3b82f6;
