@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { FileSpreadsheet, Zap, CheckCircle2, Loader2, AlertCircle, TrendingUp, Database, BarChart3, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 interface PipelineStage {
   name: string;
   status: 'pending' | 'processing' | 'completed' | 'error';
@@ -59,7 +61,7 @@ export default function FinancialBuilder() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/financial-builder/${currentProject}/run-full-pipeline`, {
+      const response = await fetch(`${API_BASE_URL}/financial-builder/${currentProject}/run-full-pipeline`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -94,7 +96,7 @@ export default function FinancialBuilder() {
     const pollInterval = setInterval(async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:8000/api/financial-builder/jobs/${jobId}/status`, {
+        const response = await fetch(`${API_BASE_URL}/financial-builder/jobs/${jobId}/status`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

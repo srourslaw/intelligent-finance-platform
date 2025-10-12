@@ -25,6 +25,8 @@ import {
   PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 export function Dashboard() {
   const { token, logout, user } = useAuth();
   const navigate = useNavigate();
@@ -90,7 +92,7 @@ export function Dashboard() {
       if (excelPath && selectedProjectId) {
         try {
           const token = localStorage.getItem('token');
-          const response = await fetch(`http://localhost:8000/api/financial-builder/${selectedProjectId}/excel-data`, {
+          const response = await fetch(`${API_BASE_URL}/financial-builder/${selectedProjectId}/excel-data`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -122,7 +124,7 @@ export function Dashboard() {
     setPipelineStatus(null);
 
     try {
-      const response = await fetch(`http://localhost:8000/api/financial-builder/${selectedProjectId}/run-full-pipeline`, {
+      const response = await fetch(`${API_BASE_URL}/financial-builder/${selectedProjectId}/run-full-pipeline`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,7 +152,7 @@ export function Dashboard() {
 
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/financial-builder/jobs/${jobIdParam}/status`, {
+        const response = await fetch(`${API_BASE_URL}/financial-builder/jobs/${jobIdParam}/status`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -1070,7 +1072,7 @@ export function Dashboard() {
                         onClick={async () => {
                           try {
                             const token = localStorage.getItem('token');
-                            const response = await fetch(`http://localhost:8000/api/financial-builder/${selectedProjectId}/download`, {
+                            const response = await fetch(`${API_BASE_URL}/financial-builder/${selectedProjectId}/download`, {
                               headers: {
                                 'Authorization': `Bearer ${token}`
                               }
