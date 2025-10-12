@@ -13,7 +13,7 @@ import traceback
 import logging
 import os
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Callable
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
@@ -56,7 +56,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Generate request ID
-        request_id = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S%f')}"
+        request_id = f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}"
 
         # Log request start
         start_time = time.time()
