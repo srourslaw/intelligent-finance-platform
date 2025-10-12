@@ -30,6 +30,7 @@ interface FinancialResults {
 export default function FinancialBuilder() {
   const { currentProject } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [stages, setStages] = useState<PipelineStage[]>([
     { name: 'File Extraction', status: 'pending', progress: 0, details: 'Extract data from project files (PDFs, Excel)', filesProcessed: 0, totalFiles: 0 },
     { name: 'Data Normalization', status: 'pending', progress: 0, details: 'Parse into normalized data points with lineage' },
@@ -48,6 +49,7 @@ export default function FinancialBuilder() {
     }
 
     setIsProcessing(true);
+    setIsLoadingResults(false);
     setError(null);
     setResults(null);
     setJobId(null);
@@ -143,20 +145,29 @@ export default function FinancialBuilder() {
           clearInterval(pollInterval);
           setIsProcessing(false);
 
-          // Parse metadata for results
-          if (status.metadata) {
-            try {
-              const metadata = typeof status.metadata === 'string'
-                ? JSON.parse(status.metadata)
-                : status.metadata;
-              setResults(metadata);
-            } catch (e) {
-              console.error('Failed to parse metadata:', e);
-            }
-          }
+          // Show loading state for results
+          setIsLoadingResults(true);
 
           // Mark all stages complete
           setStages(prev => prev.map(s => ({ ...s, status: 'completed', progress: 100 })));
+
+          // Parse metadata for results with slight delay to show loading
+          setTimeout(() => {
+            if (status.metadata) {
+              try {
+                const metadata = typeof status.metadata === 'string'
+                  ? JSON.parse(status.metadata)
+                  : status.metadata;
+                setResults(metadata);
+                setIsLoadingResults(false);
+              } catch (e) {
+                console.error('Failed to parse metadata:', e);
+                setIsLoadingResults(false);
+              }
+            } else {
+              setIsLoadingResults(false);
+            }
+          }, 500); // Small delay to ensure smooth transition
         }
 
         // Check if failed
@@ -355,8 +366,35 @@ export default function FinancialBuilder() {
           </div>
         )}
 
+        {/* Loading Results State */}
+        {!isProcessing && isLoadingResults && (
+          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-xl p-8">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <Loader2 className="w-12 h-12 text-purple-600 animate-spin" />
+                <div className="absolute inset-0 animate-ping">
+                  <div className="w-12 h-12 bg-purple-400 rounded-full opacity-20"></div>
+                </div>
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-purple-900 mb-2">
+                  🎨 Preparing Your Financial Dashboard...
+                </h3>
+                <p className="text-sm text-purple-700">
+                  Organizing {stages[0].totalFiles} files worth of financial data
+                </p>
+                <div className="mt-4 flex items-center gap-2 text-xs text-purple-600">
+                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Success & Results Dashboard */}
-        {results && (
+        {results && !isLoadingResults && (
           <div className="space-y-6">
             {/* Success Banner */}
             <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6">
