@@ -2,6 +2,7 @@
 FastAPI Backend for Intelligent Finance Platform
 Processes Excel files and provides REST API for React dashboard
 """
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -58,16 +59,22 @@ app = FastAPI(
 setup_error_handling(app)
 
 # Configure CORS for React frontend
+allowed_origins = [
+    "http://localhost:5173",  # Vite default port
+    "http://localhost:5174",  # Vite alternate port
+    "http://localhost:3000",  # Alternative dev port
+    "https://intelligent-finance-platform.vercel.app",  # Vercel production
+    "https://intelligent-finance-platform-git-main-hussein-srours-projects.vercel.app",  # Vercel preview
+]
+
+# Add custom frontend URL from environment variable if set
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url and frontend_url not in allowed_origins:
+    allowed_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Vite default port
-        "http://localhost:5174",  # Vite alternate port
-        "http://localhost:3000",  # Alternative dev port
-        "https://intelligent-finance-platform.vercel.app",  # Vercel production
-        "https://intelligent-finance-platform-git-main-hussein-srours-projects.vercel.app",  # Vercel preview
-        "https://*.vercel.app",  # All Vercel previews
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
