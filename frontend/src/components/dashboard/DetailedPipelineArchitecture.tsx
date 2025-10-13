@@ -13,14 +13,6 @@ interface DetailedPipelineArchitectureProps {
   onToggleAnimation?: () => void;
 }
 
-interface FlowParticle {
-  id: number;
-  path: { from: string; to: string }[];
-  currentSegment: number;
-  progress: number;
-  color: string;
-}
-
 export function DetailedPipelineArchitecture({
   isAnimating = false,
   onToggleAnimation
