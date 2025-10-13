@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import {
   FileSpreadsheet, FileText, Image as ImageIcon, FileCode,
-  Database, Zap, BarChart3, Upload, HardDrive, Sparkles,
-  Network, RefreshCw, Shield, TrendingUp, PieChart,
-  Calculator, BookOpen, FileDigit, Filter, Layers, Brain,
-  GitBranch, Server, CheckCircle, Activity
+  Database, Zap, BarChart3, Sparkles,
+  RefreshCw, Shield, TrendingUp, PieChart,
+  Calculator, BookOpen, FileDigit, Layers, Brain,
+  Activity
 } from 'lucide-react';
 
 interface DetailedPipelineArchitectureProps {
@@ -27,8 +27,6 @@ export function DetailedPipelineArchitecture({
 }: DetailedPipelineArchitectureProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [particles, setParticles] = useState<FlowParticle[]>([]);
-  const particleCounter = useRef(0);
   const [stats, setStats] = useState({
     filesProcessed: 0,
     extracted: 0,
