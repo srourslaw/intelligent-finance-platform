@@ -173,12 +173,6 @@ export function DetailedPipelineArchitecture({
       <div className="diagram-container">
         {/* Content Layer */}
         <div className="content-layer">
-          {/* Flow Arrow: Sources to Processing */}
-          <div className="flow-arrow arrow-purple">
-            <div className="arrow-line"></div>
-            <div className="arrow-head">→</div>
-          </div>
-
           {/* LEFT: Data Sources */}
           <div className="data-sources-column">
             <h3 className="column-title">Source Documents</h3>
@@ -201,10 +195,17 @@ export function DetailedPipelineArchitecture({
             })}
           </div>
 
-          {/* Flow Arrow: Processing to Outputs */}
-          <div className="flow-arrow arrow-green">
+          {/* Flow Arrow: Sources to Processing */}
+          <div className={`flow-arrow arrow-purple ${isAnimating ? 'animating' : ''}`}>
             <div className="arrow-line"></div>
             <div className="arrow-head">→</div>
+            {isAnimating && (
+              <>
+                <div className="flow-particle" style={{ animationDelay: '0s' }}></div>
+                <div className="flow-particle" style={{ animationDelay: '0.5s' }}></div>
+                <div className="flow-particle" style={{ animationDelay: '1s' }}></div>
+              </>
+            )}
           </div>
 
           {/* CENTER: Processing Matrix */}
@@ -247,6 +248,19 @@ export function DetailedPipelineArchitecture({
                 })}
               </div>
             </div>
+          </div>
+
+          {/* Flow Arrow: Processing to Outputs */}
+          <div className={`flow-arrow arrow-green ${isAnimating ? 'animating' : ''}`}>
+            <div className="arrow-line"></div>
+            <div className="arrow-head">→</div>
+            {isAnimating && (
+              <>
+                <div className="flow-particle" style={{ animationDelay: '0.2s' }}></div>
+                <div className="flow-particle" style={{ animationDelay: '0.7s' }}></div>
+                <div className="flow-particle" style={{ animationDelay: '1.2s' }}></div>
+              </>
+            )}
           </div>
 
           {/* RIGHT: Output Groups */}
@@ -344,11 +358,11 @@ export function DetailedPipelineArchitecture({
 
         .content-layer {
           display: grid;
-          grid-template-columns: 200px 40px 1fr 40px 280px;
-          gap: 20px;
+          grid-template-columns: 220px 50px 1fr 50px 300px;
+          gap: 0;
           position: relative;
           z-index: 2;
-          align-items: center;
+          align-items: start;
         }
 
         /* Flow Arrows */
@@ -392,6 +406,47 @@ export function DetailedPipelineArchitecture({
           50% {
             opacity: 1;
             transform: translateX(4px);
+          }
+        }
+
+        .flow-arrow.animating .arrow-head {
+          animation: pulse-arrow 1s ease-in-out infinite;
+        }
+
+        .flow-arrow.animating .arrow-line {
+          opacity: 0.6;
+        }
+
+        .flow-particle {
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          background: currentColor;
+          border-radius: 50%;
+          top: 50%;
+          left: 0;
+          animation: flow-particle 1.5s ease-in-out infinite;
+          box-shadow: 0 0 10px currentColor;
+        }
+
+        @keyframes flow-particle {
+          0% {
+            left: 0;
+            opacity: 0;
+            transform: translateY(-50%) scale(0.5);
+          }
+          20% {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
+          }
+          80% {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
+          }
+          100% {
+            left: 100%;
+            opacity: 0;
+            transform: translateY(-50%) scale(0.5);
           }
         }
 
