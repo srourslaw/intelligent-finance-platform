@@ -9,7 +9,6 @@ const SpreadsheetViewer: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const spreadsheetRef = useRef<any>(null);
   const [fileName, setFileName] = useState<string>('');
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current || spreadsheetRef.current) return;
@@ -40,7 +39,6 @@ const SpreadsheetViewer: React.FC = () => {
     });
 
     spreadsheetRef.current = xs;
-    setIsReady(true);
 
     return () => {
       spreadsheetRef.current = null;
