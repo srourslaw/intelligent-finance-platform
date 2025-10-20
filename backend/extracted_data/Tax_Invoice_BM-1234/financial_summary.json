@@ -1,0 +1,50 @@
+{
+  "file_name": "Tax_Invoice_BM-1234.pdf",
+  "extraction_methods": {
+    "mineru": {
+      "confidence": 1.0,
+      "transactions_found": 3,
+      "total_amount": 183500.0,
+      "extraction_date": "2025-10-17T03:49:08.921715"
+    },
+    "pdfplumber": {
+      "confidence": 0.0,
+      "transactions_found": 0,
+      "total_amount": 0,
+      "extraction_date": "2025-10-17T03:49:08.984803"
+    }
+  },
+  "recommended_for_statements": "mineru",
+  "best_transactions": [
+    {
+      "description": "Concrete Mix - 40MPa (20 cubic metres)",
+      "amount": 168000.0,
+      "date": "2024-09-20",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 14,
+      "unit_price": 12000.0
+    },
+    {
+      "description": "Steel Reinforcement Bar (2 tonnes)",
+      "amount": 7000.0,
+      "date": "2024-09-20",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 2,
+      "unit_price": 3500.0
+    },
+    {
+      "description": "Timber Framing (Premium Pine)",
+      "amount": 8500.0,
+      "date": "2024-09-20",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 8500.0
+    }
+  ]
+}

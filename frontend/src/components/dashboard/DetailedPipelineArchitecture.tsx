@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import * as d3 from 'd3';
 import {
-  FileSpreadsheet, FileText, Image as ImageIcon, FileCode,
-  Database, Zap, BarChart3, Sparkles,
-  RefreshCw, Shield, TrendingUp, PieChart,
+  FileSpreadsheet, FileText, FileCode,
+  BarChart3, Sparkles,
+  Shield, TrendingUp, PieChart,
   Calculator, BookOpen, FileDigit, Layers, Brain,
-  Activity, FileSearch, Users, CheckCircle, DollarSign,
+  FileSearch, Users, CheckCircle,
   Building2, ClipboardCheck, TrendingDown
 } from 'lucide-react';
 
@@ -18,7 +17,6 @@ export function DetailedPipelineArchitecture({
   isAnimating = false,
   onToggleAnimation
 }: DetailedPipelineArchitectureProps) {
-  const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [stats, setStats] = useState({
     filesProcessed: 0,
@@ -78,41 +76,6 @@ export function DetailedPipelineArchitecture({
         { id: 'audit-trail', icon: BookOpen, label: 'Audit Trail' }
       ]
     }
-  ];
-
-  // Connection paths - Logical construction financial data flow
-  const connections: any[] = [
-    // Data Sources to AI Classification (all documents flow to AI first)
-    { from: 'invoices', to: 'ai-classification', color: '#7c3aed' },
-    { from: 'pos', to: 'ai-classification', color: '#7c3aed' },
-    { from: 'timesheets', to: 'ai-classification', color: '#7c3aed' },
-    { from: 'subcontracts', to: 'ai-classification', color: '#7c3aed' },
-    { from: 'bank-statements', to: 'ai-classification', color: '#7c3aed' },
-
-    // Top Row Processing Flow: AI Classification -> OCR Extraction -> Vendor Matching
-    { from: 'ai-classification', to: 'ocr-extraction', color: '#3b82f6' },
-    { from: 'ocr-extraction', to: 'vendor-matching', color: '#3b82f6' },
-
-    // Bottom Row Processing Flow: Cost Coding -> Duplicate Check -> Validation
-    { from: 'cost-coding', to: 'duplicate-check', color: '#3b82f6' },
-    { from: 'duplicate-check', to: 'validation', color: '#3b82f6' },
-
-    // Cross connections: Top row feeds bottom row
-    { from: 'ai-classification', to: 'cost-coding', color: '#3b82f6' },
-    { from: 'vendor-matching', to: 'validation', color: '#3b82f6' },
-
-    // Validation to Project Financial Outputs
-    { from: 'validation', to: 'wip-report', color: '#10b981' },
-    { from: 'validation', to: 'cost-breakdown', color: '#10b981' },
-    { from: 'validation', to: 'budget-actual', color: '#10b981' },
-
-    // Validation to Cash Management Outputs
-    { from: 'validation', to: 'cashflow-forecast', color: '#10b981' },
-    { from: 'validation', to: 'aging-payables', color: '#10b981' },
-
-    // Validation to Compliance Outputs
-    { from: 'validation', to: 'sub-reconciliation', color: '#10b981' },
-    { from: 'validation', to: 'audit-trail', color: '#10b981' }
   ];
 
   // No SVG connections - using visual flow indicators instead

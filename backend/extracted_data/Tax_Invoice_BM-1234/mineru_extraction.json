@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "file_name": "Tax_Invoice_BM-1234.pdf",
+    "extraction_method": "mineru",
+    "extraction_date": "2025-10-17T03:49:08.921024",
+    "confidence_score": 1.0
+  },
+  "text_content": {
+    "full_text": "BUILDMART SUPPLIES PTY LTD\nABN: 98 765 432 109\n45 Supply Road, Sydney NSW 2000\nPhone: (02) 9555 7890\nTAX INVOICE\nBILL TO:\nSunset Construction Pty Ltd\nABN: 12 345 678 901\n123 Builder Street, Sydney NSW 2000\nInvoice Number:\nBM-1234\nInvoice Date:\n20/09/2024\nPurchase Order:\nPO-2024-1015\nPayment Terms:\nNet 30 Days\nDescription\nQty\nUnit Price\nAmount\nConcrete Mix - 40MPa (20 cubic metres)\n14\n$12,000.00\n$168,000.00\nSteel Reinforcement Bar (2 tonnes)\n2\n$3,500.00\n$7,000.00\nTimber Framing (Premium Pine)\n1\n$8,500.00\n$8,500.00\nSubtotal:\n$14,000.00\nGST (10%):\n$1,400.00\nTOTAL:\n$15,400.00\nPAYMENT DETAILS\nBank: Commonwealth Bank\nBSB: 062-001\nAccount Number: 5 432 109\nAccount Name: BuildMart Supplies Pty Ltd\nReference: BM-1234\nThis is a tax invoice for GST purposes. Please retain for your records.\nPayment due: 20/09/2024 + 30 days | All prices in AUD | E&OE\n",
+    "text_length": 851
+  },
+  "transactions": [
+    {
+      "description": "Concrete Mix - 40MPa (20 cubic metres)",
+      "amount": 168000.0,
+      "date": "2024-09-20",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 14,
+      "unit_price": 12000.0
+    },
+    {
+      "description": "Steel Reinforcement Bar (2 tonnes)",
+      "amount": 7000.0,
+      "date": "2024-09-20",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 2,
+      "unit_price": 3500.0
+    },
+    {
+      "description": "Timber Framing (Premium Pine)",
+      "amount": 8500.0,
+      "date": "2024-09-20",
+      "category": "materials",
+      "confidence": 1.0,
+      "transaction_type": "expense",
+      "quantity": 1,
+      "unit_price": 8500.0
+    }
+  ],
+  "financial_summary": {
+    "total_transactions": 3,
+    "total_amount": 183500.0,
+    "expense_count": 3,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 1.0,
+    "completeness": 1.0
+  }
+}

@@ -5,6 +5,7 @@ import { Dashboard } from './pages/Dashboard';
 import Login from './pages/Login';
 import Projects from './pages/Projects';
 import FinancialBuilder from './pages/FinancialBuilder';
+import SpreadsheetViewer from './pages/SpreadsheetViewer';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -35,6 +36,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FinancialBuilder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/spreadsheet-viewer"
+            element={
+              <ProtectedRoute>
+                <SpreadsheetViewer />
               </ProtectedRoute>
             }
           />

@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "file_name": "Tax_Invoice_BM-1234.pdf",
+    "extraction_method": "pdfplumber",
+    "extraction_date": "2025-10-17T03:49:08.984420",
+    "confidence_score": 0.0
+  },
+  "text_content": {
+    "full_text": "BUILDMART SUPPLIES PTY LTD\nTAX INVOICE\nABN: 98 765 432 109\n45 Supply Road, Sydney NSW 2000\nPhone: (02) 9555 7890\nBILL TO: Invoice Number: BM-1234\nSunset Construction Pty Ltd Invoice Date: 20/09/2024\nABN: 12 345 678 901\nPurchase Order: PO-2024-1015\n123 Builder Street, Sydney NSW 2000\nPayment Terms: Net 30 Days\nDescription Qty Unit Price Amount\nConcrete Mix - 40MPa (20 cubic metres) 14 $12,000.00 $168,000.00\nSteel Reinforcement Bar (2 tonnes) 2 $3,500.00 $7,000.00\nTimber Framing (Premium Pine) 1 $8,500.00 $8,500.00\nSubtotal: $14,000.00\nGST (10%): $1,400.00\nTOTAL: $15,400.00\nPAYMENT DETAILS\nBank: Commonwealth Bank\nBSB: 062-001\nAccount Number: 5 432 109\nAccount Name: BuildMart Supplies Pty Ltd\nReference: BM-1234\nThis is a tax invoice for GST purposes. Please retain for your records.\nPayment due: 20/09/2024 + 30 days | All prices in AUD | E&OE",
+    "text_length": 850
+  },
+  "transactions": [],
+  "financial_summary": {
+    "total_transactions": 0,
+    "total_amount": 0,
+    "expense_count": 0,
+    "income_count": 0
+  },
+  "quality_metrics": {
+    "confidence_score": 0.0,
+    "completeness": 0.0
+  }
+}

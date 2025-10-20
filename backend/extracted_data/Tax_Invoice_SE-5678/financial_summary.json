@@ -5,13 +5,13 @@
       "confidence": 1.0,
       "transactions_found": 5,
       "total_amount": 20080.0,
-      "extraction_date": "2025-10-10T06:33:21.481310"
+      "extraction_date": "2025-10-17T03:19:40.009304"
     },
     "pdfplumber": {
       "confidence": 0.0,
       "transactions_found": 0,
       "total_amount": 0,
-      "extraction_date": "2025-10-10T06:33:21.549432"
+      "extraction_date": "2025-10-17T03:19:40.058709"
     }
   },
   "recommended_for_statements": "mineru",
