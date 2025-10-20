@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FileSpreadsheet, Zap, CheckCircle2, Loader2, AlertCircle, TrendingUp, Database, BarChart3, Download } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { ConceptFlowAnimation } from '../components/dashboard/ConceptFlowAnimation';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -262,6 +263,9 @@ export default function FinancialBuilder() {
       </div>
 
       <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
+        {/* Concept Flow Animation */}
+        <ConceptFlowAnimation isAnimating={isProcessing} />
+
         {/* Info Card */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-lg">
           <div className="flex items-start gap-4">
