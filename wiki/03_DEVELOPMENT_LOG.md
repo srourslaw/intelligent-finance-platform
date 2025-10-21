@@ -3359,3 +3359,163 @@ document.body.removeChild(a);
 **Outstanding Issues**:
 - Download button works via curl but fails in browser (authentication flow needs investigation)
 
+
+---
+
+## 2025-10-21 - Session: AI Animation Performance Optimization
+
+### What Was Completed
+- ✅ **TypeScript Build Error Fixes**: Resolved all build errors preventing deployment
+  - Removed unused imports and variables from DetailedPipelineArchitecture.tsx
+  - Removed unused isReady state from SpreadsheetViewer.tsx
+- ✅ **Neural Network Label Positioning**: Fixed overlapping labels with staggered vertical positioning
+  - Layer 1 & 4: -38px, Layer 2 & 3: -70px, Matrix: -38px
+  - All labels now clearly visible with financial terminology
+- ✅ **Financial Analysis Output Styling**: Bright green active text (RGB 76,165,120)
+  - Removed inline styles blocking CSS
+  - Added z-index and opacity for proper layering
+- ✅ **Animation Speed Consistency**: Implemented performance timing compensation
+  - Maintains exact speed intervals (100ms/200ms/400ms/800ms) from start to finish
+  - No slowdown during mid-animation or at end
+- ✅ **Reset/Restart Functionality**: Fixed slow restart issue
+  - Proper shouldStopRef flag management
+  - Immediate response to Start button after reset
+- ✅ **Particle Animation System**: Enhanced particle lifecycle management
+  - Always creates 7 particles per file
+  - Smart cleanup at 100% completion
+  - No disappearing particles after reset
+- ✅ **Concept Flow Animation Layout**: Made full-width without scrolling
+  - Changed flexbox from center to space-between
+  - Reduced component sizes for better fit
+
+### Current Project State
+- **What's working**:
+  - AI Data Mapping Animation with consistent performance across all speed modes
+  - ConceptFlowAnimation displaying full-width on Projects page
+  - Neural network layer labels with financial terminology
+  - Particle animation system with smart cleanup
+  - Performance timing compensation for consistent frame rates
+  - Reset/Restart functionality working correctly
+  - Financial Analysis output text color changes (bright green RGB 76,165,120)
+  - All label positioning prevents text overlap
+  - Projects page with dual animations (ConceptFlow + AI Data Mapping)
+
+- **What's in progress**:
+  - N/A (all reported issues resolved)
+
+- **What's tested**:
+  - Animation speed consistency at all speed levels (Slow/Normal/Fast/Ultra)
+  - Reset button functionality
+  - Particle animations throughout entire animation cycle
+  - Label positioning at various screen sizes
+  - Output text color changes
+
+- **What needs testing**:
+  - Animation performance with very large project structures (500+ files)
+  - Animation on slow devices
+  - Different screen sizes and resolutions
+
+### Code Changes Summary
+- **Files modified**:
+  - `frontend/src/components/dashboard/AIDataMappingAnimation.tsx` - Major performance optimizations
+    - Implemented performance.now() timing compensation (lines 355-407)
+    - Fixed particle creation and cleanup (lines 363-373, 406)
+    - Adjusted label positioning (lines 541-572)
+    - Fixed output styling (lines 587, 613-614)
+    - Proper flag reset management (lines 414-418, 429-460)
+  - `frontend/src/components/dashboard/ConceptFlowAnimation.tsx` - Layout optimization
+    - Changed justify-content to space-between (line 130)
+    - Reduced component sizes (lines 149-154, 180-181, 209-220)
+  - `frontend/src/pages/Projects.tsx` - Added ConceptFlowAnimation (line 126)
+  - `frontend/src/pages/Dashboard.tsx` - Verified ConceptFlow removed
+  - `wiki/CHECKPOINT_2025-10-21.md` - Created comprehensive checkpoint
+  - `wiki/03_DEVELOPMENT_LOG.md` - This session entry
+
+### Technical Decisions Made
+1. **Performance Timing Compensation**:
+   - Decision: Use performance.now() to measure actual execution time
+   - Why: DOM operations caused variable delays accumulating over time
+   - Implementation: Subtract elapsed time from sleep interval
+   - Result: Exact speed intervals maintained throughout animation
+
+2. **Particle Lifecycle Management**:
+   - Decision: Create 7 particles per file, remove only at 100% completion
+   - Why: Previous aggressive cleanup (80%, max 8 particles) caused disappearing particles
+   - Pattern: Natural accumulation and removal
+   - Result: Consistent particle flow throughout animation
+
+3. **Label Positioning Strategy**:
+   - Decision: Staggered heights (-38px and -70px alternating)
+   - Why: Labels were overlapping horizontally when all at same height
+   - Implementation: Layers 1,4,Matrix at -38px; Layers 2,3 at -70px
+   - Result: All labels clearly visible without overlap
+
+4. **Output Text Styling**:
+   - Decision: Remove inline styles, use CSS with !important and z-index
+   - Why: Inline color style was overriding CSS active state
+   - Color: RGB(76, 165, 120) as specified by user
+   - Result: Bright green text when active, not faded
+
+5. **Flag Reset Management**:
+   - Decision: Reset shouldStopRef to false both at animation end and in resetAll
+   - Why: Flag staying true caused sleep function to exit immediately
+   - Implementation: Direct reset + setTimeout delayed reset
+   - Result: Immediate restart at correct speed
+
+### Challenges Encountered
+1. **Animation Speed Slowdown**:
+   - Challenge: Animation slowed down mid-execution and at end despite speed selection
+   - Root Cause: DOM operations causing cumulative delays over iterations
+   - Solution: Performance.now() timing to compensate for actual execution overhead
+   - Iterations: 3 rejected attempts before finding correct solution
+   - Result: Animation maintains exact speed from start to finish
+
+2. **Reset/Restart Slowness**:
+   - Challenge: After reset or completion, clicking Start caused very slow animation
+   - Symptom: Ultra mode running like Slow mode on restart
+   - Root Cause: shouldStopRef.current remaining true, causing sleep() to exit immediately
+   - Solution: Reset flag at end of animation and in resetAll function
+   - Result: Immediate restart at correct speed
+
+3. **Disappearing Particles**:
+   - Challenge: Particles disappearing after reset and diminishing during animation
+   - Root Cause: Too aggressive filtering (80% completion, 8 particle limit, conditional creation)
+   - Solution: Always create 7 particles per file, filter only at 100% completion
+   - Added: Missing cell→node-3 and outputHub→output particles
+   - Result: Consistent particle flow maintained
+
+4. **Label Overlap**:
+   - Challenge: Neural network labels overlapping when displayed
+   - Iterations: Required 3 user feedbacks to get exact positioning
+   - Solution: Staggered vertical positioning at -38px and -70px
+   - Result: All labels clearly visible
+
+5. **Faded Green Text**:
+   - Challenge: Output text appeared faded despite setting green color
+   - Root Cause: Layer masking issue with opacity and z-index
+   - Solution: Added opacity: 1 !important and z-index: 10
+   - Result: Bright, clearly visible green text
+
+### Performance Metrics
+- Animation runs consistently at selected speed from start to finish
+- Particle count stays manageable (self-cleaning at 100% completion)
+- No memory leaks detected
+- Reset/restart works immediately with no delays
+- Speed intervals maintained:
+  - Ultra mode: ~100ms per file
+  - Fast mode: ~200ms per file
+  - Normal mode: ~400ms per file
+  - Slow mode: ~800ms per file
+
+### Git Commits
+```
+9ed0489 - feat: enhance AI Data Mapping animation with optimized performance and visual improvements
+```
+
+### Next Session Goals
+1. Test animation performance with very large project structures (500+ files)
+2. Add user preference saving for animation speed selection
+3. Consider adding keyboard shortcuts for animation control (Space to pause/play, R to reset)
+4. Add animation frame skip detection for slow devices
+5. Consider adding animation quality settings (high/medium/low)
+

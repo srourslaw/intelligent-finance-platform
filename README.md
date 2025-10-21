@@ -50,6 +50,12 @@ A comprehensive financial automation platform that streamlines the entire workfl
 - **Processing Statistics:** Success rates and error tracking
 - **Performance Metrics:** System resource utilization
 
+### 🎨 **Interactive Visualizations**
+- **AI Data Mapping Animation:** Real-time neural network visualization with particle effects
+- **Concept Flow Animation:** 6-step end-to-end pipeline visualization
+- **Performance-Optimized:** Consistent frame rates across all speed modes (Slow/Normal/Fast/Ultra)
+- **Smart Particle System:** Self-regulating particle lifecycle for smooth animations
+
 ---
 
 ## 🚀 Quick Start
@@ -328,4 +334,4 @@ For support, please:
 
 **Built with ❤️ using Claude Code**
 
-*Last Updated: October 3, 2025*
+*Last Updated: October 21, 2025*
