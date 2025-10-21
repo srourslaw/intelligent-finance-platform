@@ -67,7 +67,7 @@ export function ConceptFlowAnimation({ isAnimating = false }: ConceptFlowAnimati
               <div className={`concept-step ${isAnimating ? 'animating' : ''}`}>
                 <div className={`step-icon-wrapper ${step.bgColor}`}>
                   <div className={`step-icon-gradient bg-gradient-to-br ${step.color}`}>
-                    <Icon size={28} className="text-white" />
+                    <Icon size={20} className="text-white" />
                   </div>
                 </div>
                 <div className="step-content">
@@ -127,28 +127,32 @@ export function ConceptFlowAnimation({ isAnimating = false }: ConceptFlowAnimati
         .concept-flow-steps {
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
           gap: 0;
-          overflow-x: auto;
+          overflow: visible;
           padding: 20px 0;
+          width: 100%;
         }
 
         .concept-step-wrapper {
           display: flex;
           align-items: center;
           gap: 0;
+          flex: 1;
         }
 
         .concept-step {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 16px;
-          padding: 24px;
+          gap: 12px;
+          padding: 16px 12px;
           background: white;
-          border-radius: 16px;
+          border-radius: 12px;
           border: 2px solid #e2e8f0;
-          min-width: 180px;
+          min-width: 120px;
+          max-width: 140px;
+          width: 100%;
           transition: all 0.3s ease;
           position: relative;
         }
@@ -173,23 +177,28 @@ export function ConceptFlowAnimation({ isAnimating = false }: ConceptFlowAnimati
         }
 
         .step-icon-wrapper {
-          width: 80px;
-          height: 80px;
-          border-radius: 16px;
+          width: 50px;
+          height: 50px;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 4px;
+          padding: 3px;
         }
 
         .step-icon-gradient {
           width: 100%;
           height: 100%;
-          border-radius: 12px;
+          border-radius: 9px;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .step-icon-gradient svg {
+          width: 20px;
+          height: 20px;
         }
 
         .step-content {
@@ -197,16 +206,17 @@ export function ConceptFlowAnimation({ isAnimating = false }: ConceptFlowAnimati
         }
 
         .step-title {
-          font-size: 0.95rem;
+          font-size: 0.8rem;
           font-weight: 700;
           color: #1e293b;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
+          line-height: 1.2;
         }
 
         .step-description {
-          font-size: 0.75rem;
+          font-size: 0.65rem;
           color: #64748b;
-          line-height: 1.4;
+          line-height: 1.3;
         }
 
         .concept-arrow {

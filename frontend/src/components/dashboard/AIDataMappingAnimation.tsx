@@ -352,66 +352,49 @@ export function AIDataMappingAnimation({
 
       for (let fileIdx = 0; fileIdx < folder.files.length; fileIdx++) {
         if (shouldStopRef.current) break;
+        const startTime = performance.now();
         const globalFileIdx = processedFiles;
         const nodeIdx = globalFileIdx % nodesPerLayer;
         const node2Idx = (nodeIdx + 2) % nodesPerLayer;
         const node3Idx = (nodeIdx + 1) % nodesPerLayer;
         const cellIndices: number[] = [];
 
-        // Activate file and nodes
+        // Activate all nodes at once for this file
         activateNode(`file-${globalFileIdx}`);
         activateNode(`node-1-${nodeIdx}`);
-
-        // Create particles immediately
-        for (let p = 0; p < 3; p++) {
-          particlesRef.current.push(createParticle(`file-${globalFileIdx}`, `node-1-${nodeIdx}`, '#3b82f6'));
-        }
-        await sleep(speedRef.current / 6);
-
         activateNode(`node-2-${node2Idx}`);
-        for (let p = 0; p < 2; p++) {
-          particlesRef.current.push(createParticle(`node-1-${nodeIdx}`, `node-2-${node2Idx}`, '#ef4444'));
-        }
-        await sleep(speedRef.current / 6);
+        activateNode(`node-3-${node3Idx}`);
+        activateNode(`node-4-${nodeIdx}`);
+        activateNode('outputHub');
 
         // Activate matrix cells
-        for (let j = 0; j < 5; j++) {
+        for (let j = 0; j < 2; j++) {
           const cellIdx = Math.floor(Math.random() * (matrixSize * matrixSize));
           cellIndices.push(cellIdx);
           activateNode(`cell-${cellIdx}`);
-          particlesRef.current.push(createParticle(`node-2-${node2Idx}`, `cell-${cellIdx}`, '#a78bfa'));
-          particlesRef.current.push(createParticle(`node-2-${node2Idx}`, `cell-${cellIdx}`, '#a78bfa'));
         }
-        await sleep(speedRef.current / 6);
 
-        activateNode(`node-3-${node3Idx}`);
-        for (let p = 0; p < 2; p++) {
-          particlesRef.current.push(createParticle(`cell-${nodeIdx * matrixSize}`, `node-3-${node3Idx}`, '#8b5cf6'));
-        }
-        await sleep(speedRef.current / 6);
-
-        activateNode(`node-4-${nodeIdx}`);
-        for (let p = 0; p < 2; p++) {
-          particlesRef.current.push(createParticle(`node-3-${node3Idx}`, `node-4-${nodeIdx}`, '#10b981'));
-        }
-        await sleep(speedRef.current / 6);
-
-        activateNode('outputHub');
-        for (let p = 0; p < 2; p++) {
-          particlesRef.current.push(createParticle(`node-4-${nodeIdx}`, 'outputHub', '#10b981'));
-        }
-        await sleep(speedRef.current / 6);
+        // Create particles - maintain consistent flow
+        particlesRef.current.push(createParticle(`file-${globalFileIdx}`, `node-1-${nodeIdx}`, '#3b82f6'));
+        particlesRef.current.push(createParticle(`node-1-${nodeIdx}`, `node-2-${node2Idx}`, '#ef4444'));
+        particlesRef.current.push(createParticle(`node-2-${node2Idx}`, `cell-${cellIndices[0] || 0}`, '#a78bfa'));
+        particlesRef.current.push(createParticle(`cell-${cellIndices[0] || 0}`, `node-3-${node3Idx}`, '#8b5cf6'));
+        particlesRef.current.push(createParticle(`node-3-${node3Idx}`, `node-4-${nodeIdx}`, '#10b981'));
+        particlesRef.current.push(createParticle(`node-4-${nodeIdx}`, 'outputHub', '#10b981'));
 
         const outputIdx = Math.floor(processedFiles / (totalFiles / outputs.length));
         if (outputIdx < outputs.length) {
-          for (let p = 0; p < 2; p++) {
-            particlesRef.current.push(createParticle('outputHub', `output-${outputIdx}`, '#10b981'));
-          }
           activateNode(`output-${outputIdx}`);
+          particlesRef.current.push(createParticle('outputHub', `output-${outputIdx}`, '#10b981'));
         }
 
-        // Clean up after a brief display
-        await sleep(speedRef.current / 3);
+        const elapsedSetup = performance.now() - startTime;
+        const remainingTime = Math.max(0, speedRef.current - elapsedSetup);
+
+        // Single wait period adjusted for setup time
+        await sleep(remainingTime);
+
+        // Quick cleanup
         deactivateNode(`file-${globalFileIdx}`);
         deactivateNode(`node-1-${nodeIdx}`);
         deactivateNode(`node-2-${node2Idx}`);
@@ -420,17 +403,20 @@ export function AIDataMappingAnimation({
         deactivateNode('outputHub');
         cellIndices.forEach(idx => deactivateNode(`cell-${idx}`));
 
+        // Smart particle cleanup - remove only fully completed particles
+        particlesRef.current = particlesRef.current.filter(p => p.progress < 1);
+
         processedFiles++;
         setFileCounter(`${processedFiles}/${totalFiles}`);
         setProgress(processedFiles / totalFiles * 100);
-        await sleep(speedRef.current / 8);
       }
       deactivateNode(`folder-${folderIdx}`);
     }
     if (!shouldStopRef.current) {
       setOutputCounter(`${outputs.length}/${outputs.length}`);
-      setIsRunning(false);
     }
+    setIsRunning(false);
+    shouldStopRef.current = false;
   };
 
   const togglePlayPause = () => {
@@ -459,6 +445,20 @@ export function AIDataMappingAnimation({
     setFileCounter(`0/${totalFiles}`);
     setOutputCounter('0/7');
     particlesRef.current = [];
+
+    // Force clear canvas
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    // Reset shouldStop flag after a brief delay to allow for restart
+    setTimeout(() => {
+      shouldStopRef.current = false;
+    }, 100);
   };
 
   const toggleSpeed = () => {
@@ -539,35 +539,37 @@ export function AIDataMappingAnimation({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
               <div id="layer1" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginLeft: '-40px', marginRight: '90px' }}>
                 <div style={{ position: 'absolute', top: '-38px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
-                  Input Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.9em', marginTop: '1px' }}>12 nodes</span>
+                  Document Ingestion<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.9em', marginTop: '1px' }}>OCR & Parsing</span>
                 </div>
                 {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-1-${i}`} className="neural-node layer1" style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#3b82f6', transition: 'all 0.3s' }} />)}
               </div>
 
               <div id="layer2" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginRight: '90px' }}>
-                <div style={{ position: 'absolute', top: '-38px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
-                  Processing Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.9em', marginTop: '1px' }}>12 nodes</span>
+                <div style={{ position: 'absolute', top: '-70px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  Data Extraction<span style={{ display: 'block', color: '#ef4444', fontSize: '0.9em', marginTop: '1px' }}>Line Items & Amounts</span>
                 </div>
                 {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-2-${i}`} className="neural-node layer2" style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#ef4444', transition: 'all 0.3s' }} />)}
               </div>
 
               <div style={{ position: 'relative', marginRight: '90px' }}>
-                <div style={{ position: 'absolute', top: '-30px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>Mapping Layer</div>
+                <div style={{ position: 'absolute', top: '-38px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  AI Classification<span style={{ display: 'block', color: '#8b5cf6', fontSize: '0.9em', marginTop: '1px' }}>Cost Code Mapping</span>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 18px)', gap: '3px' }}>
                   {[...Array(matrixSize * matrixSize)].map((_, i) => <div key={i} id={`cell-${i}`} className="matrix-cell" style={{ width: '18px', height: '18px', background: '#f3f4f6', borderRadius: '3px', transition: 'all 0.3s' }} />)}
                 </div>
               </div>
 
               <div id="layer3" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative', marginRight: '90px' }}>
-                <div style={{ position: 'absolute', top: '-38px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
-                  Processing Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.9em', marginTop: '1px' }}>12 nodes</span>
+                <div style={{ position: 'absolute', top: '-70px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  Data Validation<span style={{ display: 'block', color: '#9ca3af', fontSize: '0.9em', marginTop: '1px' }}>Rules & Quality Checks</span>
                 </div>
                 {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-3-${i}`} className="neural-node layer3" style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#9ca3af', transition: 'all 0.3s' }} />)}
               </div>
 
               <div id="layer4" style={{ display: 'flex', flexDirection: 'column', gap: '12px', position: 'relative' }}>
                 <div style={{ position: 'absolute', top: '-38px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6em', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', textAlign: 'center' }}>
-                  Output Layer<span style={{ display: 'block', color: '#3b82f6', fontSize: '0.9em', marginTop: '1px' }}>12 nodes</span>
+                  Financial Statements<span style={{ display: 'block', color: '#10b981', fontSize: '0.9em', marginTop: '1px' }}>Reports & Dashboards</span>
                 </div>
                 {[...Array(nodesPerLayer)].map((_, i) => <div key={i} id={`node-4-${i}`} className="neural-node layer4" style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#10b981', transition: 'all 0.3s' }} />)}
               </div>
@@ -582,7 +584,7 @@ export function AIDataMappingAnimation({
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
               {outputs.map((item, i) => (
-                <div key={i} id={`output-${i}`} className="output-item" style={{ fontSize: '0.8em', color: '#374151', padding: '8px 12px', cursor: 'pointer', transition: 'all 0.3s', borderRadius: '6px', opacity: 0.4, textAlign: 'center', border: '2px solid transparent' }}>
+                <div key={i} id={`output-${i}`} className="output-item" style={{ fontSize: '0.8em', padding: '8px 12px', cursor: 'pointer', transition: 'all 0.3s', borderRadius: '6px', opacity: 0.4, textAlign: 'center', border: '2px solid transparent' }}>
                   {item}
                 </div>
               ))}
@@ -608,7 +610,8 @@ export function AIDataMappingAnimation({
         @keyframes nodePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
         .matrix-cell.active { background: #8b5cf6 !important; box-shadow: 0 0 20px rgba(139, 92, 246, 0.8); animation: matrixGlow 1s ease-in-out infinite; }
         @keyframes matrixGlow { 0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.8); } 50% { box-shadow: 0 0 30px rgba(139, 92, 246, 1); } }
-        .output-item.active { opacity: 1; background: #dcfce7; color: #166534; font-weight: 600; transform: translateX(-3px); border: 2px solid #10b981; }
+        .output-item { color: #374151; }
+        .output-item.active { opacity: 1 !important; background: #dcfce7; color: rgb(76, 165, 120) !important; font-weight: 700; transform: translateX(-3px); border: 2px solid rgb(76, 165, 120); position: relative; z-index: 10; }
         #outputHub.active { animation: hubPulse 1s ease-in-out infinite; }
         @keyframes hubPulse { 0%, 100% { transform: translateY(-50%) scale(1); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); } 50% { transform: translateY(-50%) scale(1.2); box-shadow: 0 0 30px rgba(16, 185, 129, 0.8); } }
       `}</style>

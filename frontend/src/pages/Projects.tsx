@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getProjectsList } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { AIDataMappingAnimation } from '../components/dashboard/AIDataMappingAnimation';
+import { ConceptFlowAnimation } from '../components/dashboard/ConceptFlowAnimation';
 import { BarChart3, FolderOpen, Zap } from 'lucide-react';
 import axios from 'axios';
 
@@ -121,6 +122,9 @@ const Projects: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-8 pt-4 pb-8 space-y-8">
+        {/* Concept Flow Animation */}
+        <ConceptFlowAnimation isAnimating={true} />
+
         {/* AI Data Mapping Animation */}
         {projectStructure && (
           <AIDataMappingAnimation

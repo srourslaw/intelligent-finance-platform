@@ -17,6 +17,7 @@ import { TemplateGenerator } from '../components/dashboard/TemplateGenerator';
 import { FolderMonitoring } from '../components/dashboard/FolderMonitoring';
 import { PDFExtractionTest } from '../components/dashboard/PDFExtractionTest';
 import { DetailedPipelineArchitecture } from '../components/dashboard/DetailedPipelineArchitecture';
+import { ConceptFlowAnimation } from '../components/dashboard/ConceptFlowAnimation';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
