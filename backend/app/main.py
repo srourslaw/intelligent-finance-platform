@@ -3,10 +3,15 @@ FastAPI Backend for Intelligent Finance Platform
 Processes Excel files and provides REST API for React dashboard
 """
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation, batch, email, webhooks, system, automation, templates, folder_watch, extraction_test, project_files, financial_builder
+from app.routers import projects, uploads, auth, documents, financials, extraction, aggregation, batch, email, webhooks, system, automation, templates, folder_watch, extraction_test, project_files, financial_builder, analytics
 from app.middleware import setup_error_handling
 
 
@@ -98,6 +103,7 @@ app.include_router(folder_watch.router)  # Local folder monitoring
 app.include_router(extraction_test.router)  # MinerU extraction testing and comparison
 app.include_router(project_files.router)  # Project file structure for AI animation
 app.include_router(financial_builder.router)  # Financial Builder - full pipeline processing
+app.include_router(analytics.router)  # AI Analytics and Predictions (Databricks)
 
 
 @app.get("/")

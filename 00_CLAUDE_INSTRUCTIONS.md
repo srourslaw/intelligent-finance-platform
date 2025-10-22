@@ -146,6 +146,9 @@ Use this GitHub repository as your **single source of truth** and persistent mem
 | `wiki/00_PROJECT_OVERVIEW.md` | Vision and goals | Reference as needed |
 | `wiki/01_ARCHITECTURE.md` | System design | Before architectural changes |
 | `wiki/02_DATA_STRUCTURE.md` | Data models | Before data work |
+| `DATABRICKS_FEATURES.md` | Databricks AI features | When working on AI insights |
+| `backend/DATABRICKS_SETUP_GUIDE.md` | Databricks setup | When configuring Databricks |
+| `backend/.env` | Environment variables | **NEVER commit to Git** |
 
 ---
 
@@ -207,12 +210,16 @@ intelligent-finance-platform/
 - Axios for API calls
 - Date-fns for date handling
 
-**Backend (Future):**
+**Backend:**
 - Python FastAPI
+- python-dotenv for environment variables
+- SQLite for data storage
 - AI/ML for data extraction
+- **Databricks** for ML predictions and analytics
 
 **Deployment:**
 - Vercel (frontend)
+- Backend runs locally (can be deployed to Render/Railway)
 
 ---
 

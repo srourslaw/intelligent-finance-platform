@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   DollarSign, TrendingDown, TrendingUp, AlertTriangle, LogOut, ArrowLeft,
   Activity, Target, Clock, Briefcase, PieChart as PieChartIcon, BarChart3, FileText,
-  Home, Wallet, FolderOpen, Zap, Settings, Database, Loader2, CheckCircle2
+  Home, Wallet, FolderOpen, Zap, Settings, Database, Loader2, CheckCircle2, Brain
 } from 'lucide-react';
 import { BudgetTreemap } from '../components/dashboard/BudgetTreemap';
 import { DocumentViewer } from '../components/dashboard/DocumentViewer';
@@ -17,6 +17,7 @@ import { TemplateGenerator } from '../components/dashboard/TemplateGenerator';
 import { FolderMonitoring } from '../components/dashboard/FolderMonitoring';
 import { PDFExtractionTest } from '../components/dashboard/PDFExtractionTest';
 import { DetailedPipelineArchitecture } from '../components/dashboard/DetailedPipelineArchitecture';
+import { AIInsightsPanel } from '../components/dashboard/AIInsightsPanel';
 import { useAuth } from '../contexts/AuthContext';
 import { getDashboardData } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +36,7 @@ export function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'financials' | 'documents' | 'automation' | 'system' | 'builder'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'financials' | 'documents' | 'automation' | 'system' | 'builder' | 'insights'>('overview');
 
   // Financial Builder state
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -392,6 +393,17 @@ export function Dashboard() {
             >
               <Home className="w-4 h-4" />
               Overview
+            </button>
+            <button
+              onClick={() => setActiveTab('insights')}
+              className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
+                activeTab === 'insights'
+                  ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <Brain className="w-4 h-4" />
+              AI Insights
             </button>
             <button
               onClick={() => setActiveTab('financials')}
@@ -774,6 +786,13 @@ export function Dashboard() {
           <>
             {/* System Health & Monitoring */}
             <SystemHealth />
+          </>
+        )}
+
+        {/* AI INSIGHTS TAB */}
+        {activeTab === 'insights' && (
+          <>
+            <AIInsightsPanel projectId={selectedProjectId} />
           </>
         )}
 
