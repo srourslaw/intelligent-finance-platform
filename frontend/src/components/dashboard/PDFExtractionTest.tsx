@@ -72,9 +72,9 @@ export function PDFExtractionTest() {
       <div className="flex items-center gap-3 mb-6">
         <FileText className="w-6 h-6 text-blue-600" />
         <div>
-          <h2 className="text-xl font-bold text-gray-900">MinerU PDF Extraction Test</h2>
+          <h2 className="text-xl font-bold text-gray-900">Neural Document Intelligence Lab</h2>
           <p className="text-sm text-gray-600">
-            Upload a PDF to see MinerU vs pdfplumber extraction comparison
+            Advanced AI-powered document extraction with real-time comparative analysis
           </p>
         </div>
       </div>
@@ -132,10 +132,10 @@ export function PDFExtractionTest() {
 
           {/* Comparison Grid */}
           <div className="grid grid-cols-2 gap-6">
-            {/* MinerU Results */}
+            {/* Neural AI Results */}
             <div className="border border-blue-200 rounded-lg overflow-hidden">
               <div className="bg-blue-50 px-4 py-3 border-b border-blue-200">
-                <h3 className="font-bold text-blue-900">🚀 MinerU (Advanced)</h3>
+                <h3 className="font-bold text-blue-900">🚀 Neural AI (Advanced)</h3>
               </div>
               {results.mineru ? (
                 <div className="p-4 space-y-3">
@@ -326,9 +326,9 @@ export function PDFExtractionTest() {
                 <div>
                   <div className="font-bold text-gray-900">
                     {results.mineru.confidence > results.pdfplumber.confidence
-                      ? '🏆 MinerU wins with higher confidence!'
+                      ? '🏆 Neural AI wins with higher confidence!'
                       : results.mineru.transactions_found > results.pdfplumber.transactions_found
-                      ? '🏆 MinerU found more transactions!'
+                      ? '🏆 Neural AI found more transactions!'
                       : '✅ Both methods completed successfully'}
                   </div>
                   <div className="text-sm text-gray-600">

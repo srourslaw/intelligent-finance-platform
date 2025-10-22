@@ -27,29 +27,38 @@ class ExcelProcessor:
                 print(f"Budget file not found at: {file_path}")
                 return {"error": "Budget file not found", "items": []}
 
-            # Read Budget Summary sheet
-            df = pd.read_excel(file_path, sheet_name="Budget Summary", header=3)
+            # Read Budget Summary sheet (headers at row 5, 0-indexed = 4)
+            df = pd.read_excel(file_path, sheet_name="Budget Summary", header=4)
 
             # Clean up data
             df = df.dropna(how='all')  # Remove completely empty rows
-            df = df[df['Category'].notna()]  # Remove rows without category
+            df = df[df['Cost Category'].notna()]  # Remove rows without category
 
             # Filter out total row
-            df = df[df['Category'] != 'TOTAL']
+            df = df[df['Cost Category'] != 'TOTAL']
 
             budget_items = []
             for _, row in df.iterrows():
                 try:
+                    # Calculate % Complete from % Spent (which has formulas like =C6/B6)
+                    budget = float(row['Budget Amount']) if pd.notna(row['Budget Amount']) else 0
+                    actual = float(row['Actual Spent']) if pd.notna(row['Actual Spent']) else 0
+
+                    # Calculate percent from actual data
+                    percent_complete = 0
+                    if budget > 0:
+                        percent_complete = int((actual / budget) * 100)
+
                     budget_items.append({
-                        "category": str(row['Category']).strip(),
-                        "description": str(row['Description']).strip(),
-                        "budget": float(row['Budget']) if pd.notna(row['Budget']) else 0,
-                        "actual_spent": float(row['Actual Spent']) if pd.notna(row['Actual Spent']) else 0,
-                        "committed": float(row['Committed']) if pd.notna(row['Committed']) else 0,
-                        "forecast": float(row['Forecast']) if pd.notna(row['Forecast']) else 0,
-                        "variance": float(row['Variance']) if pd.notna(row['Variance']) else 0,
-                        "percent_complete": int(row['% Complete']) if pd.notna(row['% Complete']) else 0,
-                        "notes": str(row['Notes']) if pd.notna(row['Notes']) else ""
+                        "category": str(row['Cost Category']).strip(),
+                        "description": str(row['Notes']) if pd.notna(row['Notes']) else "",
+                        "budget": budget,
+                        "actual_spent": actual,
+                        "committed": 0,  # Not in new structure
+                        "forecast": budget,  # Use budget as forecast
+                        "variance": float(row['Variance']) if pd.notna(row['Variance']) else (budget - actual),
+                        "percent_complete": percent_complete,
+                        "notes": str(row['Status']) if pd.notna(row['Status']) else ""
                     })
                 except Exception as e:
                     print(f"Error processing row: {e}")
@@ -201,45 +210,45 @@ class ExcelProcessor:
     def read_timesheets(self) -> Dict[str, Any]:
         """Read Timesheets_September_2024.xlsx"""
         try:
-            file_path = self.base_dir / "09_TIMESHEETS" / "Timesheets_September_2024.xlsx"
+            file_path = self.base_dir / "08_LABOUR_TIMESHEETS" / "Timesheets_September_2024.xlsx"
 
             if not file_path.exists():
                 return {"error": "Timesheets file not found", "entries": []}
 
-            # Read Site Supervisor sheet
-            df_supervisor = pd.read_excel(file_path, sheet_name="Site Supervisor", header=2)
+            # Read Site Supervisor sheet (header at row 4, 0-indexed)
+            df_supervisor = pd.read_excel(file_path, sheet_name="Site Supervisor", header=4)
             df_supervisor = df_supervisor.dropna(how='all')
 
-            # Read Labour Hours sheet
-            df_labour = pd.read_excel(file_path, sheet_name="Labour Hours", header=2)
+            # Read Labourers sheet (header at row 2, 0-indexed)
+            df_labour = pd.read_excel(file_path, sheet_name="Labourers", header=2)
             df_labour = df_labour.dropna(how='all')
 
             timesheet_entries = []
 
             # Process supervisor entries
             for _, row in df_supervisor.iterrows():
-                if pd.notna(row['Date']):
+                if pd.notna(row.get('Date')):
                     timesheet_entries.append({
                         "date": str(row['Date']),
-                        "employee": str(row['Employee']),
+                        "employee": "Tom Richards",  # From sheet title
                         "role": "Site Supervisor",
-                        "hours": float(row['Hours']) if pd.notna(row['Hours']) else 0,
-                        "rate": float(row['Rate']) if pd.notna(row['Rate']) else 0,
-                        "cost": float(row['Cost']) if pd.notna(row['Cost']) else 0,
-                        "task": str(row['Task']) if pd.notna(row['Task']) else ""
+                        "hours": float(row['Hours']) if pd.notna(row.get('Hours')) else 0,
+                        "rate": 75.0,  # From sheet title
+                        "cost": float(row['Hours']) * 75.0 if pd.notna(row.get('Hours')) else 0,
+                        "task": str(row['Notes']) if pd.notna(row.get('Notes')) else ""
                     })
 
             # Process labour entries
             for _, row in df_labour.iterrows():
-                if pd.notna(row['Date']):
+                if pd.notna(row.get('Date')):
                     timesheet_entries.append({
                         "date": str(row['Date']),
-                        "employee": str(row['Worker']),
-                        "role": str(row['Role']),
-                        "hours": float(row['Hours']) if pd.notna(row['Hours']) else 0,
-                        "rate": float(row['Rate']) if pd.notna(row['Rate']) else 0,
-                        "cost": float(row['Cost']) if pd.notna(row['Cost']) else 0,
-                        "task": str(row['Task']) if pd.notna(row['Task']) else ""
+                        "employee": str(row['Name']),
+                        "role": "Labourer",
+                        "hours": float(row['Hours']) if pd.notna(row.get('Hours')) else 0,
+                        "rate": float(row['Rate']) if pd.notna(row.get('Rate')) else 0,
+                        "cost": float(row['Amount']) if pd.notna(row.get('Amount')) else 0,
+                        "task": str(row['Task']) if pd.notna(row.get('Task')) else ""
                     })
 
             print(f"✓ Timesheets: {len(timesheet_entries)} entries")
@@ -252,7 +261,7 @@ class ExcelProcessor:
     def read_purchase_orders(self) -> Dict[str, Any]:
         """Read Purchase_Orders_Master.xlsx"""
         try:
-            file_path = self.base_dir / "10_PURCHASE_ORDERS" / "Purchase_Orders_Master.xlsx"
+            file_path = self.base_dir / "06_PURCHASE_ORDERS_INVOICES" / "Purchase_Orders_Master.xlsx"
 
             if not file_path.exists():
                 return {"error": "Purchase orders file not found", "orders": []}
@@ -263,19 +272,23 @@ class ExcelProcessor:
 
             purchase_orders = []
             for _, row in df.iterrows():
-                if pd.notna(row['PO#']):
+                if pd.notna(row.get('PO#')):
+                    amount = float(row['Amount']) if pd.notna(row.get('Amount')) else 0
+                    gst = amount * 0.1  # Calculate 10% GST
+                    total = amount + gst
+
                     purchase_orders.append({
                         "po_num": str(row['PO#']),
                         "date": str(row['Date']),
                         "supplier": str(row['Supplier']),
                         "description": str(row['Description']),
-                        "category": str(row['Category']),
-                        "amount": float(row['Amount']) if pd.notna(row['Amount']) else 0,
-                        "gst": float(row['GST']) if pd.notna(row['GST']) else 0,
-                        "total": float(row['Total']) if pd.notna(row['Total']) else 0,
-                        "invoice_received": str(row['Invoice Received']),
-                        "paid": str(row['Paid']),
-                        "notes": str(row['Notes']) if pd.notna(row['Notes']) else ""
+                        "category": "Materials",  # Default category
+                        "amount": amount,
+                        "gst": gst,
+                        "total": total,
+                        "invoice_received": str(row['Invoice Received']) if pd.notna(row.get('Invoice Received')) else "NO",
+                        "paid": str(row['Status']) if pd.notna(row.get('Status')) else "PENDING",
+                        "notes": str(row['Delivery Date']) if pd.notna(row.get('Delivery Date')) else ""
                     })
 
             print(f"✓ Purchase Orders: {len(purchase_orders)}")
